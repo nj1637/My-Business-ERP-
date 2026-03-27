@@ -311,32 +311,74 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
 <div id="auth-wrap" class="fixed inset-0 z-[200] overflow-y-auto" style="display:none">
   <div class="min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-sm">
-      <div class="text-center mb-7">
+      <div class="text-center mb-5">
         <div class="w-14 h-14 bg-emerald-500/20 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <i data-lucide="leaf" class="w-7 h-7 text-emerald-400"></i>
         </div>
         <h2 class="text-2xl font-bold text-white" id="auth-title">Welcome Back</h2>
         <p class="text-slate-400 text-sm mt-1" id="auth-subtitle">Sign in to your ERP</p>
       </div>
+
+      <!-- Owner / Employee Toggle -->
+      <div class="flex items-center bg-white/5 border border-white/10 rounded-2xl p-1 mb-5 gap-1">
+        <button id="auth-toggle-owner" onclick="window.setAuthMode('owner')"
+          class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all bg-emerald-600 text-white shadow">
+          👑 Owner Login
+        </button>
+        <button id="auth-toggle-employee" onclick="window.setAuthMode('employee')"
+          class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400">
+          👤 Employee Login
+        </button>
+      </div>
+
       <div class="auth-card p-7">
-        <!-- Login -->
-        <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
-          <div><label class="lbl text-slate-300">Email</label>
-            <input type="email" id="login-email" required class="inp bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500" placeholder="you@example.com"></div>
-          <div><label class="lbl text-slate-300">Password</label>
-            <div class="relative">
-              <input type="password" id="login-password" required class="inp bg-white/5 border-white/10 text-white placeholder:text-slate-500 pr-11">
-              <button type="button" class="eye-btn absolute right-3 top-1/2 -translate-y-1/2" onclick="toggleEye('login-password',this)"><i data-lucide="eye" class="w-4 h-4"></i></button>
-            </div></div>
-          <button type="submit" id="login-btn" class="btn btn-primary w-full justify-center py-2.5">
-            <i data-lucide="log-in" class="w-4 h-4"></i> Sign In
-          </button>
-          <div class="text-center mt-2">
-            <button type="button" onclick="showForgotPassword()" class="text-emerald-400 text-sm font-medium hover:text-emerald-300 transition-colors">Forgot Password?</button>
-          </div>
-        </form>
-        <p class="text-center text-slate-400 text-sm mt-4">New? <button onclick="showSignup()" class="text-emerald-400 font-semibold">Create account</button></p>
-        <!-- Signup -->
+        <!-- OWNER Login Form -->
+        <div id="owner-login-section">
+          <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+            <div><label class="lbl text-slate-300">Email</label>
+              <input type="email" id="login-email" required class="inp bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500" placeholder="you@example.com"></div>
+            <div><label class="lbl text-slate-300">Password</label>
+              <div class="relative">
+                <input type="password" id="login-password" required class="inp bg-white/5 border-white/10 text-white placeholder:text-slate-500 pr-11">
+                <button type="button" class="eye-btn absolute right-3 top-1/2 -translate-y-1/2" onclick="toggleEye('login-password',this)"><i data-lucide="eye" class="w-4 h-4"></i></button>
+              </div></div>
+            <button type="submit" id="login-btn" class="btn btn-primary w-full justify-center py-2.5">
+              <i data-lucide="log-in" class="w-4 h-4"></i> Sign In as Owner
+            </button>
+            <div class="text-center mt-2">
+              <button type="button" onclick="showForgotPassword()" class="text-emerald-400 text-sm font-medium hover:text-emerald-300 transition-colors">Forgot Password?</button>
+            </div>
+          </form>
+          <p class="text-center text-slate-400 text-sm mt-4">New? <button onclick="showSignup()" class="text-emerald-400 font-semibold">Create account</button></p>
+        </div>
+
+        <!-- EMPLOYEE Login Form -->
+        <div id="employee-login-section" class="hidden">
+          <form id="emp-login-form" onsubmit="window.handleEmployeeLogin(event)" class="space-y-4">
+            <div>
+              <label class="lbl text-slate-300">Business Name</label>
+              <input type="text" id="emp-login-biz" class="inp bg-white/5 border-white/10 text-white placeholder:text-slate-500" placeholder="Type your business name..." autocomplete="off" oninput="window.searchBusinessForEmployee(this.value)">
+              <div id="emp-biz-suggestions" class="hidden mt-1 bg-white rounded-xl shadow-xl border border-slate-100 max-h-40 overflow-y-auto"></div>
+            </div>
+            <div><label class="lbl text-slate-300">Employee Email</label>
+              <input type="email" id="emp-login-email" required class="inp bg-white/5 border-white/10 text-white placeholder:text-slate-500" placeholder="your.email@example.com"></div>
+            <div><label class="lbl text-slate-300">Password</label>
+              <div class="relative">
+                <input type="password" id="emp-login-password" required class="inp bg-white/5 border-white/10 text-white placeholder:text-slate-500 pr-11">
+                <button type="button" class="eye-btn absolute right-3 top-1/2 -translate-y-1/2" onclick="toggleEye('emp-login-password',this)"><i data-lucide="eye" class="w-4 h-4"></i></button>
+              </div>
+            </div>
+            <p id="emp-login-error" class="text-red-400 text-sm hidden"></p>
+            <button type="submit" id="emp-login-btn" class="btn w-full justify-center py-2.5" style="background:#3b82f6;color:white">
+              <i data-lucide="log-in" class="w-4 h-4"></i> Sign In as Employee
+            </button>
+            <div class="text-center mt-2">
+              <button type="button" onclick="window.empForgotPassword()" class="text-blue-400 text-sm font-medium hover:text-blue-300 transition-colors">Forgot Password? (Request to Owner)</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Signup (owner only) -->
         <form id="signup-form" onsubmit="handleSignup(event)" class="space-y-3 hidden mt-1">
           <div><label class="lbl text-slate-300">Business Name</label>
             <input type="text" id="signup-biz-name" class="inp bg-white/5 border-white/10 text-white" placeholder="My Business "></div>
@@ -529,7 +571,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
   <!-- FEATURE 10: GST Summary Card -->
   <div class="card p-4 mb-4">
     <div class="flex items-center justify-between mb-3">
-      <div class="flex items-center gap-2"><i data-lucide="receipt-tax" class="w-4 h-4 text-indigo-600"></i><span class="font-bold text-slate-800 text-sm">GST Summary</span></div>
+      <div class="flex items-center gap-2"><i data-lucide="percent" class="w-4 h-4 text-indigo-600"></i><span class="font-bold text-slate-800 text-sm">GST Summary</span></div>
       <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px]" id="gst-filing-badge">Filing Due Soon</span>
     </div>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -993,6 +1035,178 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
     </button>
   </div>
 </div>
+    </button>
+  </div>
+</div>
+
+<!-- ===== EMPLOYEES ===== -->
+<div id="view-employees" class="tab">
+  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
+    <div>
+      <h2 class="text-xl font-bold text-slate-800">Employees</h2>
+      <p class="text-slate-400 text-sm">Staff management, roles & access control</p>
+    </div>
+    <button onclick="window.openEmployeeDrawer&&openEmployeeDrawer(null)" class="btn btn-primary btn-sm">
+      <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add Employee
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-3 gap-3 mb-5">
+    <div class="stat text-center p-3"><div class="text-xl font-black text-blue-600" id="emp-total">0</div><div class="text-xs text-slate-400 mt-1">Total Staff</div></div>
+    <div class="stat text-center p-3"><div class="text-xl font-black text-emerald-600" id="emp-active">0</div><div class="text-xs text-slate-400 mt-1">Active</div></div>
+    <div class="stat text-center p-3"><div class="text-xl font-black text-amber-600" id="emp-salary">₹0</div><div class="text-xs text-slate-400 mt-1">Monthly Salary</div></div>
+  </div>
+
+  <!-- Employees list -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="employees-list">
+    <div class="col-span-full p-8 text-center text-slate-400">
+      <i data-lucide="user-check" class="w-12 h-12 mx-auto mb-3 text-slate-200"></i>
+      <div class="font-semibold">No employees yet</div>
+      <div class="text-sm mt-1">Add your first employee to get started</div>
+      <button onclick="window.openEmployeeDrawer&&openEmployeeDrawer(null)" class="btn btn-primary btn-sm mt-4">
+        <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add First Employee
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Employee Drawer -->
+<div id="emp-drawer-bg" class="drawer-bg" onclick="window.closeEmployeeDrawer&&closeEmployeeDrawer()"></div>
+<div id="emp-drawer" class="drawer" style="max-width:600px">
+  <div class="drawer-head">
+    <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center mr-3 flex-shrink-0">
+      <i data-lucide="user-check" class="w-5 h-5 text-blue-600"></i>
+    </div>
+    <div class="flex-1">
+      <div class="font-bold text-slate-800" id="emp-drawer-title">Add Employee</div>
+      <div class="text-xs text-slate-400" id="emp-drawer-sub">New staff member</div>
+    </div>
+    <button onclick="window.closeEmployeeDrawer&&closeEmployeeDrawer()" class="btn btn-icon btn-ghost ml-2">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  </div>
+
+  <!-- Drawer Tabs -->
+  <div class="border-b border-slate-100 px-4">
+    <div class="flex gap-0">
+      <button class="dtab-btn active" id="emptab-info-btn" onclick="window.switchEmpTab('info')">👤 Info</button>
+      <button class="dtab-btn" id="emptab-role-btn" onclick="window.switchEmpTab('role')">🔐 Role & Access</button>
+      <button class="dtab-btn" id="emptab-login-btn" onclick="window.switchEmpTab('login')">🔑 Login</button>
+    </div>
+  </div>
+
+  <div class="drawer-body">
+    <!-- INFO TAB -->
+    <div id="emptab-info" class="space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="col-span-2"><label class="lbl">Full Name *</label><input type="text" id="emp-name" class="inp" placeholder="Employee full name"></div>
+        <div><label class="lbl">Phone</label><input type="tel" id="emp-phone" class="inp" placeholder="Mobile number"></div>
+        <div><label class="lbl">Department</label>
+          <select id="emp-dept" class="inp bg-white">
+            <option value="billing">Billing / Invoicing</option>
+            <option value="reception">Reception</option>
+            <option value="therapy">Therapy / Treatment</option>
+            <option value="admin">Administration</option>
+            <option value="inventory">Inventory Manager</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div><label class="lbl">Designation</label><input type="text" id="emp-designation" class="inp" placeholder="e.g. Billing Staff"></div>
+        <div><label class="lbl">Monthly Salary (₹)</label><input type="number" id="emp-salary" class="inp" placeholder="0"></div>
+        <div><label class="lbl">Join Date</label><input type="date" id="emp-join-date" class="inp"></div>
+        <div class="col-span-2"><label class="lbl">Address</label><input type="text" id="emp-address" class="inp" placeholder="Employee address"></div>
+        <div class="col-span-2"><label class="lbl">Notes</label><textarea id="emp-notes" rows="2" class="inp resize-none" placeholder="Any notes..."></textarea></div>
+      </div>
+      <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+        <label class="toggle"><input type="checkbox" id="emp-active" checked><span class="toggle-track"></span></label>
+        <div><div class="text-sm font-semibold text-slate-700">Active Employee</div><div class="text-xs text-slate-400">Can login and perform allowed actions</div></div>
+      </div>
+    </div>
+
+    <!-- ROLE TAB -->
+    <div id="emptab-role" class="hidden">
+      <div class="mb-4">
+        <label class="lbl">Quick Role Template</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="window.applyRoleTemplate('admin')" class="p-3 border-2 border-slate-200 rounded-xl text-left hover:border-blue-400 transition-all">
+            <div class="font-bold text-blue-700 text-sm">👑 Admin</div>
+            <div class="text-xs text-slate-500 mt-0.5">Full access (same as owner)</div>
+          </button>
+          <button onclick="window.applyRoleTemplate('billing')" class="p-3 border-2 border-slate-200 rounded-xl text-left hover:border-emerald-400 transition-all">
+            <div class="font-bold text-emerald-700 text-sm">🧾 Billing Staff</div>
+            <div class="text-xs text-slate-500 mt-0.5">Invoice, clients, records only</div>
+          </button>
+          <button onclick="window.applyRoleTemplate('receptionist')" class="p-3 border-2 border-slate-200 rounded-xl text-left hover:border-purple-400 transition-all">
+            <div class="font-bold text-purple-700 text-sm">📋 Receptionist</div>
+            <div class="text-xs text-slate-500 mt-0.5">View clients & appointments</div>
+          </button>
+          <button onclick="window.applyRoleTemplate('viewer')" class="p-3 border-2 border-slate-200 rounded-xl text-left hover:border-slate-400 transition-all">
+            <div class="font-bold text-slate-700 text-sm">👁 View Only</div>
+            <div class="text-xs text-slate-500 mt-0.5">Read-only, no changes</div>
+          </button>
+        </div>
+      </div>
+      <!-- Detailed Permissions -->
+      <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Detailed Permissions</div>
+      <div id="role-permissions-list" class="space-y-1 max-h-96 overflow-y-auto pr-1"></div>
+    </div>
+
+    <!-- LOGIN TAB -->
+    <div id="emptab-login" class="hidden space-y-4">
+      <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl">
+        <div class="font-bold text-blue-800 text-sm mb-1">🔑 Employee Login Credentials</div>
+        <p class="text-xs text-blue-700">Set an email & password so this employee can log in. They will see the app with only their permitted features.</p>
+      </div>
+      <div><label class="lbl">Login Email *</label><input type="email" id="emp-email" class="inp" placeholder="employee@example.com"></div>
+      <div>
+        <label class="lbl">Password *</label>
+        <div class="relative">
+          <input type="password" id="emp-password" class="inp pr-11" placeholder="Min. 6 characters">
+          <button type="button" class="eye-btn absolute right-3 top-1/2 -translate-y-1/2" onclick="toggleEye('emp-password',this)"><i data-lucide="eye" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+      <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+        <div class="font-bold text-amber-800 text-sm mb-1">⚠️ Note</div>
+        <p class="text-xs text-amber-700">Employee will login using the "Employee Login" toggle on the login screen. The email/password here is stored locally. For full Firebase Auth integration, use Firebase Console to create the user account.</p>
+      </div>
+      <!-- Forgot password request -->
+      <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+        <div class="font-bold text-slate-700 text-sm mb-1">🔒 Forgot Password Policy</div>
+        <p class="text-xs text-slate-600">When an employee forgets their password, a request will be shown to the owner in the Employees section. Only the owner can reset it.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-foot">
+    <button id="emp-delete-btn" class="btn btn-danger btn-sm mr-auto hidden" onclick="window.deleteEmployee&&deleteEmployee()">
+      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Remove
+    </button>
+    <button onclick="window.closeEmployeeDrawer&&closeEmployeeDrawer()" class="btn btn-ghost">Cancel</button>
+    <button onclick="window.saveEmployee&&saveEmployee()" class="btn btn-primary">
+      <i data-lucide="save" class="w-4 h-4"></i> Save Employee
+    </button>
+  </div>
+</div>
+
+<!-- Employee Role Permission Modal (full detailed) -->
+<div id="emp-role-modal" class="modal" onclick="if(event.target===this)document.getElementById('emp-role-modal').classList.remove('open')">
+  <div class="modal-box max-w-2xl w-full">
+    <div class="modal-head">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center"><i data-lucide="shield" class="w-4 h-4 text-red-600"></i></div>
+        <div><div class="font-bold text-slate-800">Permission Settings</div><div class="text-xs text-slate-400" id="emp-role-modal-sub">Configure access level</div></div>
+      </div>
+      <button onclick="document.getElementById('emp-role-modal').classList.remove('open')" class="btn btn-icon btn-ghost"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+    <div class="modal-body" id="emp-role-modal-body"></div>
+    <div class="modal-foot">
+      <button onclick="document.getElementById('emp-role-modal').classList.remove('open')" class="btn btn-ghost">Close</button>
+      <button onclick="window.saveRoleFromModal&&saveRoleFromModal()" class="btn btn-primary"><i data-lucide="shield-check" class="w-4 h-4"></i> Apply Permissions</button>
+    </div>
+  </div>
+</div>
+
 <div id="view-records" class="tab">
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
     <div><h2 class="text-xl font-bold text-slate-800">Sales Records</h2><p class="text-slate-400 text-sm">Invoices, Credit Notes, Reports</p></div>
@@ -2851,6 +3065,7 @@ document.addEventListener('DOMContentLoaded', function() {
             { id: 'services', icon: 'sparkles', label: 'Services' },
             { id: 'expenses', icon: 'receipt', label: 'Expenses', class: 'feat-expenses' },
             { id: 'clients', icon: 'users', label: 'Clients' }, 
+            { id: 'employees', icon: 'user-check', label: 'Employees' },
             { id: 'ai-report', icon: 'bar-chart-2', label: 'AI Report' },
             { id: 'settings', icon: 'settings', label: 'Settings' }
         ];
@@ -3210,6 +3425,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if(tabId === 'records') { window.populateClientFilter(); window.renderRecords(); }
             if(tabId === 'clients') window.renderClients();
             if(tabId === 'services') window.renderServices && window.renderServices();
+            if(tabId === 'employees') window.renderEmployees && window.renderEmployees();
             if(tabId === 'settings') window.populateSettingsUI();
             
             window.scrollTo(0,0);
@@ -6434,8 +6650,7 @@ new Chart(document.getElementById('expChart'), {
   options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}} }
 });` : ''}
 <\/script>
-</body>
-</html>`;
+`;
 
   // Download as HTML file
   var blob = new Blob([html], {type:'text/html;charset=utf-8'});
@@ -6900,7 +7115,7 @@ window.generateDigitalInvoiceQR = function(inv) {
         +'<tfoot><tr class="total-row"><td colspan="4" style="padding:10px;text-align:right">Grand Total</td><td style="padding:10px;text-align:right;color:#059669">'+fmt(inv.grandTotal)+'</td></tr></tfoot>'
         +'</table>'
         +'<div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:8px;font-size:12px;color:#64748b;text-align:center">'+(inv.paymentStatus==='paid'?'✅ PAID':'⏳ Payment Pending')+'</div>'
-        +'</body></html>';
+        +';
 
     // Encode as data URI and create QR
     var encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(miniHTML);
@@ -7006,41 +7221,33 @@ window.openStaffModal = function() {
     document.getElementById('staff-modal').classList.add('open');
 };
 
-// ── ADD FEATURE BUTTONS TO SIDEBAR ───────────────────────────
-setTimeout(function(){
+// ── ADD FEATURE BUTTONS TO SIDEBAR — PERSISTENT ──────────────
+// These are added once and survive renderNavigation calls
+window.ensureSidebarTools = function() {
     var nav = document.getElementById('desk-nav');
-    if(!nav) return;
-
-    // WhatsApp Settings toggle
-    if(!document.getElementById('wa-autosend-toggle')) {
-        var waEnabled = localStorage.getItem('ayur_wa_autosend') === 'true';
-        var waSection = document.createElement('div');
-        waSection.className = 'nav-section mt-2';
-        waSection.textContent = 'Tools';
-        nav.appendChild(waSection);
-
-        var waBtn = document.createElement('button');
-        waBtn.className = 'nav-item';
-        waBtn.id = 'wa-autosend-toggle';
-        waBtn.onclick = function(){
-            var cur = localStorage.getItem('ayur_wa_autosend') === 'true';
-            localStorage.setItem('ayur_wa_autosend', !cur);
-            waBtn.querySelector('span').textContent = (!cur?'✅ ':'📲 ')+'WA Auto-Send';
-            window.showToast&&window.showToast('WhatsApp auto-send '+ (!cur?'ON':'OFF'));
-        };
-        waBtn.innerHTML = '<i data-lucide="message-circle" class="w-4 h-4"></i><span>'+(waEnabled?'✅ ':'📲 ')+'WA Auto-Send</span>';
-        nav.appendChild(waBtn);
-
-        // Staff Access
-        var staffBtn = document.createElement('button');
-        staffBtn.className = 'nav-item';
-        staffBtn.onclick = window.openStaffModal;
-        staffBtn.innerHTML = '<i data-lucide="users" class="w-4 h-4"></i><span>Staff Access</span>';
-        nav.appendChild(staffBtn);
-
-        if(typeof lucide!=='undefined') lucide.createIcons({node:nav});
-    }
-}, 1500);
+    if(!nav || document.getElementById('wa-autosend-toggle')) return;
+    var waEnabled = localStorage.getItem('ayur_wa_autosend') === 'true';
+    var section = document.createElement('div');
+    section.id = 'sidebar-tools-section';
+    section.innerHTML = '<div class="nav-section mt-2">Tools</div>';
+    var waBtn = document.createElement('button');
+    waBtn.className = 'nav-item'; waBtn.id = 'wa-autosend-toggle';
+    waBtn.onclick = function(){
+        var cur = localStorage.getItem('ayur_wa_autosend')==='true';
+        localStorage.setItem('ayur_wa_autosend', String(!cur));
+        waBtn.querySelector('span').textContent=(!cur?'✅ ':'📲 ')+'WA Auto-Send';
+        window.showToast&&window.showToast('WhatsApp auto-send '+(!cur?'ON':'OFF'));
+    };
+    waBtn.innerHTML='<i data-lucide="message-circle" class="w-4 h-4"></i><span>'+(waEnabled?'✅ ':'📲 ')+'WA Auto-Send</span>';
+    var staffBtn = document.createElement('button');
+    staffBtn.className='nav-item'; staffBtn.id='staff-nav-btn';
+    staffBtn.onclick = function(){ window.switchTab&&window.switchTab('employees'); };
+    staffBtn.innerHTML='<i data-lucide="users" class="w-4 h-4"></i><span>Employees</span>';
+    section.appendChild(waBtn); section.appendChild(staffBtn);
+    nav.parentElement.appendChild(section);
+    if(typeof lucide!=='undefined') lucide.createIcons({node:section});
+};
+setTimeout(window.ensureSidebarTools, 1200);
 
 // ── SETTINGS: WA SETTINGS MODAL PATCH ────────────────────────
 // Patch openSettingsModal for wa settings
@@ -7267,7 +7474,351 @@ window.renderServices = function() {
     if(typeof lucide!=='undefined') lucide.createIcons({node:listEl});
 };
 window.quickServiceInvoice=function(id){ var s=(window.AppState.services||[]).find(function(x){ return x.id===id; }); if(!s) return; if(window.switchTab) window.switchTab('invoice'); setTimeout(function(){ window.setInvoiceMode('services'); window.addServiceItem(s); },300); };
-window.exportServicesCSV=function(){ var svcs=(window.AppState&&window.AppState.services)||[]; if(!svcs.length){window.showToast&&window.showToast('No services','warning');return;} var h='Name,Category,Duration,Rate,GST%,SAC,Active\n'; var r=svcs.map(function(s){ return '"'+s.name+'","'+s.category+'","'+(s.duration||'')+'",'+s.rate+','+s.gst+',"'+(s.sac||'"),'+(s.active!==false); }).join('\n'); if(typeof downloadCSV==='function') downloadCSV(h+r,'Services.csv'); };
+window.exportServicesCSV=function(){ var svcs=(window.AppState&&window.AppState.services)||[]; if(!svcs.length){window.showToast&&window.showToast('No services','warning');return;} var h='Name,Category,Duration,Rate,GST%,SAC,Active\n'; var r=svcs.map(function(s){ return '"'+s.name+'","'+s.category+'","'+(s.duration||'')+'",'+s.rate+','+s.gst+',"'+(s.sac||'')+'",'+String(s.active!==false); }).join('\n'); if(typeof downloadCSV==='function') downloadCSV(h+r,'Services.csv'); };
+</script>
+
+
+<script>
+// ================================================================
+// EMPLOYEE SYSTEM — Complete Implementation
+// ================================================================
+
+window.EMP_PERMISSIONS = {
+    'dash_view':        { label:'View Dashboard', group:'Dashboard', sensitive:false, defaultOn:true },
+    'dash_financials':  { label:'See Financial Amounts', group:'Dashboard', sensitive:true, defaultOn:false },
+    'dash_health':      { label:'Business Health Score', group:'Dashboard', sensitive:false, defaultOn:true },
+    'dash_target':      { label:'Set Daily Target', group:'Dashboard', sensitive:false, defaultOn:false },
+    'inv_create':       { label:'Create Invoice', group:'Invoice', sensitive:false, defaultOn:true },
+    'inv_draft':        { label:'Save as Draft', group:'Invoice', sensitive:false, defaultOn:true },
+    'inv_finalize':     { label:'Finalize Invoice', group:'Invoice', sensitive:false, defaultOn:true },
+    'inv_view':         { label:'View Invoice Records', group:'Invoice', sensitive:false, defaultOn:true },
+    'inv_delete':       { label:'Delete Invoice', group:'Invoice', sensitive:true, defaultOn:false },
+    'inv_pdf':          { label:'Download PDF', group:'Invoice', sensitive:false, defaultOn:true },
+    'inv_whatsapp':     { label:'Send via WhatsApp', group:'Invoice', sensitive:false, defaultOn:true },
+    'inv_bulk_pdf':     { label:'Bulk Export PDF', group:'Invoice', sensitive:false, defaultOn:false },
+    'inv_csv':          { label:'Export CSV', group:'Invoice', sensitive:false, defaultOn:false },
+    'inv_template':     { label:'Change Invoice Template', group:'Invoice', sensitive:false, defaultOn:true },
+    'inv_discount':     { label:'Apply Discount', group:'Invoice', sensitive:true, defaultOn:false },
+    'inv_credit':       { label:'Mark as Credit Sale', group:'Invoice', sensitive:true, defaultOn:false },
+    'inv_void':         { label:'Void Invoice', group:'Invoice', sensitive:true, defaultOn:false },
+    'client_view':      { label:'View Clients', group:'Clients', sensitive:false, defaultOn:true },
+    'client_add':       { label:'Add New Client', group:'Clients', sensitive:false, defaultOn:true },
+    'client_edit':      { label:'Edit Client Details', group:'Clients', sensitive:false, defaultOn:true },
+    'client_delete':    { label:'Delete Client', group:'Clients', sensitive:true, defaultOn:false },
+    'client_ledger':    { label:'View Client Ledger', group:'Clients', sensitive:false, defaultOn:true },
+    'client_export':    { label:'Export Clients CSV', group:'Clients', sensitive:true, defaultOn:false },
+    'client_reminder':  { label:'Send Payment Reminder', group:'Clients', sensitive:false, defaultOn:true },
+    'inv_tab':          { label:'View Inventory', group:'Inventory', sensitive:false, defaultOn:true },
+    'prod_add':         { label:'Add Product', group:'Inventory', sensitive:false, defaultOn:false },
+    'prod_edit':        { label:'Edit Product', group:'Inventory', sensitive:true, defaultOn:false },
+    'prod_delete':      { label:'Delete Product', group:'Inventory', sensitive:true, defaultOn:false },
+    'prod_import':      { label:'Import via Excel', group:'Inventory', sensitive:true, defaultOn:false },
+    'prod_export':      { label:'Export Inventory CSV', group:'Inventory', sensitive:false, defaultOn:false },
+    'svc_view':         { label:'View Services', group:'Services', sensitive:false, defaultOn:true },
+    'svc_add':          { label:'Add Service', group:'Services', sensitive:false, defaultOn:false },
+    'svc_edit':         { label:'Edit Service', group:'Services', sensitive:false, defaultOn:false },
+    'svc_delete':       { label:'Delete Service', group:'Services', sensitive:true, defaultOn:false },
+    'svc_invoice':      { label:'Create Service Invoice', group:'Services', sensitive:false, defaultOn:true },
+    'exp_view':         { label:'View Expenses', group:'Expenses', sensitive:true, defaultOn:false },
+    'exp_add':          { label:'Log Expense', group:'Expenses', sensitive:true, defaultOn:false },
+    'exp_delete':       { label:'Delete Expense', group:'Expenses', sensitive:true, defaultOn:false },
+    'exp_export':       { label:'Export Expenses CSV', group:'Expenses', sensitive:true, defaultOn:false },
+    'report_view':      { label:'View Financial Reports', group:'Reports', sensitive:true, defaultOn:false },
+    'report_pnl':       { label:'Profit & Loss Report', group:'Reports', sensitive:true, defaultOn:false },
+    'report_bs':        { label:'Balance Sheet', group:'Reports', sensitive:true, defaultOn:false },
+    'ai_report':        { label:'Generate AI Report', group:'Reports', sensitive:true, defaultOn:false },
+    'rec_view':         { label:'View Sales Records', group:'Records', sensitive:false, defaultOn:true },
+    'rec_filter':       { label:'Filter Records', group:'Records', sensitive:false, defaultOn:true },
+    'rec_export':       { label:'Export Records CSV', group:'Records', sensitive:true, defaultOn:false },
+    'daybook_view':     { label:'View Daybook', group:'Daybook', sensitive:false, defaultOn:true },
+    'settings_view':    { label:'View Settings', group:'Settings', sensitive:false, defaultOn:false },
+    'settings_edit':    { label:'Edit Business Settings', group:'Settings', sensitive:true, defaultOn:false },
+    'settings_logo':    { label:'Change Logo/Branding', group:'Settings', sensitive:true, defaultOn:false },
+    'settings_bank':    { label:'View/Edit Bank Details', group:'Settings', sensitive:true, defaultOn:false },
+    'settings_pin':     { label:'Change PIN Lock', group:'Settings', sensitive:true, defaultOn:false },
+    'emp_view':         { label:'View Employee List', group:'Employees', sensitive:true, defaultOn:false },
+    'emp_add':          { label:'Add Employee', group:'Employees', sensitive:true, defaultOn:false },
+    'emp_edit_role':    { label:'Edit Employee Roles', group:'Employees', sensitive:true, defaultOn:false },
+    'backup_download':  { label:'Download Backup Excel', group:'Data', sensitive:true, defaultOn:false },
+    'tally_export':     { label:'Export to Tally XML', group:'Data', sensitive:true, defaultOn:false },
+    'trash_view':       { label:'View Recycle Bin', group:'Data', sensitive:true, defaultOn:false },
+    'trash_restore':    { label:'Restore Deleted Items', group:'Data', sensitive:true, defaultOn:false },
+    'recurring_view':   { label:'View Recurring Invoices', group:'Other', sensitive:false, defaultOn:true },
+    'recurring_add':    { label:'Create Recurring Invoice', group:'Other', sensitive:false, defaultOn:false },
+    'pay_upi':          { label:'Set UPI Payment Mode', group:'Payment', sensitive:false, defaultOn:true },
+    'pay_cash':         { label:'Set Cash Payment Mode', group:'Payment', sensitive:false, defaultOn:true },
+    'pay_split':        { label:'Split Payment', group:'Payment', sensitive:true, defaultOn:false },
+    'pay_status_change':{ label:'Change Payment Status', group:'Payment', sensitive:true, defaultOn:false },
+};
+
+window.ROLE_TEMPLATES = {
+    admin: (function(){ var p={}; Object.keys(window.EMP_PERMISSIONS).forEach(function(k){ p[k]=true; }); return p; })(),
+    billing: { inv_create:true,inv_draft:true,inv_finalize:true,inv_view:true,inv_pdf:true,inv_whatsapp:true,inv_template:true,client_view:true,client_add:true,client_edit:true,client_ledger:true,client_reminder:true,rec_view:true,rec_filter:true,svc_view:true,svc_invoice:true,pay_upi:true,pay_cash:true,dash_view:true,daybook_view:true,inv_tab:true,recurring_view:true },
+    receptionist: { dash_view:true,client_view:true,client_add:true,rec_view:true,inv_view:true,daybook_view:true,svc_view:true },
+    viewer: { dash_view:true,rec_view:true,client_view:true,inv_tab:true,svc_view:true }
+};
+
+window._authMode='owner';
+window.setAuthMode=function(mode){
+    window._authMode=mode;
+    var ob=document.getElementById('auth-toggle-owner'),eb=document.getElementById('auth-toggle-employee');
+    var os=document.getElementById('owner-login-section'),es=document.getElementById('employee-login-section');
+    if(mode==='owner'){if(ob)ob.className='flex-1 py-2.5 rounded-xl text-sm font-bold transition-all bg-emerald-600 text-white shadow';if(eb)eb.className='flex-1 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400';if(os)os.classList.remove('hidden');if(es)es.classList.add('hidden');}
+    else{if(ob)ob.className='flex-1 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400';if(eb)eb.className='flex-1 py-2.5 rounded-xl text-sm font-bold transition-all bg-blue-600 text-white shadow';if(os)os.classList.add('hidden');if(es)es.classList.remove('hidden');}
+};
+
+window._selectedEmpBizUid=null;
+window.searchBusinessForEmployee=function(query){
+    var sugg=document.getElementById('emp-biz-suggestions');
+    if(!sugg||!query||query.length<2){if(sugg)sugg.classList.add('hidden');return;}
+    var found=[];
+    for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(k&&k.startsWith('ayur_employees_')){
+            var uid=k.replace('ayur_employees_','');
+            var cfg=JSON.parse(localStorage.getItem('ayur_settings_cache_'+uid)||'{}');
+            var biz=cfg.businessName||'';
+            if(biz&&biz.toLowerCase().includes(query.toLowerCase())) found.push({uid:uid,biz:biz});
+        }
+    }
+    if(!found.length){sugg.classList.add('hidden');return;}
+    sugg.innerHTML=found.map(function(b){return '<div onclick="window.selectEmpBiz(\''+b.uid+'\',\''+b.biz+'\')" class="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-slate-50 flex items-center gap-3"><div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center font-bold text-blue-700">'+b.biz.charAt(0)+'</div><div class="font-medium text-slate-800">'+b.biz+'</div></div>';}).join('');
+    sugg.classList.remove('hidden');
+};
+window.selectEmpBiz=function(uid,name){
+    window._selectedEmpBizUid=uid;
+    var inp=document.getElementById('emp-login-biz');if(inp)inp.value=name;
+    var sugg=document.getElementById('emp-biz-suggestions');if(sugg)sugg.classList.add('hidden');
+};
+
+window.handleEmployeeLogin=function(e){
+    e.preventDefault();
+    var bizUid=window._selectedEmpBizUid;
+    var email=(document.getElementById('emp-login-email')||{}).value||'';
+    var password=(document.getElementById('emp-login-password')||{}).value||'';
+    var errEl=document.getElementById('emp-login-error');
+    if(!bizUid){if(errEl){errEl.textContent='Select a business first';errEl.classList.remove('hidden');}return;}
+    if(!email||!password){if(errEl){errEl.textContent='Email and password required';errEl.classList.remove('hidden');}return;}
+    var emps=[];try{emps=JSON.parse(localStorage.getItem('ayur_employees_'+bizUid)||'[]');}catch(ex){}
+    var emp=emps.find(function(emp){return emp.email===email&&emp.password===password&&emp.active!==false;});
+    if(!emp){if(errEl){errEl.textContent='Invalid credentials or account inactive';errEl.classList.remove('hidden');}return;}
+    window._isEmployeeSession=true;window._employeeData=emp;window._employeeOwnerUid=bizUid;window._employeePermissions=emp.permissions||{};
+    var cfg=JSON.parse(localStorage.getItem('ayur_settings_cache_'+bizUid)||'{}');
+    if(window.AppState){window.AppState.settings=Object.assign(window.AppState.settings||{},cfg);window.AppState._isEmployee=true;window.AppState._empData=emp;}
+    var authC=document.getElementById('auth-wrap');if(authC)authC.style.display='none';
+    var appC=document.getElementById('app');if(appC)appC.style.display='flex';
+    window.applyEmployeeRestrictions();
+    window.showToast&&window.showToast('Welcome '+emp.name+'! 👋','info');
+    if(window.switchTab)window.switchTab('dashboard');
+};
+
+window.applyEmployeeRestrictions=function(){
+    if(!window._isEmployeeSession)return;
+    setTimeout(function(){
+        var banner=document.getElementById('employee-banner');
+        if(!banner){
+            banner=document.createElement('div');banner.id='employee-banner';
+            banner.style.cssText='background:linear-gradient(135deg,#1e3a8a,#3730a3);color:white;padding:8px 16px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10;';
+            banner.innerHTML='<span>👤 Employee: '+(window._employeeData&&window._employeeData.name||'Staff')+'</span><button onclick="window.requestPermissionExpansion()" style="background:rgba(255,255,255,.15);border:none;color:white;padding:3px 10px;border-radius:8px;font-size:10px;cursor:pointer;font-weight:700;">Request Access ↗</button>';
+            var topbar=document.getElementById('topbar');if(topbar&&topbar.parentElement)topbar.parentElement.insertBefore(banner,topbar.nextSibling);
+        }
+        // Hide nav items based on permissions
+        var perms=window._employeePermissions;
+        document.querySelectorAll('.nav-item').forEach(function(btn){
+            var txt=btn.textContent.trim().toLowerCase();
+            if(txt.includes('expense')&&!perms['exp_view'])btn.style.display='none';
+            if(txt.includes('employee')&&!perms['emp_view'])btn.style.display='none';
+            if(txt.includes('settings')&&!perms['settings_view'])btn.style.display='none';
+            if(txt.includes('ai report')&&!perms['ai_report'])btn.style.display='none';
+            if(txt.includes('daybook')&&!perms['daybook_view'])btn.style.display='none';
+        });
+    },600);
+};
+
+window.empForgotPassword=function(){
+    var email=(document.getElementById('emp-login-email')||{}).value||'';
+    var bizUid=window._selectedEmpBizUid;
+    if(!email||!bizUid){window.showToast&&window.showToast('Enter email and select business first','warning');return;}
+    var reqs=JSON.parse(localStorage.getItem('ayur_pw_requests_'+bizUid)||'[]');
+    reqs.push({email:email,requestedAt:new Date().toISOString(),status:'pending'});
+    localStorage.setItem('ayur_pw_requests_'+bizUid,JSON.stringify(reqs));
+    window.showToast&&window.showToast('Password reset request sent to owner ✅','info');
+};
+
+window.requestPermissionExpansion=function(){
+    var emp=window._employeeData;var bizUid=window._employeeOwnerUid;
+    if(!emp||!bizUid)return;
+    var reqs=JSON.parse(localStorage.getItem('ayur_perm_requests_'+bizUid)||'[]');
+    var exist=reqs.find(function(r){return r.empEmail===emp.email&&r.status==='pending';});
+    if(exist){window.showToast&&window.showToast('Request already pending','info');return;}
+    reqs.push({empEmail:emp.email,empName:emp.name,requestedAt:new Date().toISOString(),status:'pending'});
+    localStorage.setItem('ayur_perm_requests_'+bizUid,JSON.stringify(reqs));
+    window.showToast&&window.showToast('Permission request sent to owner! ✅');
+};
+
+window._editEmpId=null;window._currentEmpPermissions={};
+window.loadEmployees=function(){var uid=window.AppState&&window.AppState.user&&window.AppState.user.uid;if(!uid)return[];try{return JSON.parse(localStorage.getItem('ayur_employees_'+uid)||'[]');}catch(e){return[];}};
+window.saveEmployees=function(emps){
+    var uid=window.AppState&&window.AppState.user&&window.AppState.user.uid;if(!uid)return;
+    localStorage.setItem('ayur_employees_'+uid,JSON.stringify(emps));
+    var s=window.AppState&&window.AppState.settings||{};
+    localStorage.setItem('ayur_settings_cache_'+uid,JSON.stringify({businessName:s.businessName,gstin:s.gstin}));
+    if(window.AppState&&window.AppState.user&&window.AppState.user.email)localStorage.setItem('ayur_owner_email_'+uid,window.AppState.user.email);
+};
+
+window.renderEmployees=function(){
+    var emps=window.loadEmployees();
+    var listEl=document.getElementById('employees-list');
+    var te=document.getElementById('emp-total'),ae=document.getElementById('emp-active'),se=document.getElementById('emp-salary');
+    if(te)te.textContent=emps.length;if(ae)ae.textContent=emps.filter(function(e){return e.active!==false;}).length;
+    var sal=emps.reduce(function(s,e){return s+Number(e.salary||0);},0);if(se)se.textContent='₹'+sal.toLocaleString('en-IN');
+    if(!listEl)return;
+    var uid=window.AppState&&window.AppState.user&&window.AppState.user.uid;
+    var pwR=JSON.parse(localStorage.getItem('ayur_pw_requests_'+uid)||'[]').filter(function(r){return r.status==='pending';});
+    var pmR=JSON.parse(localStorage.getItem('ayur_perm_requests_'+uid)||'[]').filter(function(r){return r.status==='pending';});
+    var pendHTML='';
+    if(pwR.length||pmR.length){
+        pendHTML='<div class="col-span-full mb-4"><div class="card p-4 border-amber-200 bg-amber-50"><div class="font-bold text-amber-800 text-sm mb-2 flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4"></i> Pending Requests ('+((pwR.length+pmR.length))+')</div>'
+        +pwR.map(function(r){return'<div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-amber-100 mb-2"><div><div class="text-sm font-bold text-amber-900">🔑 Password Reset</div><div class="text-xs text-amber-600">'+r.email+' · '+new Date(r.requestedAt).toLocaleDateString('en-IN')+'</div></div><button onclick="window.handlePwResetRequest(\''+r.email+'\')" class="btn btn-sm btn-primary text-xs">Reset</button></div>';}).join('')
+        +pmR.map(function(r){return'<div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-blue-100 mb-2"><div><div class="text-sm font-bold text-blue-900">🔓 Permission Request</div><div class="text-xs text-blue-600">'+r.empName+' · '+new Date(r.requestedAt).toLocaleDateString('en-IN')+'</div></div><button onclick="window.openPermissionRequest(\''+r.empEmail+'\')" class="btn btn-sm text-xs" style="background:#3b82f6;color:white">Review</button></div>';}).join('')
+        +'</div></div>';
+    }
+    if(!emps.length){listEl.innerHTML=pendHTML+'<div class="col-span-full p-8 text-center text-slate-400 flex flex-col items-center gap-2"><span class="text-4xl">👥</span><div class="font-semibold">No employees yet</div><button onclick="window.openEmployeeDrawer(null)" class="btn btn-primary btn-sm mt-2"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add Employee</button></div>';if(typeof lucide!=='undefined')lucide.createIcons({node:listEl});return;}
+    var totalPerms=Object.keys(window.EMP_PERMISSIONS).length;
+    listEl.innerHTML=pendHTML+emps.map(function(emp){
+        var pc=Object.values(emp.permissions||{}).filter(Boolean).length;
+        return'<div class="card p-4 '+(emp.active===false?'opacity-60':'')+'">'
+        +'<div class="flex items-start gap-3 mb-3"><div class="w-11 h-11 bg-gradient-to-br from-blue-400 to-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-base flex-shrink-0">'+emp.name.charAt(0).toUpperCase()+'</div>'
+        +'<div class="flex-1 min-w-0"><h4 class="font-bold text-slate-800 text-sm">'+emp.name+'</h4><div class="text-xs text-slate-400">'+emp.designation+(emp.dept?' · '+emp.dept:'')+'</div><div class="text-xs text-slate-400">✉️ '+emp.email+'</div></div>'
+        +'<span class="badge '+(emp.active!==false?'badge-green':'badge-red')+' text-[10px]">'+(emp.active!==false?'Active':'Off')+'</span></div>'
+        +'<div class="grid grid-cols-2 gap-2 mb-3 text-xs"><div class="bg-slate-50 p-2 rounded-lg"><span class="text-slate-400">Salary</span><div class="font-bold text-slate-800">₹'+Number(emp.salary||0).toLocaleString('en-IN')+'</div></div>'
+        +'<div class="bg-blue-50 p-2 rounded-lg"><span class="text-slate-400">Permissions</span><div class="font-bold text-blue-700">'+pc+'/'+totalPerms+'</div></div></div>'
+        +'<div class="flex gap-2 pt-3 border-t border-slate-100"><button onclick="window.openEmployeeDrawer(\''+emp.id+'\')" class="btn btn-ghost btn-sm flex-1 justify-center text-xs">Edit</button>'
+        +'<button onclick="window.openRoleDrawer(\''+emp.id+'\')" class="btn btn-sm flex-1 justify-center text-xs" style="background:#3b82f6;color:white"><i data-lucide="shield" class="w-3 h-3"></i> Roles</button></div></div>';
+    }).join('');
+    if(typeof lucide!=='undefined')lucide.createIcons({node:listEl});
+};
+
+window.openEmployeeDrawer=function(id){
+    window._editEmpId=id||null;
+    var emps=window.loadEmployees();
+    ['emp-name','emp-phone','emp-designation','emp-salary','emp-join-date','emp-address','emp-notes','emp-email','emp-password'].forEach(function(f){var el=document.getElementById(f);if(el)el.value='';});
+    var ae=document.getElementById('emp-active');if(ae)ae.checked=true;
+    var de=document.getElementById('emp-dept');if(de)de.value='billing';
+    window._currentEmpPermissions={};
+    var te=document.getElementById('emp-drawer-title'),se=document.getElementById('emp-drawer-sub'),db=document.getElementById('emp-delete-btn');
+    if(id){
+        var emp=emps.find(function(e){return e.id===id;});
+        if(emp){
+            if(te)te.textContent='Edit Employee';if(se)se.textContent='#'+id.slice(-6).toUpperCase();if(db)db.classList.remove('hidden');
+            var sv=function(fid,v){var el=document.getElementById(fid);if(el)el.value=v||'';};
+            sv('emp-name',emp.name);sv('emp-phone',emp.phone);sv('emp-designation',emp.designation);sv('emp-salary',emp.salary);sv('emp-join-date',emp.joinDate);sv('emp-address',emp.address);sv('emp-notes',emp.notes);sv('emp-email',emp.email);sv('emp-password',emp.password);
+            if(de)de.value=emp.dept||'billing';if(ae)ae.checked=emp.active!==false;
+            window._currentEmpPermissions=Object.assign({},emp.permissions||{});
+        }
+    }else{if(te)te.textContent='Add Employee';if(se)se.textContent='New staff member';if(db)db.classList.add('hidden');Object.keys(window.EMP_PERMISSIONS).forEach(function(k){window._currentEmpPermissions[k]=window.EMP_PERMISSIONS[k].defaultOn;});}
+    window.switchEmpTab('info');
+    var bg=document.getElementById('emp-drawer-bg');if(bg)bg.classList.add('open');
+    setTimeout(function(){var d=document.getElementById('emp-drawer');if(d)d.classList.add('open');},10);
+    if(typeof lucide!=='undefined')lucide.createIcons();
+};
+window.closeEmployeeDrawer=function(){var d=document.getElementById('emp-drawer');if(d)d.classList.remove('open');setTimeout(function(){var bg=document.getElementById('emp-drawer-bg');if(bg)bg.classList.remove('open');},300);window._editEmpId=null;};
+window.switchEmpTab=function(tab){['info','role','login'].forEach(function(t){var c=document.getElementById('emptab-'+t);if(c)c.classList.toggle('hidden',t!==tab);var b=document.getElementById('emptab-'+t+'-btn');if(b)b.classList.toggle('active',t===tab);});if(tab==='role')window.renderRolePermissions();};
+
+window.renderRolePermissions=function(){
+    var container=document.getElementById('role-permissions-list');if(!container)return;
+    var perms=window._currentEmpPermissions;var groups={};
+    Object.keys(window.EMP_PERMISSIONS).forEach(function(k){var p=window.EMP_PERMISSIONS[k];if(!groups[p.group])groups[p.group]=[];groups[p.group].push({key:k,label:p.label,sensitive:p.sensitive});});
+    container.innerHTML=Object.keys(groups).map(function(g){
+        return'<div class="mb-3"><div class="text-[10px] font-black uppercase tracking-wider text-indigo-400 bg-indigo-50 px-2 py-1 rounded mb-1">'+g+'</div>'
+        +groups[g].map(function(p){
+            var isOn=perms[p.key]===true;
+            return'<label class="flex items-center gap-3 py-2 px-2 rounded-xl hover:bg-slate-50 cursor-pointer '+(p.sensitive?'border-l-2 border-amber-400 pl-3 ml-1':'')+'">'
+            +'<label class="toggle" style="width:34px;height:20px;flex-shrink:0" onclick="event.stopPropagation()"><input type="checkbox" data-perm="'+p.key+'" '+(isOn?'checked':'')+' onchange="window.onPermToggle(\''+p.key+'\',this.checked,'+p.sensitive+')"><span class="toggle-track"></span></label>'
+            +'<div class="flex-1 text-xs text-slate-700">'+p.label+'</div>'+(p.sensitive?'<span class="text-amber-500 text-[9px] font-bold">🔒</span>':'')+'</label>';
+        }).join('')+'</div>';
+    }).join('');
+};
+window.onPermToggle=function(key,value,isSensitive){
+    if(isSensitive&&value){if(!confirm('⚠️ "'+window.EMP_PERMISSIONS[key].label+'" is sensitive.\n\nEnable this?')){var el=document.querySelector('[data-perm="'+key+'"]');if(el)el.checked=false;return;}}
+    window._currentEmpPermissions[key]=value;
+};
+window.applyRoleTemplate=function(tpl){
+    var tpl_data=window.ROLE_TEMPLATES[tpl];if(!tpl_data)return;
+    Object.keys(window.EMP_PERMISSIONS).forEach(function(k){window._currentEmpPermissions[k]=false;});
+    Object.keys(tpl_data).forEach(function(k){window._currentEmpPermissions[k]=true;});
+    window.renderRolePermissions();
+    var nm={admin:'👑 Admin',billing:'🧾 Billing',receptionist:'📋 Receptionist',viewer:'👁 Viewer'};
+    window.showToast&&window.showToast((nm[tpl]||tpl)+' applied!','info');
+};
+window.saveEmployee=function(){
+    var name=(document.getElementById('emp-name')||{}).value||'';
+    var email=(document.getElementById('emp-email')||{}).value||'';
+    if(!name){window.showToast&&window.showToast('Name required','error');return;}
+    if(!email){window.showToast&&window.showToast('Login email required','warning');window.switchEmpTab('login');return;}
+    var emps=window.loadEmployees();
+    var dup=emps.find(function(e){return e.email===email&&e.id!==window._editEmpId;});
+    if(dup){window.showToast&&window.showToast('Email already in use','error');return;}
+    var emp={id:window._editEmpId||Date.now().toString(),name:name,phone:(document.getElementById('emp-phone')||{}).value||'',dept:(document.getElementById('emp-dept')||{}).value||'billing',designation:(document.getElementById('emp-designation')||{}).value||'',salary:Number((document.getElementById('emp-salary')||{}).value||0),joinDate:(document.getElementById('emp-join-date')||{}).value||'',address:(document.getElementById('emp-address')||{}).value||'',notes:(document.getElementById('emp-notes')||{}).value||'',email:email,password:(document.getElementById('emp-password')||{}).value||'',active:(document.getElementById('emp-active')||{checked:true}).checked,permissions:Object.assign({},window._currentEmpPermissions)};
+    if(!window._editEmpId){emps.push(emp);window.showToast&&window.showToast('Employee added! ✅');}
+    else{emps=emps.map(function(e){return e.id===emp.id?Object.assign(e,emp):e;});window.showToast&&window.showToast('Updated! ✅');}
+    window.saveEmployees(emps);window.closeEmployeeDrawer();window.renderEmployees();
+};
+window.deleteEmployee=function(){if(!window._editEmpId)return;if(!confirm('Remove this employee?'))return;var emps=window.loadEmployees().filter(function(e){return e.id!==window._editEmpId;});window.saveEmployees(emps);window.closeEmployeeDrawer();window.renderEmployees();window.showToast&&window.showToast('Employee removed');};
+
+window.openRoleDrawer=function(empId){
+    var emp=window.loadEmployees().find(function(e){return e.id===empId;});if(!emp)return;
+    window._editEmpId=empId;window._currentEmpPermissions=Object.assign({},emp.permissions||{});
+    var subEl=document.getElementById('emp-role-modal-sub');if(subEl)subEl.textContent=emp.name+' — Permissions';
+    var body=document.getElementById('emp-role-modal-body');
+    if(body){
+        var groups={};Object.keys(window.EMP_PERMISSIONS).forEach(function(k){var p=window.EMP_PERMISSIONS[k];if(!groups[p.group])groups[p.group]=[];groups[p.group].push({key:k,label:p.label,sensitive:p.sensitive});});
+        body.innerHTML='<div class="grid grid-cols-2 gap-2 mb-4">'
+        +'<button onclick="window.applyRoleTemplate(\'admin\');window.saveRolePermListSync()" class="p-3 border-2 border-blue-200 rounded-xl text-left hover:border-blue-400"><div class="font-bold text-blue-700 text-sm">👑 Admin</div><div class="text-xs text-slate-500">Full access</div></button>'
+        +'<button onclick="window.applyRoleTemplate(\'billing\');window.saveRolePermListSync()" class="p-3 border-2 border-emerald-200 rounded-xl text-left hover:border-emerald-400"><div class="font-bold text-emerald-700 text-sm">🧾 Billing</div><div class="text-xs text-slate-500">Invoice only</div></button>'
+        +'<button onclick="window.applyRoleTemplate(\'receptionist\');window.saveRolePermListSync()" class="p-3 border-2 border-purple-200 rounded-xl text-left hover:border-purple-400"><div class="font-bold text-purple-700 text-sm">📋 Receptionist</div><div class="text-xs text-slate-500">View clients</div></button>'
+        +'<button onclick="window.applyRoleTemplate(\'viewer\');window.saveRolePermListSync()" class="p-3 border-2 border-slate-200 rounded-xl text-left hover:border-slate-400"><div class="font-bold text-slate-700 text-sm">👁 Viewer</div><div class="text-xs text-slate-500">Read only</div></button>'
+        +'</div><div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">All Permissions</div>'
+        +'<div class="max-h-[50vh] overflow-y-auto pr-1">'
+        +Object.keys(groups).map(function(g){
+            return'<div class="mb-3"><div class="text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-500 px-2 py-1 rounded mb-1">'+g+'</div>'
+            +groups[g].map(function(p){
+                var isOn=window._currentEmpPermissions[p.key]===true;
+                return'<label class="flex items-center gap-3 py-2 px-2 rounded-xl hover:bg-slate-50 '+(p.sensitive?'border-l-2 border-amber-300 ml-1 pl-2':'')+'">'
+                +'<label class="toggle" style="width:34px;height:20px;flex-shrink:0" onclick="event.stopPropagation()"><input type="checkbox" data-mperm="'+p.key+'" '+(isOn?'checked':'')+' onchange="window.onPermToggle(\''+p.key+'\',this.checked,'+p.sensitive+')"><span class="toggle-track"></span></label>'
+                +'<span class="flex-1 text-xs text-slate-700">'+p.label+'</span>'+(p.sensitive?'<span class="text-amber-400 text-[9px] font-bold">SENSITIVE</span>':'')+'</label>';
+            }).join('')+'</div>';
+        }).join('')+'</div>';
+    }
+    document.getElementById('emp-role-modal').classList.add('open');
+    if(typeof lucide!=='undefined')lucide.createIcons();
+};
+window.saveRolePermListSync=function(){
+    // Re-render the permissions list in modal after template apply
+    var body=document.getElementById('emp-role-modal-body');
+    if(!body)return;
+    body.querySelectorAll('[data-mperm]').forEach(function(el){el.checked=window._currentEmpPermissions[el.dataset.mperm]===true;});
+};
+window.saveRoleFromModal=function(){
+    if(!window._editEmpId)return;
+    var emps=window.loadEmployees().map(function(e){return e.id===window._editEmpId?Object.assign(e,{permissions:Object.assign({},window._currentEmpPermissions)}):e;});
+    window.saveEmployees(emps);document.getElementById('emp-role-modal').classList.remove('open');
+    window.renderEmployees();window.showToast&&window.showToast('Permissions saved! ✅');
+};
+window.handlePwResetRequest=function(email){
+    var uid=window.AppState&&window.AppState.user&&window.AppState.user.uid;
+    var newPw=prompt('New password for '+email+' (min 6 chars):');
+    if(!newPw||newPw.length<6){window.showToast&&window.showToast('Too short','error');return;}
+    var emps=window.loadEmployees().map(function(e){return e.email===email?Object.assign(e,{password:newPw}):e;});window.saveEmployees(emps);
+    var reqs=JSON.parse(localStorage.getItem('ayur_pw_requests_'+uid)||'[]').map(function(r){return r.email===email?Object.assign(r,{status:'resolved'}):r;});localStorage.setItem('ayur_pw_requests_'+uid,JSON.stringify(reqs));
+    window.showToast&&window.showToast('Password reset for '+email+' ✅');window.renderEmployees();
+};
+window.openPermissionRequest=function(empEmail){
+    var emp=window.loadEmployees().find(function(e){return e.email===empEmail;});if(!emp)return;
+    var uid=window.AppState&&window.AppState.user&&window.AppState.user.uid;
+    var reqs=JSON.parse(localStorage.getItem('ayur_perm_requests_'+uid)||'[]').map(function(r){return r.empEmail===empEmail?Object.assign(r,{status:'reviewed'}):r;});localStorage.setItem('ayur_perm_requests_'+uid,JSON.stringify(reqs));
+    window.openRoleDrawer(emp.id);
+};
 </script>
 </body>
 </html>
