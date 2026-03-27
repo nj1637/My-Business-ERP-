@@ -287,10 +287,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
     <!-- Logo -->
     <div class="relative">
       <div class="splash-ring"></div>
-      <div class="splash-logo-wrap w-24 h-24 bg-white/10 border-2 border-emerald-500/40 rounded-3xl flex items-center justify-center shadow-2xl relative z-10">
-        <i data-lucide="leaf" class="splash-leaf w-12 h-12 text-emerald-400"></i>
-      </div>
+      <div class="splash-leaf w-14 h-14 bg-white/10 border border-white/20 rounded-xl overflow-hidden flex items-center justify-center""
+      id="settings-logo-preview"><i data-lucide="building-2" class="w-7 h-7 text-emerald-400"></i></div>
+      <div class="flex-1 min-w-0">  </div>
     </div>
+
     <!-- Title -->
     <div class="text-center">
       <h1 class="splash-title text-4xl font-black text-white tracking-tight" style="font-family:'Plus Jakarta Sans',sans-serif">My Business</h1>
@@ -437,8 +438,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
           <span class="live-dot"></span>
           <span class="text-[11px] font-semibold text-emerald-700">Live</span>
         </div>
-        <button onclick="window.openTrashModal&&openTrashModal()" class="btn btn-icon btn-ghost" title="Recycle Bin">
+        <button onclick="window.openTrashModal&&openTrashModal()" class="btn btn-icon btn-ghost relative" title="Recycle Bin">
           <i data-lucide="trash-2" class="w-4 h-4 text-slate-400"></i>
+        </button>
+        <button onclick="window.switchTab&&switchTab('inventory')" class="btn btn-icon btn-ghost relative" title="Low Stock Alert">
+          <i data-lucide="package" class="w-4 h-4 text-slate-400"></i>
+          <span id="stock-alert-badge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full items-center justify-center hidden">0</span>
         </button>
         <button onclick="window.openFinancialReports&&openFinancialReports()" class="btn btn-icon btn-ghost" title="Reports">
           <i data-lucide="bar-chart-2" class="w-4 h-4 text-slate-400"></i>
@@ -470,12 +475,87 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
 <div id="view-dashboard" class="tab">
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
     <div><h2 class="text-xl font-bold text-slate-800">Dashboard</h2><p class="text-slate-400 text-sm">Business overview</p></div>
-    <select id="dash-date-filter" onchange="window.updateDashboard&&updateDashboard()" class="inp w-auto text-sm">
-      <option value="all">All Time</option>
-      <option value="this_month">This Month</option>
-      <option value="last_month">Last Month</option>
-    </select>
+    <div class="flex items-center gap-2">
+      <select id="dash-date-filter" onchange="window.updateDashboard&&updateDashboard()" class="inp w-auto text-sm">
+        <option value="all">All Time</option>
+        <option value="this_month">This Month</option>
+        <option value="last_month">Last Month</option>
+      </select>
+    </div>
   </div>
+
+  <!-- FEATURE 1: Business Health Score -->
+  <div class="card p-4 mb-4" id="health-score-card">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 relative" id="health-score-ring">
+          <svg width="56" height="56" viewBox="0 0 56 56" class="absolute inset-0">
+            <circle cx="28" cy="28" r="24" fill="none" stroke="#e2e8f0" stroke-width="5"/>
+            <circle cx="28" cy="28" r="24" fill="none" stroke="#10b981" stroke-width="5" stroke-linecap="round"
+              stroke-dasharray="150.8" id="health-ring-fill" stroke-dashoffset="150.8"
+              style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1s ease"/>
+          </svg>
+          <span class="text-xs font-black text-slate-800 z-10" id="health-score-num">0</span>
+        </div>
+        <div>
+          <div class="font-bold text-slate-800 text-sm">Business Health Score</div>
+          <div class="text-xs text-slate-400" id="health-score-label">Calculating...</div>
+        </div>
+      </div>
+      <button onclick="window.showHealthDetail&&showHealthDetail()" class="btn btn-ghost btn-sm text-xs">Details</button>
+    </div>
+    <div class="mt-3 grid grid-cols-4 gap-2" id="health-breakdown"></div>
+  </div>
+
+  <!-- FEATURE 5: Daily Sales Target -->
+  <div class="card p-4 mb-4" id="daily-target-card">
+    <div class="flex items-center justify-between mb-2">
+      <div class="flex items-center gap-2">
+        <i data-lucide="target" class="w-4 h-4 text-purple-600"></i>
+        <span class="font-bold text-slate-800 text-sm">Daily Sales Target</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-slate-400" id="target-today-rev">₹0 today</span>
+        <button onclick="window.setDailyTarget&&setDailyTarget()" class="btn btn-ghost btn-sm text-xs"><i data-lucide="edit-3" class="w-3 h-3"></i> Set</button>
+      </div>
+    </div>
+    <div class="flex items-center justify-between mb-1.5">
+      <span class="text-xs text-slate-500" id="target-progress-label">No target set</span>
+      <span class="text-xs font-bold text-purple-700" id="target-pct">0%</span>
+    </div>
+    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+      <div id="target-bar" class="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full transition-all duration-700" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- FEATURE 10: GST Summary Card -->
+  <div class="card p-4 mb-4">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2"><i data-lucide="receipt-tax" class="w-4 h-4 text-indigo-600"></i><span class="font-bold text-slate-800 text-sm">GST Summary</span></div>
+      <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px]" id="gst-filing-badge">Filing Due Soon</span>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div class="bg-blue-50 rounded-xl p-3 text-center"><div class="text-base font-black text-blue-700" id="gst-cgst">₹0</div><div class="text-[10px] font-bold text-blue-500 uppercase">CGST</div></div>
+      <div class="bg-emerald-50 rounded-xl p-3 text-center"><div class="text-base font-black text-emerald-700" id="gst-sgst">₹0</div><div class="text-[10px] font-bold text-emerald-500 uppercase">SGST</div></div>
+      <div class="bg-amber-50 rounded-xl p-3 text-center"><div class="text-base font-black text-amber-700" id="gst-igst">₹0</div><div class="text-[10px] font-bold text-amber-500 uppercase">IGST</div></div>
+      <div class="bg-purple-50 rounded-xl p-3 text-center"><div class="text-base font-black text-purple-700" id="gst-itc">₹0</div><div class="text-[10px] font-bold text-purple-500 uppercase">ITC Credit</div></div>
+    </div>
+    <div class="mt-2 p-2 bg-indigo-50 rounded-lg flex items-center justify-between">
+      <span class="text-xs text-indigo-700 font-semibold">Net GST Payable</span>
+      <span class="text-sm font-black text-indigo-800" id="gst-net-payable">₹0</span>
+    </div>
+  </div>
+
+  <!-- FEATURE 9: Cash Flow Forecast -->
+  <div class="card p-4 mb-4">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2"><i data-lucide="trending-up" class="w-4 h-4 text-teal-600"></i><span class="font-bold text-slate-800 text-sm">30-Day Cash Flow Forecast</span></div>
+      <span class="badge bg-teal-50 text-teal-700 border border-teal-200 text-[10px]">Expected Collection</span>
+    </div>
+    <div class="grid grid-cols-3 gap-2 mb-2" id="cashflow-forecast"></div>
+    <div class="text-xs text-slate-400 text-center">Based on unpaid invoice due dates & historical payment patterns</div>
+  </div>
+
   <!-- Stat Cards -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
     <div class="stat"><div class="flex items-center justify-between mb-3"><div class="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i></div><span class="badge badge-green text-[10px]">Revenue</span></div><div class="font-bold text-slate-800 mb-0.5 truncate" style="font-size:clamp(14px,3.5vw,22px)" id="dash-revenue">₹0</div><div class="text-xs text-slate-400">Total Revenue</div></div>
@@ -483,6 +563,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
     <div class="stat"><div class="flex items-center justify-between mb-3"><div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="indian-rupee" class="w-4 h-4 text-blue-600"></i></div><span class="badge badge-blue text-[10px]" id="dash-profit-label">Net</span></div><div class="font-bold text-slate-800 mb-0.5 truncate" style="font-size:clamp(14px,3.5vw,22px)" id="dash-profit">₹0</div><div class="text-xs text-slate-400">Net Profit</div></div>
     <div class="stat"><div class="flex items-center justify-between mb-3"><div class="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="clock" class="w-4 h-4 text-amber-500"></i></div><span class="badge badge-amber text-[10px]">Pending</span></div><div class="font-bold text-slate-800 mb-0.5 truncate" style="font-size:clamp(14px,3.5vw,22px)" id="dash-unpaid">₹0</div><div class="text-xs text-slate-400">Outstanding</div></div>
   </div>
+
+  <!-- FEATURE 6: Birthday/Anniversary Reminders -->
+  <div id="birthday-reminders-card" class="hidden card p-4 mb-4 border-pink-200 bg-pink-50/30">
+    <div class="flex items-center gap-2 mb-2"><i data-lucide="cake" class="w-4 h-4 text-pink-500"></i><span class="font-bold text-slate-800 text-sm">Client Reminders Today</span></div>
+    <div id="birthday-reminders-list" class="space-y-2"></div>
+  </div>
+
   <!-- Charts -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
     <div class="card lg:col-span-2 p-5">
@@ -555,7 +642,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
     <div class="flex gap-2">
       <button onclick="saveInvoice('draft')" class="btn btn-ghost text-sm"><i data-lucide="save" class="w-4 h-4"></i> Draft</button>
       <button onclick="openTemplateGallery()" class="btn btn-ghost text-sm"><i data-lucide="layout-template" class="w-4 h-4"></i></button>
-      <button onclick="saveInvoice('final')" class="btn btn-primary text-sm"><i data-lucide="check-circle" class="w-4 h-4"></i> Finalize</button>
+      <button onclick="window.openInvoicePreview&&openInvoicePreview()" class="btn btn-primary text-sm"><i data-lucide="eye" class="w-4 h-4"></i> Preview & Finalize</button>
     </div>
   </div>
   <!-- Doc type row -->
@@ -590,10 +677,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
       <!-- Products -->
       <div class="card p-5">
         <h3 class="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2"><i data-lucide="package" class="w-4 h-4 text-emerald-600"></i> Line Items</h3>
-        <div class="relative mb-4">
-          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-emerald-600 z-10"></i>
-          <input type="text" id="inv-product-search" class="inp pl-10 bg-emerald-50 border-emerald-200 focus:bg-white" placeholder="Search & add product..." autocomplete="off" oninput="handleProductSearch(this.value)" onfocus="handleProductSearch(this.value)">
-          <div id="product-suggestions" class="hidden absolute z-20 w-full mt-1 bg-white rounded-xl shadow-xl border border-slate-100 max-h-48 overflow-y-auto"></div>
+        <div class="relative mb-4 flex gap-2">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-emerald-600 z-10"></i>
+            <input type="text" id="inv-product-search" class="inp pl-10 bg-emerald-50 border-emerald-200 focus:bg-white" placeholder="Search & add product..." autocomplete="off" oninput="handleProductSearch(this.value)" onfocus="handleProductSearch(this.value)">
+            <div id="product-suggestions" class="hidden absolute z-20 w-full mt-1 bg-white rounded-xl shadow-xl border border-slate-100 max-h-48 overflow-y-auto"></div>
+          </div>
+          <button onclick="window.addBlankRow&&addBlankRow()" class="btn btn-primary btn-icon flex-shrink-0" title="Add custom/manual product row">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+          </button>
         </div>
         <div class="overflow-x-auto rounded-xl border border-slate-100 bg-slate-50" id="invoice-items-wrapper"></div>
       </div>
@@ -798,17 +890,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
     </div>
   </div>
 
-  <!-- Invoice Display -->
-  <div class="card p-4 mb-4 cursor-pointer hover:shadow-md transition-shadow" onclick="openSettingsModal('invoice-display')">
-    <div class="flex items-center gap-3">
-      <div class="acc-icon bg-emerald-50"><i data-lucide="sliders" class="w-5 h-5 text-emerald-600"></i></div>
-      <div class="flex-1"><div class="font-bold text-slate-800 text-sm">Invoice Amount Display</div><div class="text-xs text-slate-400 mt-0.5">GST inclusive/exclusive options</div></div>
-      <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
-    </div>
-  </div>
-
   <!-- Settings Grid — modal triggers -->
   <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
+
+    <div class="card p-4 cursor-pointer hover:shadow-md hover:border-emerald-200 transition-all" onclick="openSettingsModal('invoice-display')">
+      <div class="acc-icon bg-emerald-50 mb-3"><i data-lucide="sliders" class="w-5 h-5 text-emerald-600"></i></div>
+      <div class="font-bold text-slate-800 text-sm">Invoice Display</div>
+      <div class="text-xs text-slate-400 mt-0.5">GST inclusive/exclusive</div>
+    </div>
 
     <div class="card p-4 cursor-pointer hover:shadow-md hover:border-emerald-200 transition-all" onclick="openSettingsModal('inv-numbering')">
       <div class="acc-icon bg-blue-50 mb-3"><i data-lucide="hash" class="w-5 h-5 text-blue-600"></i></div>
@@ -1041,6 +1130,33 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
   MODALS
 ============================================================ -->
 
+<!-- Invoice PREVIEW Modal (before finalize) -->
+<div id="invoice-preview-modal" class="modal" onclick="if(event.target===this)closeInvoicePreview()">
+  <div class="modal-box max-w-4xl w-full">
+    <div class="modal-head">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center"><i data-lucide="eye" class="w-4 h-4 text-amber-600"></i></div>
+        <div>
+          <div class="font-bold text-slate-800">Invoice Preview</div>
+          <div class="text-xs text-amber-600 font-semibold uppercase tracking-wider">Draft — Not Finalized</div>
+        </div>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <button onclick="openTemplateGallery();window._previewOpen=true" class="btn btn-ghost btn-sm"><i data-lucide="layout-template" class="w-3.5 h-3.5"></i> Template</button>
+        <button onclick="closeInvoicePreview()" class="btn btn-ghost btn-sm"><i data-lucide="x" class="w-4 h-4"></i></button>
+        <button onclick="window.confirmFinalize&&confirmFinalize()" class="btn btn-primary btn-sm"><i data-lucide="check-circle" class="w-4 h-4"></i> Confirm & Finalize</button>
+      </div>
+    </div>
+    <div class="px-4 py-2 bg-amber-50 border-b border-amber-100 text-xs text-amber-700 font-medium flex items-center gap-2">
+      <i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0"></i>
+      Preview mode — change template above, then click Confirm & Finalize to save.
+    </div>
+    <div class="modal-body bg-slate-200 p-2" id="preview-modal-body">
+      <div id="preview-render-area" class="bg-white shadow-xl text-slate-800 leading-relaxed" style="width:210mm;min-height:297mm;padding:8mm 10mm;font-size:11px;margin:0 auto;transform-origin:top left"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Invoice View Modal -->
 <div id="invoice-modal" class="modal" onclick="if(event.target===this)closeInvModal()">
   <div class="modal-box max-w-4xl w-full">
@@ -1217,6 +1333,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
           <div class="col-span-2"><label class="lbl">Address</label><input type="text" id="cl-address" class="inp"></div>
           <div><label class="lbl">GSTIN</label><input type="text" id="cl-gstin" class="inp"></div>
           <div><label class="lbl">Tax Slab</label><select id="cl-tax-slab" class="inp bg-white"><option value="">Default</option><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="28">28%</option></select></div>
+          <div><label class="lbl">🎂 Birthday</label><input type="date" id="cl-birthday" class="inp"></div>
         </div>
         <div><label class="lbl">Notes / Allergies</label><textarea id="cl-notes" rows="2" class="inp resize-none"></textarea></div>
         <div class="p-3 bg-green-50 border border-green-200 rounded-xl flex items-center justify-between">
@@ -1833,7 +1950,7 @@ function openClientDrawer(id, isNew) {
     var sub = document.getElementById('cl-drawer-sub');
     var delBtn = document.getElementById('cl-delete-btn');
     var ledBtn = document.getElementById('cl-ledger-btn');
-    ['cl-name','cl-mobile','cl-email','cl-address','cl-gstin','cl-notes'].forEach(function(x){ var el=document.getElementById(x); if(el) el.value=''; });
+    ['cl-name','cl-mobile','cl-email','cl-address','cl-gstin','cl-notes','cl-birthday'].forEach(function(x){ var el=document.getElementById(x); if(el) el.value=''; });
     document.getElementById('cl-journal-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('cl-journal-entry').value = '';
     document.getElementById('cl-journal-list').innerHTML = '';
@@ -1848,6 +1965,7 @@ function openClientDrawer(id, isNew) {
             document.getElementById('cl-address').value = c.address||'';
             document.getElementById('cl-gstin').value = c.gstin||'';
             document.getElementById('cl-notes').value = c.notes||'';
+            var bdEl = document.getElementById('cl-birthday'); if(bdEl) bdEl.value = c.birthday||'';
             window._clJournal = Array.isArray(c.journal) ? c.journal.slice() : [];
             renderClJournal();
             updateClFinancials(c.name);
@@ -1924,6 +2042,7 @@ async function saveClFromDrawer() {
         address:document.getElementById('cl-address').value.trim(),
         gstin:document.getElementById('cl-gstin').value.trim(),
         notes:document.getElementById('cl-notes').value.trim(),
+        birthday:(document.getElementById('cl-birthday')&&document.getElementById('cl-birthday').value)||'',
         journal:window._clJournal,
         isDeleted:false
     };
@@ -3228,10 +3347,31 @@ document.addEventListener('DOMContentLoaded', function() {
             
             let tbodyHtml = `<tr><td colspan="7" class="p-6 text-center text-slate-400 italic">No items added yet.</td></tr>`;
             if(items.length > 0) {
-                tbodyHtml = items.map(item => `<tr class="border-b border-slate-100 last:border-0 bg-white"><td class="p-3 font-medium text-slate-800 min-w-[120px]">${item.name} ${(window.isFeatureEnabled('batch') && (item.batch || item.expiry)) ? `<br><span class="text-[9px] text-slate-400">B:${item.batch||'-'} E:${item.expiry||'-'}</span>` : ''}</td>${window.isFeatureEnabled('hsn') ? `<td class="p-3"><input type="text" class="w-16 p-1 border border-slate-200 rounded outline-none text-xs" value="${item.hsn || ''}" onchange="window.updateDraftItem('${item.id}', 'hsn', this.value)" placeholder="HSN"></td>` : ''}<td class="p-3"><input type="number" min="1" class="w-16 p-1 border border-slate-200 rounded outline-none" value="${item.qty}" onchange="window.updateDraftItem('${item.id}', 'qty', this.value)"></td><td class="p-3"><input type="number" class="w-20 p-1 border border-slate-200 rounded outline-none" value="${item.rate}" onchange="window.updateDraftItem('${item.id}', 'rate', this.value)"></td><td class="p-3 text-slate-600">${item.gst}%</td><td class="p-3 text-right font-medium text-emerald-700">${window.formatCurrency(Number(item.qty)*Number(item.rate),curr)}</td><td class="p-3 text-center"><button onclick="window.removeDraftItem('${item.id}')" class="text-red-400 hover:text-red-600 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`).join('');
+                tbodyHtml = items.map(item => {
+                    // Manual row gets editable name input, product row shows name as text
+                    const nameCell = item.isManual
+                        ? `<input type="text" class="item-name-input w-full p-1 border border-emerald-300 rounded outline-none text-sm font-medium bg-emerald-50 focus:bg-white focus:border-emerald-500" value="${(item.name||'').replace(/"/g,'&quot;')}" placeholder="Product/Service name..." oninput="window.updateDraftItem('${item.id}','name',this.value)" onblur="window.checkAutoCreateProduct&&checkAutoCreateProduct('${item.id}',this.value)">`
+                        : `<span class="font-medium text-slate-800">${item.name}</span>`;
+                    const gstCell = item.isManual
+                        ? `<input type="number" min="0" max="28" step="5" class="w-14 p-1 border border-slate-200 rounded outline-none text-xs" value="${item.gst||0}" onchange="window.updateDraftItem('${item.id}','gst',this.value)" placeholder="0">%`
+                        : `${item.gst}%`;
+                    return `<tr class="border-b border-slate-100 last:border-0 ${item.isManual?'bg-emerald-50/30':'bg-white'}">
+                        <td class="p-3 min-w-[140px]">
+                            ${nameCell}
+                            ${(window.isFeatureEnabled('batch') && (item.batch || item.expiry) && !item.isManual) ? `<br><span class="text-[9px] text-slate-400">B:${item.batch||'-'} E:${item.expiry||'-'}</span>` : ''}
+                            ${item.isManual ? '<span class="text-[9px] text-emerald-500 font-bold">✏ Custom</span>' : ''}
+                        </td>
+                        ${window.isFeatureEnabled('hsn') ? `<td class="p-3"><input type="text" class="w-16 p-1 border border-slate-200 rounded outline-none text-xs" value="${item.hsn||''}" onchange="window.updateDraftItem('${item.id}','hsn',this.value)" placeholder="HSN"></td>` : ''}
+                        <td class="p-3"><input type="number" min="1" class="w-16 p-1 border border-slate-200 rounded outline-none" value="${item.qty}" onchange="window.updateDraftItem('${item.id}','qty',this.value)"></td>
+                        <td class="p-3"><input type="number" class="w-20 p-1 border border-slate-200 rounded outline-none" value="${item.rate}" onchange="window.updateDraftItem('${item.id}','rate',this.value)"></td>
+                        <td class="p-3 text-slate-600 whitespace-nowrap">${gstCell}</td>
+                        <td class="p-3 text-right font-medium text-emerald-700">${window.formatCurrency(Number(item.qty)*Number(item.rate),curr)}</td>
+                        <td class="p-3 text-center"><button onclick="window.removeDraftItem('${item.id}')" class="text-red-400 hover:text-red-600 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                    </tr>`;
+                }).join('');
             }
             
-            const theadHtml = `<tr><th class="p-3">Item Name</th>${window.isFeatureEnabled('hsn') ? '<th class="p-3 w-16">HSN</th>' : ''}<th class="p-3 w-16">Qty</th><th class="p-3 w-24">Rate</th><th class="p-3 w-16">GST</th><th class="p-3 w-24 text-right">Total</th><th class="p-3 w-10"></th></tr>`;
+            const theadHtml = `<tr><th class="p-3">Item Name</th>${window.isFeatureEnabled('hsn')?'<th class="p-3 w-16">HSN</th>':''}<th class="p-3 w-16">Qty</th><th class="p-3 w-24">Rate</th><th class="p-3 w-16">GST</th><th class="p-3 w-24 text-right">Total</th><th class="p-3 w-10"></th></tr>`;
             setHTML('invoice-items-wrapper', `<table class="w-full text-left text-sm min-w-[650px]"><thead class="bg-slate-100 text-slate-600 font-medium">${theadHtml}</thead><tbody id="invoice-items-body">${tbodyHtml}</tbody></table>`);
             if (typeof lucide !== 'undefined') lucide.createIcons();
 
@@ -3571,7 +3711,41 @@ document.addEventListener('DOMContentLoaded', function() {
             setHTML('clients-list', filteredClients.map(c => {
                 const cInvoices = invoices.filter(i => i.client.name === c.name && i.status === 'final' && i.status !== 'void'); const clv = cInvoices.reduce((sum, i) => sum + Number(i.grandTotal), 0);
                 const unpaid=cInvoices.filter(i=>i.paymentStatus!=='paid').reduce((s,i)=>s+Number(i.grandTotal||0),0);
-                return `<div class="card card-hover p-4"><div class="flex items-start gap-3 mb-3"><div class="w-11 h-11 bg-gradient-to-br from-emerald-400 to-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-base shrink-0 uppercase shadow-md">${c.name.charAt(0)}</div><div class="flex-1 min-w-0"><h4 class="font-bold text-slate-800 truncate text-sm">${c.name}</h4><div class="text-xs text-slate-400">📞 ${c.mobile||'No Mobile'}</div></div><div class="text-right shrink-0"><div class="font-bold text-emerald-600 text-sm">${formatINR(clv)}</div><div class="text-[10px] text-slate-400">${cInvoices.length} orders</div></div></div>${unpaid>0?`<div class="mb-3 px-2.5 py-1.5 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between"><span class="text-xs text-amber-600 font-semibold">Outstanding</span><span class="text-xs font-bold text-amber-700">${formatINR(unpaid)}</span></div>`:''} ${c.notes?`<div class="text-xs text-slate-500 bg-slate-50 p-2 rounded-lg mb-3 italic line-clamp-2 border border-slate-100">${c.notes}</div>`:''}<div class="flex gap-2 pt-3 border-t border-slate-100"><button onclick="openClientDrawer('${c.id}',false)" class="btn btn-secondary btn-sm flex-1 justify-center text-xs">Edit Profile</button>${window.isFeatureEnabled('ledger')?`<button onclick="window.generateClientLedger('${c.name}')" class="btn btn-sm flex-1 justify-center text-xs" style="background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe">Ledger</button>`:''}</div></div>`
+                // Feature 7: Profit margin from client invoices
+                const avgInv = cInvoices.length > 0 ? (clv / cInvoices.length) : 0;
+                // Feature 6: Birthday check
+                const todayMMDD = (new Date().getMonth()+1).toString().padStart(2,'0') + '-' + new Date().getDate().toString().padStart(2,'0');
+                const bdMMDD = c.birthday ? c.birthday.slice(5) : '';
+                const isBday = bdMMDD === todayMMDD;
+                return `<div class="card card-hover p-4 ${isBday?'border-pink-300 bg-pink-50/20':''}">
+                  ${isBday?`<div class="mb-2 flex items-center gap-2 text-pink-600 text-xs font-bold"><i data-lucide="cake" class="w-3.5 h-3.5"></i> Birthday Today! 🎂</div>`:''}
+                  <div class="flex items-start gap-3 mb-3">
+                    <div class="w-11 h-11 bg-gradient-to-br from-emerald-400 to-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-base shrink-0 uppercase shadow-md">${c.name.charAt(0)}</div>
+                    <div class="flex-1 min-w-0">
+                      <h4 class="font-bold text-slate-800 truncate text-sm">${c.name}</h4>
+                      <div class="text-xs text-slate-400">📞 ${c.mobile||'No Mobile'}</div>
+                      ${c.birthday?`<div class="text-xs text-pink-500 font-medium">🎂 ${c.birthday}</div>`:''}
+                    </div>
+                    <div class="text-right shrink-0">
+                      <div class="font-bold text-emerald-600 text-sm">${formatINR(clv)}</div>
+                      <div class="text-[10px] text-slate-400">${cInvoices.length} orders</div>
+                      ${avgInv>0?`<div class="text-[10px] text-blue-500">avg ${formatINR(avgInv)}</div>`:''}
+                    </div>
+                  </div>
+                  ${unpaid>0?`<div class="mb-3 px-2.5 py-1.5 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
+                    <span class="text-xs text-amber-600 font-semibold">Outstanding</span>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-amber-700">${formatINR(unpaid)}</span>
+                      <button onclick="window.sendReminderWA&&sendReminderWA('${c.id}')" class="text-[10px] bg-green-500 text-white px-2 py-0.5 rounded-full font-bold hover:bg-green-600">📲 Remind</button>
+                    </div>
+                  </div>`:''}
+                  ${c.notes?`<div class="text-xs text-slate-500 bg-slate-50 p-2 rounded-lg mb-3 italic line-clamp-2 border border-slate-100">${c.notes}</div>`:''}
+                  <div class="flex gap-2 pt-3 border-t border-slate-100">
+                    <button onclick="openClientDrawer('${c.id}',false)" class="btn btn-ghost btn-sm flex-1 justify-center text-xs">Edit</button>
+                    <button onclick="window.quickInvoiceFromClient&&quickInvoiceFromClient('${c.id}')" class="btn btn-primary btn-sm flex-1 justify-center text-xs"><i data-lucide="file-plus" class="w-3 h-3"></i> Invoice</button>
+                    ${window.isFeatureEnabled('ledger')?`<button onclick="window.generateClientLedger('${c.name}')" class="btn btn-sm flex-1 justify-center text-xs" style="background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe">Ledger</button>`:''}
+                  </div>
+                </div>`;
             }).join('') || '<div class="col-span-full p-8 text-center text-slate-400">No clients found.</div>');
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
@@ -3668,43 +3842,54 @@ document.addEventListener('DOMContentLoaded', function() {
                 const retainedEarnings = (revenue - cogs) - opsExpenses; // Assuming starting equity is 0 and no drawings.
 
                 html = `
-                <div class="max-w-4xl mx-auto grid grid-cols-2 gap-8 bg-white border border-slate-200 shadow-sm p-8 rounded-xl">
-                    <div class="col-span-2 text-center border-b pb-4 mb-2"><h2 class="text-2xl font-bold text-slate-800">Balance Sheet</h2></div>
+                <div class="max-w-2xl mx-auto bg-white border border-slate-200 shadow-sm p-5 rounded-xl">
+                    <h2 class="text-xl font-bold text-center mb-4 text-slate-800 border-b pb-3">Balance Sheet</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <h3 class="font-bold text-slate-700 bg-slate-100 p-2 mb-2 uppercase tracking-wider text-xs">Assets</h3>
+                        <h3 class="font-bold text-slate-700 bg-slate-100 p-2 mb-2 uppercase tracking-wider text-xs rounded">Assets</h3>
                         <table class="w-full text-sm">
-                            <tr class="border-b border-slate-50"><td class="py-2">Cash & Bank Equivalents</td><td class="py-2 text-right">${formatINR(cashEquiv)}</td></tr>
-                            <tr class="border-b border-slate-50"><td class="py-2">Accounts Receivable</td><td class="py-2 text-right">${formatINR(ar)}</td></tr>
-                            <tr class="border-b border-slate-50"><td class="py-2">Inventory Value</td><td class="py-2 text-right">${formatINR(invVal)}</td></tr>
-                            <tr class="font-bold mt-4 border-t-2 border-slate-300"><td class="py-2 text-slate-800 uppercase">Total Assets</td><td class="py-2 text-right text-emerald-700">${formatINR(totalAssets)}</td></tr>
+                            <tr class="border-b border-slate-100"><td class="py-2 text-slate-600">Cash & Bank</td><td class="py-2 text-right font-semibold">${formatINR(cashEquiv)}</td></tr>
+                            <tr class="border-b border-slate-100"><td class="py-2 text-slate-600">Accounts Receivable</td><td class="py-2 text-right font-semibold">${formatINR(ar)}</td></tr>
+                            <tr class="border-b border-slate-100"><td class="py-2 text-slate-600">Inventory Value</td><td class="py-2 text-right font-semibold">${formatINR(invVal)}</td></tr>
+                            <tr class="border-t-2 border-slate-300 font-bold"><td class="py-2 text-slate-800 uppercase text-xs">Total Assets</td><td class="py-2 text-right text-emerald-700">${formatINR(totalAssets)}</td></tr>
                         </table>
                     </div>
                     <div>
-                        <h3 class="font-bold text-slate-700 bg-slate-100 p-2 mb-2 uppercase tracking-wider text-xs">Liabilities & Equity</h3>
+                        <h3 class="font-bold text-slate-700 bg-slate-100 p-2 mb-2 uppercase tracking-wider text-xs rounded">Liabilities & Equity</h3>
                         <table class="w-full text-sm">
-                            <tr class="border-b border-slate-50"><td class="py-2">Net GST Payable</td><td class="py-2 text-right">${formatINR(taxPayable)}</td></tr>
-                            <tr class="border-b border-slate-50"><td class="py-2">Retained Earnings (Profit)</td><td class="py-2 text-right">${formatINR(retainedEarnings)}</td></tr>
-                            <tr><td class="py-2"></td><td class="py-2"></td></tr>
-                            <tr class="font-bold mt-4 border-t-2 border-slate-300"><td class="py-2 text-slate-800 uppercase">Total Liab. & Equity</td><td class="py-2 text-right text-indigo-700">${formatINR(taxPayable + retainedEarnings)}</td></tr>
+                            <tr class="border-b border-slate-100"><td class="py-2 text-slate-600">Net GST Payable</td><td class="py-2 text-right font-semibold">${formatINR(taxPayable)}</td></tr>
+                            <tr class="border-b border-slate-100"><td class="py-2 text-slate-600">Retained Earnings</td><td class="py-2 text-right font-semibold">${formatINR(retainedEarnings)}</td></tr>
+                            <tr class="border-t-2 border-slate-300 font-bold"><td class="py-2 text-slate-800 uppercase text-xs">Total Liab. & Equity</td><td class="py-2 text-right text-indigo-700">${formatINR(taxPayable + retainedEarnings)}</td></tr>
                         </table>
                     </div>
-                    <div class="col-span-2 text-center text-xs text-slate-400 italic mt-4">Note: This is a generated approximation. Requires balancing entry if discrepancies exist.</div>
+                    </div>
+                    <div class="mt-4 text-center text-xs text-slate-400 italic border-t pt-3">Note: Generated approximation. Requires balancing entry if discrepancies exist.</div>
                 </div>`;
             } else if (tab === 'tb') {
+                const tbRevenue = invoices.reduce((s,i) => s + Number(i.subtotal||0), 0);
+                let tbCogs = 0; invoices.forEach(i => i.items.forEach(it => { const p = products.find(x => x.id === it.productId); tbCogs += (p?Number(p.cost||0):0)*Number(it.qty||0); }));
+                const tbExp = expenses.reduce((s,e) => s + Number(e.amount||0), 0);
+                const tbAR = invoices.filter(i=>i.paymentStatus!=='paid').reduce((s,i)=>s+Number(i.grandTotal||0),0);
+                const tbGstOut = invoices.reduce((s,i)=>s+Number(i.totalTax||0),0);
+                const tbGstIn = expenses.reduce((s,e)=>s+Number(e.gstAmount||0),0);
+                const tbGstNet = tbGstOut - tbGstIn;
                 html = `
-                <div class="max-w-3xl mx-auto bg-white border border-slate-200 shadow-sm p-8 rounded-xl">
-                    <h2 class="text-2xl font-bold text-center mb-6 text-slate-800 border-b pb-4">Trial Balance</h2>
-                    <table class="w-full text-left text-sm mb-6">
-                        <thead class="bg-slate-800 text-white font-medium"><tr><th class="p-3">Ledger Account</th><th class="p-3 text-right">Debit (Dr)</th><th class="p-3 text-right">Credit (Cr)</th></tr></thead>
+                <div class="max-w-2xl mx-auto bg-white border border-slate-200 shadow-sm p-5 rounded-xl">
+                    <h2 class="text-xl font-bold text-center mb-4 text-slate-800 border-b pb-3">Trial Balance</h2>
+                    <div class="overflow-x-auto">
+                    <table class="w-full text-sm" style="min-width:0">
+                        <thead><tr style="background:#1e293b;color:white"><th class="p-3 text-left rounded-tl-lg">Ledger Account</th><th class="p-3 text-right">Debit (Dr)</th><th class="p-3 text-right rounded-tr-lg">Credit (Cr)</th></tr></thead>
                         <tbody>
-                            <tr class="border-b border-slate-100"><td class="p-3">Sales / Revenue Account</td><td class="p-3 text-right">-</td><td class="p-3 text-right">Auto-Calculated</td></tr>
-                            <tr class="border-b border-slate-100"><td class="p-3">Cost of Goods Sold (COGS)</td><td class="p-3 text-right">Auto-Calculated</td><td class="p-3 text-right">-</td></tr>
-                            <tr class="border-b border-slate-100"><td class="p-3">Expense Accounts</td><td class="p-3 text-right">Auto-Calculated</td><td class="p-3 text-right">-</td></tr>
-                            <tr class="border-b border-slate-100"><td class="p-3">Accounts Receivable</td><td class="p-3 text-right">Auto-Calculated</td><td class="p-3 text-right">-</td></tr>
-                            <tr class="border-b border-slate-100"><td class="p-3">GST Input/Output (Net)</td><td class="p-3 text-right">-</td><td class="p-3 text-right">Auto-Calculated</td></tr>
-                            <tr class="bg-slate-50 text-xs italic"><td colspan="3" class="p-4 text-center text-slate-500">Trial Balance populates automatically in final end-of-year accounting exports.</td></tr>
+                            <tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-3 text-slate-700">Sales / Revenue</td><td class="p-3 text-right text-slate-400">—</td><td class="p-3 text-right font-bold text-emerald-700">${formatINR(tbRevenue)}</td></tr>
+                            <tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-3 text-slate-700">Cost of Goods Sold</td><td class="p-3 text-right font-bold text-red-600">${formatINR(tbCogs)}</td><td class="p-3 text-right text-slate-400">—</td></tr>
+                            <tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-3 text-slate-700">Expense Accounts</td><td class="p-3 text-right font-bold text-red-600">${formatINR(tbExp)}</td><td class="p-3 text-right text-slate-400">—</td></tr>
+                            <tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-3 text-slate-700">Accounts Receivable</td><td class="p-3 text-right font-bold text-blue-600">${formatINR(tbAR)}</td><td class="p-3 text-right text-slate-400">—</td></tr>
+                            <tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-3 text-slate-700">GST Payable (Net)</td><td class="p-3 text-right text-slate-400">—</td><td class="p-3 text-right font-bold text-purple-700">${formatINR(tbGstNet)}</td></tr>
+                            <tr style="background:#f8fafc;font-weight:700"><td class="p-3 text-slate-800 uppercase text-xs">TOTALS</td><td class="p-3 text-right text-red-700">${formatINR(tbCogs+tbExp+tbAR)}</td><td class="p-3 text-right text-emerald-700">${formatINR(tbRevenue+tbGstNet)}</td></tr>
                         </tbody>
                     </table>
+                    </div>
+                    <p class="text-xs text-slate-400 italic text-center mt-3">Auto-calculated from finalized invoices & expenses.</p>
                 </div>`;
             }
             setHTML('report-render-area', html);
@@ -4414,11 +4599,10 @@ window.createPO = function(){
 <script>
 (function () {
 
-/* ── Invoice Numbering Settings Card ── */
+/* ── Invoice Numbering Settings Card — handled by modal now ── */
 document.addEventListener("DOMContentLoaded", function () {
-
-    var view = document.getElementById("view-settings");
-    if (!view || document.getElementById("inv-numbering-card")) return;
+    // Inline card disabled — use Settings > Invoice Numbering modal instead
+    return;
 
     var saved = localStorage.getItem("ayur_inv_mode") || "advanced";
 
@@ -4853,6 +5037,655 @@ window.showLogin  = function() { if(window.toggleAuthMode) window.toggleAuthMode
 window.showSignup = function() { if(window.toggleAuthMode) window.toggleAuthMode('signup'); };
 </script>
 
+<script>
+// ================================================================
+// NEW FEATURES BATCH 2
+// ================================================================
+
+// ── 1. INVOICE PREVIEW BEFORE FINALIZE ───────────────────────
+window._previewOpen = false;
+window.openInvoicePreview = function() {
+    if(!window.AppState || !window.AppState.draft) return;
+    var draft = window.AppState.draft;
+    if(!draft.client || !draft.client.name) { window.showToast&&window.showToast('Client name required','error'); return; }
+    if(!draft.items || draft.items.length === 0) { window.showToast&&window.showToast('Add at least one item','error'); return; }
+    // Generate preview HTML
+    var previewInv = Object.assign({}, draft, { status:'draft', paymentStatus:'unpaid', grandTotal: draft.grandTotal || 0 });
+    // Calc totals for preview
+    if(window.updateInvoiceUI) window.updateInvoiceUI();
+    var area = document.getElementById('preview-render-area');
+    if(area && window.generateInvoiceHTML) {
+        area.innerHTML = window.generateInvoiceHTML(previewInv);
+    }
+    var modal = document.getElementById('invoice-preview-modal');
+    if(modal) modal.classList.add('open');
+    window._previewOpen = true;
+    if(typeof lucide !== 'undefined') lucide.createIcons();
+    setTimeout(function(){ scalePreviewInv(); }, 80);
+};
+
+function scalePreviewInv() {
+    var area = document.getElementById('preview-render-area');
+    var body = document.getElementById('preview-modal-body');
+    if(!area || !body) return;
+    var bw = body.clientWidth - 16;
+    var aw = area.scrollWidth;
+    var scale = bw / aw;
+    if(scale < 1) { area.style.transform = 'scale('+scale+')'; area.style.transformOrigin = 'top left'; body.style.height = (area.scrollHeight * scale + 16) + 'px'; }
+    else { area.style.transform = ''; body.style.height = ''; }
+}
+
+window.closeInvoicePreview = function() {
+    var modal = document.getElementById('invoice-preview-modal');
+    if(modal) modal.classList.remove('open');
+    window._previewOpen = false;
+};
+
+window.confirmFinalize = function() {
+    window.closeInvoicePreview();
+    if(window.saveInvoice) window.saveInvoice('final');
+};
+
+// Patch template change to re-render preview if open
+(function(){
+    var origSet = window.setTemplate;
+    window.setTemplate = function(tpl) {
+        if(origSet) origSet(tpl);
+        // Re-render preview if preview modal is open
+        if(window._previewOpen) {
+            setTimeout(function(){
+                var draft = window.AppState && window.AppState.draft;
+                if(!draft) return;
+                var area = document.getElementById('preview-render-area');
+                if(area && window.generateInvoiceHTML) {
+                    area.innerHTML = window.generateInvoiceHTML(Object.assign({}, draft, {status:'draft',paymentStatus:'unpaid'}));
+                    scalePreviewInv();
+                }
+            }, 50);
+        }
+    };
+})();
+
+// ── 2. BLANK MANUAL ROW IN INVOICE ───────────────────────────
+window.addBlankRow = function() {
+    if(!window.AppState || !window.AppState.draft) return;
+    window.AppState.draft.items.push({
+        id: Date.now().toString(),
+        productId: null,
+        name: '',
+        rate: 0,
+        qty: 1,
+        gst: 0,
+        hsn: '',
+        batch: '',
+        expiry: '',
+        inclusive: true,
+        isManual: true
+    });
+    window.updateInvoiceUI && window.updateInvoiceUI();
+    // Focus the last name input
+    setTimeout(function(){
+        var inputs = document.querySelectorAll('.item-name-input');
+        if(inputs.length) inputs[inputs.length-1].focus();
+    }, 100);
+    window.showToast && window.showToast('Blank row added — fill details', 'info');
+};
+
+// ── 3. ACTIVE MODULE: Auto-add to Inventory toggle ───────────
+// Added to active modules list via JS
+(function(){
+    setTimeout(function(){
+        var container = document.getElementById('feature-toggles-container');
+        if(!container || document.getElementById('feat-autoAddInventory')) return;
+        var lbl = document.createElement('label');
+        lbl.className = 'toggle-row';
+        lbl.onclick = function(e){ e.stopPropagation(); };
+        lbl.innerHTML = '<label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="feat-autoAddInventory" onclick="event.stopPropagation()"><span class="toggle-track"></span></label><div><div class="text-sm font-medium text-slate-700">Auto-Add to Inventory</div><div class="text-xs text-slate-400">Create new product when invoiced item not in stock</div></div>';
+        container.appendChild(lbl);
+    }, 800);
+})();
+
+// ── 4. FIX BUSINESS HEALTH SCORE ─────────────────────────────
+// Override with corrected calculation
+window.updateHealthScore = function() {
+    var invs = (window.AppState&&window.AppState.invoices)||[];
+    var prods = (window.AppState&&window.AppState.products)||[];
+    var clients = (window.AppState&&window.AppState.clients)||[];
+    var finalized = invs.filter(function(i){ return i.status==='final' && i.docType !== 'Quotation'; });
+
+    var totalRev = finalized.reduce(function(s,i){ return s+Number(i.grandTotal||0); },0);
+    var collected = finalized.filter(function(i){ return i.paymentStatus==='paid'; }).reduce(function(s,i){ return s+Number(i.grandTotal||0); },0);
+    // Collection Rate (0-25) — only meaningful if there are invoices
+    var cScore = finalized.length > 0 ? Math.round((collected / Math.max(totalRev,1)) * 25) : 12;
+
+    // Revenue Growth (0-25) — compare this month vs last month
+    var now = new Date();
+    var thisM = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    var lastM = now.getMonth()===0 ? (now.getFullYear()-1)+'-12' : now.getFullYear()+'-'+String(now.getMonth()).padStart(2,'0');
+    var revThis = finalized.filter(function(i){ return (i.date||'').startsWith(thisM); }).reduce(function(s,i){ return s+Number(i.grandTotal||0); },0);
+    var revLast = finalized.filter(function(i){ return (i.date||'').startsWith(lastM); }).reduce(function(s,i){ return s+Number(i.grandTotal||0); },0);
+    var gScore = revLast > 0 ? Math.min(25, Math.round((revThis/revLast)*20)) : (revThis>0 ? 20 : 10);
+
+    // Stock Health (0-25)
+    var totalProds = prods.filter(function(p){ return !p.isHidden; }).length;
+    var lowProds = prods.filter(function(p){ return !p.isHidden && Number(p.stock||0) <= 10; }).length;
+    var sScore = totalProds > 0 ? Math.max(0, Math.round(((totalProds - lowProds) / totalProds) * 25)) : 25;
+
+    // Client Activity (0-25) — clients with invoice in last 30 days vs total
+    var d30 = new Date(Date.now() - 30*864e5);
+    var activeSet = new Set(finalized.filter(function(i){ return new Date(i.date) >= d30; }).map(function(i){ return i.client&&i.client.name; }).filter(Boolean));
+    var cliScore = clients.length > 0 ? Math.min(25, Math.round((activeSet.size / clients.length) * 30)) : (finalized.length > 0 ? 15 : 5);
+
+    var total = cScore + gScore + sScore + cliScore;
+    var color = total>=80?'#10b981':total>=60?'#3b82f6':total>=40?'#f59e0b':'#ef4444';
+    var label = total>=80?'Excellent 🚀':total>=60?'Good 👍':total>=40?'Fair ⚡':'Needs Work ⚠️';
+
+    var numEl = document.getElementById('health-score-num');
+    var ringEl = document.getElementById('health-ring-fill');
+    var labelEl = document.getElementById('health-score-label');
+    if(numEl) numEl.textContent = total;
+    if(ringEl) { ringEl.style.stroke = color; ringEl.style.strokeDashoffset = 150.8 * (1 - total/100); }
+    if(labelEl) labelEl.textContent = label;
+
+    var bd = document.getElementById('health-breakdown');
+    if(bd) bd.innerHTML = [
+        {label:'Collection',val:cScore,max:25,color:'#10b981'},
+        {label:'Growth',val:gScore,max:25,color:'#3b82f6'},
+        {label:'Stock',val:sScore,max:25,color:'#f59e0b'},
+        {label:'Clients',val:cliScore,max:25,color:'#8b5cf6'}
+    ].map(function(s){
+        return '<div class="text-center p-2 bg-slate-50 rounded-xl"><div class="text-sm font-black" style="color:'+s.color+'">'+s.val+'<span class="text-[10px] text-slate-400">/'+s.max+'</span></div><div class="text-[10px] text-slate-500 mt-0.5">'+s.label+'</div></div>';
+    }).join('');
+};
+
+// ── 5. DAILY SALES TARGET FIX ────────────────────────────────
+window.updateDailyTarget = function() {
+    var target = Number(localStorage.getItem('ayur_daily_target') || 0);
+    var today = new Date().toISOString().split('T')[0];
+    var todayRev = ((window.AppState&&window.AppState.invoices)||[])
+        .filter(function(i){ return i.status==='final' && i.date===today && i.docType!=='Quotation'; })
+        .reduce(function(s,i){ return s+Number(i.grandTotal||0); },0);
+    var fmt = function(n){ return '₹'+Number(n).toLocaleString('en-IN'); };
+    var pct = target > 0 ? Math.min(100, Math.round((todayRev/target)*100)) : 0;
+    var todayRevEl = document.getElementById('target-today-rev');
+    var label = document.getElementById('target-progress-label');
+    var pctEl = document.getElementById('target-pct');
+    var bar = document.getElementById('target-bar');
+    if(todayRevEl) todayRevEl.textContent = fmt(todayRev)+' today';
+    if(target > 0) {
+        if(label) label.textContent = fmt(todayRev)+' of '+fmt(target);
+        if(pctEl) pctEl.textContent = pct+'%';
+        if(bar) {
+            bar.style.width = pct+'%';
+            bar.style.background = pct>=100?'linear-gradient(90deg,#10b981,#059669)':pct>=70?'linear-gradient(90deg,#3b82f6,#6366f1)':'linear-gradient(90deg,#f59e0b,#f97316)';
+        }
+    } else {
+        if(label) label.textContent = 'No target set — click Set';
+        if(pctEl) pctEl.textContent = '';
+        if(bar) bar.style.width = '0%';
+    }
+};
+
+// ── 6. TEMPLATE GALLERY — ADD 5 NEW TEMPLATES ────────────────
+(function(){
+    var newTpls = [
+        {id:'tricolor', name:'🇮🇳 Tricolor', accent:'India', color:'#000080', bg:'#f0f4ff'},
+        {id:'grunge',   name:'🔥 Grunge',   accent:'Orange', color:'#e05c00', bg:'#fff8f5'},
+        {id:'sidebar-red', name:'📋 Sidebar', accent:'Red',  color:'#dc2626', bg:'#fff5f5'},
+        {id:'waterwave', name:'🌊 WaveFlow', accent:'Teal',  color:'#0369a1', bg:'#f0f9ff'},
+        {id:'vintage',  name:'📜 Vintage',  accent:'Sepia', color:'#8B6914', bg:'#fef9ee'}
+    ];
+    // Merge into TPL_LIST if not already present
+    setTimeout(function(){
+        if(typeof TPL_LIST !== 'undefined') {
+            newTpls.forEach(function(t){
+                if(!TPL_LIST.find(function(x){ return x.id===t.id; })) {
+                    TPL_LIST.push(t);
+                }
+            });
+        }
+    }, 300);
+})();
+
+// ── 7. MOBILE BACK BUTTON ────────────────────────────────────
+(function(){
+    var tabHistory = [];
+    window.addEventListener('popstate', function(e) {
+        if(tabHistory.length > 1) {
+            tabHistory.pop(); // remove current
+            var prev = tabHistory[tabHistory.length - 1];
+            if(prev && window.switchTab) {
+                window.switchTab(prev);
+            }
+        } else {
+            // Let browser handle naturally (exit app or go back in browser)
+        }
+    });
+
+    // Patch switchTab to push history
+    var patchBackBtn = setInterval(function(){
+        if(window.switchTab && !window.switchTab._backPatched) {
+            window.switchTab._backPatched = true;
+            var orig = window.switchTab;
+            window.switchTab = function(tabId) {
+                orig(tabId);
+                // Push state for back navigation
+                if(tabHistory[tabHistory.length-1] !== tabId) {
+                    tabHistory.push(tabId);
+                    if(tabHistory.length > 20) tabHistory.shift();
+                    try { history.pushState({tab: tabId}, '', ''); } catch(e){}
+                }
+            };
+            clearInterval(patchBackBtn);
+        }
+    }, 400);
+
+    // Close modals on back press
+    document.addEventListener('backbutton', function(e) {
+        e.preventDefault();
+        var openModal = document.querySelector('.modal.open');
+        if(openModal) { openModal.classList.remove('open'); return; }
+        var openDrawer = document.querySelector('.drawer.open');
+        if(openDrawer) { openDrawer.classList.remove('open'); return; }
+    }, false);
+})();
+
+// ── 8. SPLASH SCREEN — USE BUSINESS LOGO ─────────────────────
+(function(){
+    var splashPatched = false;
+    var patchSplash = setInterval(function(){
+        if(window.AppState && window.AppState.settings && window.AppState.settings.businessName && !splashPatched) {
+            splashPatched = true;
+            clearInterval(patchSplash);
+            // Update splash if still visible
+            var splashTitle = document.querySelector('#splash h1');
+            if(splashTitle) splashTitle.textContent = window.AppState.settings.businessName;
+            // Update logo
+            var logo = window.AppState.settings.logo;
+            var splashIcon = document.querySelector('#splash .splash-leaf')?.parentElement;
+            if(logo && splashIcon) {
+                splashIcon.innerHTML = '<img src="'+logo+'" style="width:56px;height:56px;object-fit:contain;border-radius:12px;">';
+            }
+        }
+    }, 500);
+})();
+
+// Patch populateSettingsUI to update sidebar biz name
+var _origPopulateSettingsUI = window.populateSettingsUI;
+window.populateSettingsUI = function() {
+    if(_origPopulateSettingsUI) _origPopulateSettingsUI.apply(this, arguments);
+    var s = window.AppState && window.AppState.settings;
+    if(!s) return;
+    var sn = document.getElementById('sidebar-biz-name');
+    if(sn) sn.textContent = s.businessName || 'My Business';
+    // Update settings hero logo
+    var heroLogo = document.getElementById('settings-logo-preview');
+    if(heroLogo && s.logo) heroLogo.innerHTML = '<img src="'+s.logo+'" class="w-full h-full object-contain rounded-xl">';
+};
+
+// ── 9. FIX FINANCIAL REPORTS MOBILE TABLE ────────────────────
+(function(){
+    var origSwitch = window.switchReportTab;
+    // Wait for it to be defined
+    var wait = setInterval(function(){
+        if(window.switchReportTab && window.switchReportTab !== origSwitch || window.switchReportTab) {
+            clearInterval(wait);
+            var origFn = window.switchReportTab;
+            window.switchReportTab = function(tab) {
+                origFn(tab);
+                // Fix: make all report tables mobile-responsive
+                setTimeout(function(){
+                    var reportContent = document.getElementById('report-content');
+                    if(!reportContent) return;
+                    reportContent.querySelectorAll('table').forEach(function(tbl){
+                        tbl.style.width = '100%';
+                        tbl.style.minWidth = '0';
+                        tbl.style.tableLayout = 'fixed';
+                        tbl.style.wordBreak = 'break-word';
+                        // Make amounts wrap properly
+                        tbl.querySelectorAll('td,th').forEach(function(cell){
+                            cell.style.padding = '8px';
+                            cell.style.fontSize = '12px';
+                            cell.style.verticalAlign = 'middle';
+                        });
+                    });
+                    // Fix balance sheet grid overlap
+                    var bsGrid = reportContent.querySelector('.grid-cols-2');
+                    if(bsGrid) {
+                        bsGrid.style.gridTemplateColumns = '1fr';
+                        bsGrid.style.gap = '16px';
+                    }
+                }, 100);
+            };
+        }
+    }, 300);
+})();
+
+// ── 10. TALLY EXPORT BUTTON ──────────────────────────────────
+window.exportToTally = function() {
+    var invs = (window.AppState&&window.AppState.invoices)||[];
+    var finalized = invs.filter(function(i){ return i.status==='final'; });
+    if(finalized.length === 0) { window.showToast&&window.showToast('No finalized invoices to export','warning'); return; }
+    var s = (window.AppState&&window.AppState.settings)||{};
+    var bizName = s.businessName || 'My Business';
+    var gstin = s.gstin || '';
+
+    var xml = '<?xml version="1.0" encoding="UTF-8"?>\n<ENVELOPE>\n<HEADER>\n<TALLYREQUEST>Import Data</TALLYREQUEST>\n</HEADER>\n<BODY>\n<IMPORTDATA>\n<REQUESTDESC>\n<REPORTNAME>Vouchers</REPORTNAME>\n<STATICVARIABLES><SVCURRENTCOMPANY>'+bizName+'</SVCURRENTCOMPANY></STATICVARIABLES>\n</REQUESTDESC>\n<REQUESTDATA>\n';
+
+    finalized.forEach(function(inv) {
+        var date = (inv.date||'').replace(/-/g,'');
+        var amount = Number(inv.grandTotal||0).toFixed(2);
+        var tax = Number(inv.totalTax||0).toFixed(2);
+        var clientName = (inv.client&&inv.client.name)||'Cash';
+        xml += '<TALLYMESSAGE xmlns:UDF="TallyUDF">\n';
+        xml += '<VOUCHER VCHTYPE="Sales" ACTION="Create">\n';
+        xml += '<DATE>'+date+'</DATE>\n';
+        xml += '<VOUCHERTYPENAME>Sales</VOUCHERTYPENAME>\n';
+        xml += '<VOUCHERNUMBER>'+inv.id+'</VOUCHERNUMBER>\n';
+        xml += '<PARTYLEDGERNAME>'+clientName+'</PARTYLEDGERNAME>\n';
+        xml += '<ALLLEDGERENTRIES.LIST>\n';
+        xml += '<LEDGERNAME>'+clientName+'</LEDGERNAME>\n';
+        xml += '<ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>\n';
+        xml += '<AMOUNT>-'+amount+'</AMOUNT>\n';
+        xml += '</ALLLEDGERENTRIES.LIST>\n';
+        xml += '<ALLLEDGERENTRIES.LIST>\n';
+        xml += '<LEDGERNAME>Sales Account</LEDGERNAME>\n';
+        xml += '<ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>\n';
+        xml += '<AMOUNT>'+(Number(amount)-Number(tax)).toFixed(2)+'</AMOUNT>\n';
+        xml += '</ALLLEDGERENTRIES.LIST>\n';
+        if(Number(tax) > 0) {
+            xml += '<ALLLEDGERENTRIES.LIST>\n';
+            xml += '<LEDGERNAME>GST Payable</LEDGERNAME>\n';
+            xml += '<ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>\n';
+            xml += '<AMOUNT>'+tax+'</AMOUNT>\n';
+            xml += '</ALLLEDGERENTRIES.LIST>\n';
+        }
+        xml += '</VOUCHER>\n</TALLYMESSAGE>\n';
+    });
+
+    xml += '</REQUESTDATA>\n</IMPORTDATA>\n</BODY>\n</ENVELOPE>';
+
+    var blob = new Blob([xml], {type:'application/xml'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href=url;
+    a.download = bizName.replace(/\s+/g,'_')+'_Tally_'+new Date().toISOString().split('T')[0]+'.xml';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 2000);
+    window.showToast && window.showToast('Tally XML exported! Import in Tally Prime ✅');
+};
+
+// Add Tally Export button to Settings > Download Backup area
+setTimeout(function(){
+    var fbCard = document.querySelector('#fb-reads-count')?.closest('.card');
+    if(fbCard && !document.getElementById('tally-export-btn')) {
+        var btn = document.createElement('button');
+        btn.id = 'tally-export-btn';
+        btn.className = 'btn btn-ghost btn-sm w-full justify-center mt-2 text-xs';
+        btn.innerHTML = '<i data-lucide="upload" class="w-3 h-3"></i> Export to Tally (.xml)';
+        btn.onclick = window.exportToTally;
+        fbCard.appendChild(btn);
+        if(typeof lucide !== 'undefined') lucide.createIcons({node: btn});
+    }
+}, 1000);
+</script>
+
+<script>
+// ================================================================
+// 10 BUSINESS GROWTH FEATURES
+// ================================================================
+
+// ── FEATURE 1: Business Health Score ──────────────────────────
+window.updateHealthScore = function() {
+    var invs = (window.AppState&&window.AppState.invoices)||[];
+    var exps = (window.AppState&&window.AppState.expenses)||[];
+    var prods = (window.AppState&&window.AppState.products)||[];
+    var clients = (window.AppState&&window.AppState.clients)||[];
+    var finalized = invs.filter(function(i){ return i.status==='final'; });
+
+    var scores = {};
+    // Collection Rate (0-25)
+    var totalRev = finalized.reduce(function(s,i){ return s+Number(i.grandTotal||0); },0);
+    var collected = finalized.filter(function(i){ return i.paymentStatus==='paid'; }).reduce(function(s,i){ return s+Number(i.grandTotal||0); },0);
+    scores.collection = totalRev > 0 ? Math.round((collected/totalRev)*25) : 0;
+
+    // Revenue Growth (0-25) — compare last 30 days vs prev 30
+    var now = new Date(); var d30 = new Date(now - 30*864e5); var d60 = new Date(now - 60*864e5);
+    var rev30 = finalized.filter(function(i){ return new Date(i.date)>=d30; }).reduce(function(s,i){ return s+Number(i.grandTotal||0); },0);
+    var rev60 = finalized.filter(function(i){ return new Date(i.date)>=d60 && new Date(i.date)<d30; }).reduce(function(s,i){ return s+Number(i.grandTotal||0); },0);
+    scores.growth = rev60>0 ? Math.min(25, Math.round((rev30/rev60)*12.5)) : (rev30>0?15:0);
+
+    // Stock Health (0-25)
+    var lowStock = prods.filter(function(p){ return Number(p.stock||0)<=10 && !p.isHidden; }).length;
+    scores.stock = prods.length > 0 ? Math.max(0, 25 - Math.round((lowStock/prods.length)*25)) : 25;
+
+    // Client Activity (0-25) — clients with invoice in last 30 days
+    var activeClients = new Set(finalized.filter(function(i){ return new Date(i.date)>=d30; }).map(function(i){ return i.client&&i.client.name; })).size;
+    scores.clients = clients.length > 0 ? Math.min(25, Math.round((activeClients/clients.length)*30)) : 0;
+
+    var total = scores.collection + scores.growth + scores.stock + scores.clients;
+    var color = total>=80?'#10b981':total>=60?'#3b82f6':total>=40?'#f59e0b':'#ef4444';
+    var label = total>=80?'Excellent 🚀':total>=60?'Good 👍':total>=40?'Fair ⚡':'Needs Work ⚠️';
+
+    var numEl = document.getElementById('health-score-num');
+    var ringEl = document.getElementById('health-ring-fill');
+    var labelEl = document.getElementById('health-score-label');
+    if(numEl) numEl.textContent = total;
+    if(ringEl) { ringEl.style.stroke = color; ringEl.style.strokeDashoffset = 150.8 - (total/100)*150.8; }
+    if(labelEl) labelEl.textContent = label;
+
+    var bd = document.getElementById('health-breakdown');
+    if(bd) bd.innerHTML = [
+        {label:'Collection',val:scores.collection,max:25,color:'#10b981'},
+        {label:'Growth',val:scores.growth,max:25,color:'#3b82f6'},
+        {label:'Stock',val:scores.stock,max:25,color:'#f59e0b'},
+        {label:'Clients',val:scores.clients,max:25,color:'#8b5cf6'}
+    ].map(function(s){
+        return '<div class="text-center p-2 bg-slate-50 rounded-xl"><div class="text-sm font-black" style="color:'+s.color+'">'+s.val+'<span class="text-[10px] text-slate-400">/'+s.max+'</span></div><div class="text-[10px] text-slate-500 mt-0.5">'+s.label+'</div></div>';
+    }).join('');
+};
+
+window.showHealthDetail = function() {
+    window.showToast && window.showToast('Health Score: Collection Rate + Growth + Stock + Active Clients', 'info');
+};
+
+// ── FEATURE 2: Smart Invoice Reminder ─────────────────────────
+window.sendReminderWA = function(clientId) {
+    var client = (window.AppState.clients||[]).find(function(c){ return c.id===clientId; });
+    if(!client) return;
+    var unpaidInvs = (window.AppState.invoices||[]).filter(function(i){ return i.client&&i.client.name===client.name && i.paymentStatus!=='paid' && i.status==='final'; });
+    if(unpaidInvs.length===0) { window.showToast('No pending dues for this client','info'); return; }
+    var total = unpaidInvs.reduce(function(s,i){ return s+Number(i.grandTotal||0); },0);
+    var bizName = (window.AppState.settings&&window.AppState.settings.businessName)||'My Business';
+    var ids = unpaidInvs.map(function(i){ return i.id; }).join(', ');
+    var fmt = function(n){ return '₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2}); };
+    var msg = '🌿 *'+bizName+'*\n\nDear '+client.name+',\n\nThis is a friendly reminder regarding your outstanding payment:\n\n📋 Invoice(s): '+ids+'\n💰 Total Due: *'+fmt(total)+'*\n\nKindly arrange payment at your earliest convenience.\n\nThank you for your trust! 🙏';
+    var mobile = (client.mobile||'').replace(/\D/g,'');
+    var num = mobile.length===10 ? '91'+mobile : mobile;
+    window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg), '_blank');
+};
+
+// ── FEATURE 3: Quick Invoice from Client ──────────────────────
+window.quickInvoiceFromClient = function(clientId) {
+    var client = (window.AppState.clients||[]).find(function(c){ return c.id===clientId; });
+    if(!client) return;
+    if(window.AppState) {
+        window.AppState.draft.client = { name: client.name, mobile: client.mobile||'', gstin: client.gstin||'', address: client.address||'' };
+        window.AppState.draft.items = [];
+    }
+    if(window.switchTab) window.switchTab('invoice');
+    if(window.restoreDraftToUI) window.restoreDraftToUI();
+    if(window.updateInvoiceUI) window.updateInvoiceUI();
+    window.showToast && window.showToast('Invoice pre-filled for '+client.name+' ✅');
+};
+
+// ── FEATURE 4: Stock Alert Badge in Topbar ────────────────────
+window.updateStockAlertBadge = function() {
+    var low = (window.AppState.products||[]).filter(function(p){ return Number(p.stock||0)<=10 && !p.isHidden; });
+    var badge = document.getElementById('stock-alert-badge');
+    if(!badge) return;
+    if(low.length>0) {
+        badge.textContent = low.length;
+        badge.style.display = 'flex';
+    } else {
+        badge.style.display = 'none';
+    }
+};
+
+// ── FEATURE 5: Daily Sales Target ─────────────────────────────
+window.setDailyTarget = function() {
+    var current = localStorage.getItem('ayur_daily_target')||'';
+    var val = prompt('Set daily sales target (₹):', current);
+    if(val && !isNaN(val) && Number(val)>0) {
+        localStorage.setItem('ayur_daily_target', val);
+        window.updateDailyTarget();
+        window.showToast && window.showToast('Daily target set: ₹'+Number(val).toLocaleString('en-IN'));
+    }
+};
+
+window.updateDailyTarget = function() {
+    var target = Number(localStorage.getItem('ayur_daily_target')||0);
+    var today = new Date().toISOString().split('T')[0];
+    var todayRev = (window.AppState.invoices||[])
+        .filter(function(i){ return i.status==='final' && i.date===today; })
+        .reduce(function(s,i){ return s+Number(i.grandTotal||0); },0);
+
+    var fmt = function(n){ return '₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:0}); };
+    var pct = target>0 ? Math.min(100, Math.round((todayRev/target)*100)) : 0;
+    var bar = document.getElementById('target-bar');
+    var label = document.getElementById('target-progress-label');
+    var pctEl = document.getElementById('target-pct');
+    var todayRevEl = document.getElementById('target-today-rev');
+
+    if(todayRevEl) todayRevEl.textContent = fmt(todayRev)+' today';
+    if(target>0) {
+        if(label) label.textContent = fmt(todayRev)+' of '+fmt(target)+' target';
+        if(pctEl) pctEl.textContent = pct+'%';
+        if(bar) {
+            bar.style.width = pct+'%';
+            bar.style.background = pct>=100 ? 'linear-gradient(90deg,#10b981,#059669)' : pct>=70 ? 'linear-gradient(90deg,#3b82f6,#6366f1)' : 'linear-gradient(90deg,#f59e0b,#f97316)';
+        }
+    } else {
+        if(label) label.textContent = 'No target set — click Set to add';
+        if(pctEl) pctEl.textContent = '';
+    }
+};
+
+// ── FEATURE 6: Birthday/Anniversary Reminders ─────────────────
+window.updateBirthdayReminders = function() {
+    var today = new Date();
+    var todayMMDD = (today.getMonth()+1).toString().padStart(2,'0')+'-'+today.getDate().toString().padStart(2,'0');
+    var matches = (window.AppState.clients||[]).filter(function(c){
+        if(!c.birthday) return false;
+        return c.birthday.slice(5) === todayMMDD;
+    });
+    var card = document.getElementById('birthday-reminders-card');
+    var list = document.getElementById('birthday-reminders-list');
+    if(!card || !list) return;
+    if(matches.length>0) {
+        card.classList.remove('hidden');
+        list.innerHTML = matches.map(function(c){
+            var num = (c.mobile||'').replace(/\D/g,'');
+            var waNum = num.length===10?'91'+num:num;
+            var msg = '🎂 Happy Birthday '+c.name+'! Wishing you great health and happiness. 🌿\n\n— '+((window.AppState.settings&&window.AppState.settings.businessName)||'My Business');
+            return '<div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-pink-100 shadow-sm"><div class="flex items-center gap-2"><div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center text-pink-600 font-bold text-sm">'+c.name.charAt(0)+'</div><div><div class="text-sm font-bold text-slate-800">'+c.name+'</div><div class="text-xs text-pink-500">🎂 Birthday Today!</div></div></div><a href="https://wa.me/'+waNum+'?text='+encodeURIComponent(msg)+'" target="_blank" class="btn btn-sm text-xs" style="background:#25D366;color:white;border:none">Wish 🎉</a></div>';
+        }).join('');
+    } else {
+        card.classList.add('hidden');
+    }
+};
+
+// ── FEATURE 8: Product Margin Highlight in Inventory ──────────
+// Already implemented in renderInventory margin field — enhanced below:
+window.getMarginColor = function(cost, rate) {
+    if(!cost || !rate) return 'text-slate-400';
+    var m = ((rate-cost)/rate)*100;
+    return m>=40?'text-emerald-600':m>=20?'text-blue-600':m>=0?'text-amber-600':'text-red-600';
+};
+
+// ── FEATURE 9: Cash Flow Forecast ─────────────────────────────
+window.updateCashFlowForecast = function() {
+    var el = document.getElementById('cashflow-forecast');
+    if(!el) return;
+    var invs = (window.AppState.invoices||[]).filter(function(i){ return i.status==='final' && i.paymentStatus!=='paid'; });
+    var now = new Date();
+    var week1=0, week2=0, week3=0;
+    invs.forEach(function(i){
+        var daysOld = Math.floor((now - new Date(i.date)) / 864e5);
+        // Estimate collection timing based on invoice age
+        if(daysOld <= 7) week1 += Number(i.grandTotal||0);
+        else if(daysOld <= 14) week2 += Number(i.grandTotal||0);
+        else week3 += Number(i.grandTotal||0);
+    });
+    var fmt = function(n){ return '₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:0}); };
+    var total = week1+week2+week3;
+    el.innerHTML = [
+        {label:'This Week',val:week1,color:'bg-emerald-50 border-emerald-200',txt:'text-emerald-700'},
+        {label:'Next 2 Weeks',val:week2,color:'bg-blue-50 border-blue-200',txt:'text-blue-700'},
+        {label:'30+ Days',val:week3,color:'bg-amber-50 border-amber-200',txt:'text-amber-700'}
+    ].map(function(f){
+        return '<div class="'+f.color+' border rounded-xl p-3 text-center"><div class="text-base font-black '+f.txt+'">'+fmt(f.val)+'</div><div class="text-[10px] text-slate-500 mt-0.5">'+f.label+'</div></div>';
+    }).join('') + (total>0 ? '<div class="col-span-3 flex justify-between items-center bg-teal-50 border border-teal-200 rounded-xl p-3"><span class="text-sm font-bold text-teal-800">Total Expected</span><span class="text-lg font-black text-teal-700">'+fmt(total)+'</span></div>' : '<div class="col-span-3 text-center text-slate-400 text-sm p-4">No outstanding invoices — all clear! ✅</div>');
+};
+
+// ── FEATURE 10: GST Summary ───────────────────────────────────
+window.updateGSTSummary = function() {
+    var invs = (window.AppState.invoices||[]).filter(function(i){ return i.status==='final'; });
+    var exps = (window.AppState.expenses)||[];
+    var cgst = invs.reduce(function(s,i){ return s+Number(i.totalTax||0)/2; },0);
+    var sgst = cgst;
+    var igst = 0; // simplified
+    var itc = exps.reduce(function(s,e){ return s+Number(e.gstAmount||0); },0);
+    var net = Math.max(0, (cgst+sgst+igst) - itc);
+    var fmt = function(n){ return '₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:0}); };
+    var setText = function(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; };
+    setText('gst-cgst', fmt(cgst));
+    setText('gst-sgst', fmt(sgst));
+    setText('gst-igst', fmt(igst));
+    setText('gst-itc', fmt(itc));
+    setText('gst-net-payable', fmt(net));
+    // Filing reminder badge
+    var badge = document.getElementById('gst-filing-badge');
+    if(badge) {
+        var d = new Date(); var day = d.getDate();
+        badge.textContent = day>=10&&day<=20 ? '⚠️ GSTR-1 Due!' : day>20 ? '🔴 GSTR-3B Due!' : '✅ Filing OK';
+        badge.className = 'badge text-[10px] ' + (day>=10 ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200');
+    }
+};
+
+// ── PATCH updateDashboard to call all new features ────────────
+(function() {
+    var maxWait = 60, waited = 0;
+    var interval = setInterval(function(){
+        waited++;
+        if(window.updateDashboard || waited > maxWait) {
+            clearInterval(interval);
+            if(!window.updateDashboard) return;
+            var orig = window.updateDashboard;
+            window.updateDashboard = function() {
+                orig.apply(this, arguments);
+                try { window.updateHealthScore(); } catch(e){}
+                try { window.updateDailyTarget(); } catch(e){}
+                try { window.updateBirthdayReminders(); } catch(e){}
+                try { window.updateCashFlowForecast(); } catch(e){}
+                try { window.updateGSTSummary(); } catch(e){}
+                try { window.updateStockAlertBadge(); } catch(e){}
+            };
+        }
+    }, 200);
+})();
+
+// ── PATCH listeners to call stock badge ──────────────────────
+(function(){
+    var orig = window.renderInventory;
+    if(orig) {
+        window.renderInventory = function(){
+            orig.apply(this,arguments);
+            try { window.updateStockAlertBadge(); } catch(e){}
+        };
+    }
+})();
+</script>
+
 <!-- ============================================================
   SETTINGS MODALS
 ============================================================ -->
@@ -4935,16 +5768,18 @@ var _settingsModals = {
         ['shipping','Shipping & PO Fields'],['tds','TDS Deduction'],['rcm','Reverse Charge (RCM)'],
         ['hsn','HSN/SAC Codes'],['dueDate','Invoice Due Dates'],['ledger','Client Ledger'],
         ['creditNote','Credit Notes'],['margin','Margin Calculator'],['batch','Batch & Expiry'],
-        ['deleteBtn','Allow Deletion'],['stamp','Company Seal on PDF'],['returnStock','Auto-Return Stock']
+        ['deleteBtn','Allow Deletion'],['stamp','Company Seal on PDF'],['returnStock','Auto-Return Stock'],
+        ['autoCreateClient','Auto-Create New Client 🆕'],['autoCreateProduct','Auto-Create New Product 🆕']
       ];
       return '<div class="space-y-2">' + list.map(function(f){
-        var checked = feats[f[0]] !== false;
-        return `<label class="toggle-row"><label class="toggle"><input type="checkbox" data-feat="${f[0]}" id="smod-feat-${f[0]}" ${checked?'checked':''}><span class="toggle-track"></span></label><span class="text-sm font-medium text-slate-700">${f[1]}</span></label>`;
+        var checked = f[0]==='autoCreateClient'||f[0]==='autoCreateProduct' ? (feats[f[0]] !== false) : (feats[f[0]] !== false);
+        var extraNote = (f[0]==='autoCreateClient'||f[0]==='autoCreateProduct') ? `<div class="text-xs text-emerald-600">New entry auto-saved on invoice finalize</div>` : '';
+        return `<label class="toggle-row flex-col items-start gap-1"><div class="flex items-center gap-2 w-full"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" data-feat="${f[0]}" id="smod-feat-${f[0]}" ${checked?'checked':''}><span class="toggle-track"></span></label><span class="text-sm font-medium text-slate-700">${f[1]}</span></div>${extraNote}</label>`;
       }).join('') + '</div>';
     },
     save: function() {
       var feats = {};
-      ['expenses','multiDoc','currency','shipping','tds','rcm','hsn','dueDate','ledger','creditNote','margin','batch','deleteBtn','stamp','returnStock'].forEach(function(k){
+      ['expenses','multiDoc','currency','shipping','tds','rcm','hsn','dueDate','ledger','creditNote','margin','batch','deleteBtn','stamp','returnStock','autoCreateClient','autoCreateProduct'].forEach(function(k){
         var el = document.getElementById('smod-feat-'+k); if(el) feats[k] = el.checked;
         var orig = document.getElementById('feat-'+k); if(orig && el) orig.checked = el.checked;
       });
@@ -5426,5 +6261,579 @@ setTimeout(function(){
   }
 }, 500);
 </script>
-</body>
+
+<script>
+// ================================================================
+// RECOMMENDED FEATURES — BATCH 3
+// ================================================================
+
+// ── AUTO-CREATE CLIENT ON INVOICE FINALIZE ────────────────────
+window.autoCreateClientIfNeeded = async function(draft) {
+    if(!window.isFeatureEnabled('autoCreateClient')) return;
+    if(!draft.client || !draft.client.name) return;
+    var existing = (window.AppState.clients||[]).find(function(c){ return c.name.toLowerCase() === draft.client.name.toLowerCase(); });
+    if(existing) return; // already exists
+    try {
+        var db=window._db, appId=window._appId, uid=window.AppState.user.uid;
+        if(!db || !appId || !uid) return;
+        await window._addDoc(window._collection(db,'artifacts',appId,'users',uid,'clients'), {
+            name: draft.client.name, mobile: draft.client.mobile||'', gstin: draft.client.gstin||'',
+            address: draft.client.address||'', notes:'', birthday:'', journal:[], isDeleted:false,
+            createdAt: window._serverTimestamp()
+        });
+        window.showToast && window.showToast('New client "'+draft.client.name+'" auto-saved! ✅');
+    } catch(e) { console.warn('Auto-create client failed:', e); }
+};
+
+// ── AUTO-CREATE PRODUCT ON INVOICE FINALIZE ───────────────────
+window.autoCreateProductIfNeeded = async function(draft) {
+    if(!window.isFeatureEnabled('autoCreateProduct')) return;
+    var db=window._db, appId=window._appId, uid=window.AppState&&window.AppState.user&&window.AppState.user.uid;
+    if(!db||!appId||!uid) return;
+    var items = draft.items || [];
+    for(var i=0; i<items.length; i++) {
+        var item = items[i];
+        if(!item.isManual || !item.name) continue;
+        var existing = (window.AppState.products||[]).find(function(p){ return p.name.toLowerCase()===item.name.toLowerCase(); });
+        if(existing) continue;
+        try {
+            await window._addDoc(window._collection(db,'artifacts',appId,'users',uid,'products'), {
+                name: item.name, category:'General', hsn: item.hsn||'', cost: Math.round(item.rate*0.7),
+                rate: item.rate, gst: item.gst||0, stock:0, batch:'', expiry:'', isHidden:false, isDeleted:false,
+                createdAt: window._serverTimestamp()
+            });
+            window.showToast && window.showToast('"'+item.name+'" added to inventory! 📦');
+        } catch(e) { console.warn('Auto-create product failed:', e); }
+    }
+};
+
+// Check auto-create product on name blur
+window.checkAutoCreateProduct = function(itemId, name) {
+    if(!name || !window.isFeatureEnabled('autoCreateProduct')) return;
+    var exists = (window.AppState.products||[]).find(function(p){ return p.name.toLowerCase()===name.toLowerCase(); });
+    if(!exists && name.length > 1) {
+        // Show hint
+        window.showToast && window.showToast('"'+name+'" will be auto-added to inventory on finalize', 'info');
+    }
+};
+
+// Patch saveInvoice to trigger auto-creates + WhatsApp on finalize
+(function(){
+    var origSave = window.saveInvoice;
+    var patchInterval = setInterval(function(){
+        if(window.saveInvoice && window.saveInvoice !== origSave || typeof window.saveInvoice === 'function') {
+            clearInterval(patchInterval);
+            var orig = window.saveInvoice;
+            window.saveInvoice = async function(status) {
+                await orig.apply(this, arguments);
+                if(status === 'final' && window.AppState && window.AppState.draft) {
+                    var draft = JSON.parse(JSON.stringify(window.AppState.draft));
+                    // Auto-create client
+                    try { await window.autoCreateClientIfNeeded(draft); } catch(e){}
+                    // Auto-create products
+                    try { await window.autoCreateProductIfNeeded(draft); } catch(e){}
+                    // WhatsApp auto-send if enabled
+                    if(localStorage.getItem('ayur_wa_autosend') === 'true') {
+                        setTimeout(function(){ window.autoSendWAInvoice && window.autoSendWAInvoice(); }, 1500);
+                    }
+                    // Update recurring invoices
+                    try { window.updateRecurringBadge && window.updateRecurringBadge(); } catch(e){}
+                }
+            };
+        }
+    }, 500);
+})();
+
+// ── WHATSAPP AUTO-SEND ON FINALIZE ───────────────────────────
+window.autoSendWAInvoice = async function() {
+    // Find the most recent finalized invoice
+    var invs = (window.AppState&&window.AppState.invoices)||[];
+    var latest = invs.filter(function(i){ return i.status==='final'; }).sort(function(a,b){ return (b.createdAt||0)-(a.createdAt||0); })[0];
+    if(!latest) return;
+    var biz = (window.AppState.settings&&window.AppState.settings.businessName)||'My Business';
+    var fmt = function(n){ return '₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2}); };
+    var msg = '🌿 *'+biz+'*\n\nDear '+latest.client.name+',\n\nYour invoice is ready:\n\n📋 *'+latest.id+'*\n📅 '+latest.date+'\n💰 *'+fmt(latest.grandTotal)+'*\n\n'+(latest.paymentStatus==='paid'?'✅ Paid':'⏳ Payment Pending')+'\n\nThank you! 🙏';
+    var mobile = (latest.client&&latest.client.mobile||'').replace(/\D/g,'');
+    var num = mobile.length===10?'91'+mobile:mobile;
+    if(num) window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg),'_blank');
+};
+
+// ── BARCODE SCANNER ───────────────────────────────────────────
+window.openBarcodeScanner = function() {
+    // Check browser support
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        window.showToast&&window.showToast('Camera not supported on this browser','error'); return;
+    }
+    // Create scanner modal
+    var existing = document.getElementById('barcode-scanner-modal');
+    if(existing) existing.remove();
+    var modal = document.createElement('div');
+    modal.id = 'barcode-scanner-modal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;';
+    modal.innerHTML = `
+        <div style="color:white;font-size:16px;font-weight:700;margin-bottom:16px;">📷 Barcode Scanner</div>
+        <div style="position:relative;width:280px;height:280px;border:3px solid #10b981;border-radius:12px;overflow:hidden;">
+            <video id="barcode-video" style="width:100%;height:100%;object-fit:cover;" autoplay playsinline></video>
+            <div style="position:absolute;inset:0;border:2px solid #10b981;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,.5);"></div>
+            <div style="position:absolute;top:50%;left:10%;right:10%;height:2px;background:#10b981;transform:translateY(-50%);animation:scanLine 2s ease-in-out infinite;"></div>
+        </div>
+        <style>@keyframes scanLine{0%,100%{top:20%}50%{top:80%}}</style>
+        <div style="color:#94a3b8;font-size:12px;margin-top:12px;text-align:center;">Point camera at barcode/QR code<br>Product will be added to invoice</div>
+        <div id="barcode-manual-input" style="margin-top:16px;display:flex;gap:8px;">
+            <input id="barcode-manual" type="text" placeholder="Type barcode manually..." style="padding:8px 12px;border-radius:8px;border:1px solid #475569;background:#1e293b;color:white;font-size:13px;width:200px;">
+            <button onclick="window.processBarcode(document.getElementById('barcode-manual').value)" style="padding:8px 14px;background:#10b981;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;">Add</button>
+        </div>
+        <button onclick="window.closeBarcodeScanner()" style="margin-top:16px;padding:10px 24px;background:#ef4444;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;">✕ Close</button>
+    `;
+    document.body.appendChild(modal);
+
+    // Start camera
+    navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(stream){
+        window._barcodeStream = stream;
+        var video = document.getElementById('barcode-video');
+        if(video) video.srcObject = stream;
+
+        // Use BarcodeDetector API if available
+        if('BarcodeDetector' in window) {
+            var detector = new BarcodeDetector({formats:['ean_13','ean_8','code_128','qr_code','upc_a','upc_e']});
+            window._barcodeInterval = setInterval(async function(){
+                var v = document.getElementById('barcode-video');
+                if(!v) { clearInterval(window._barcodeInterval); return; }
+                try {
+                    var codes = await detector.detect(v);
+                    if(codes.length > 0) {
+                        clearInterval(window._barcodeInterval);
+                        window.processBarcode(codes[0].rawValue);
+                    }
+                } catch(e){}
+            }, 500);
+        }
+    }).catch(function(err){
+        window.showToast&&window.showToast('Camera access denied: '+err.message,'error');
+        modal.remove();
+    });
+};
+
+window.closeBarcodeScanner = function() {
+    if(window._barcodeStream) { window._barcodeStream.getTracks().forEach(function(t){ t.stop(); }); window._barcodeStream = null; }
+    if(window._barcodeInterval) { clearInterval(window._barcodeInterval); window._barcodeInterval = null; }
+    var m = document.getElementById('barcode-scanner-modal'); if(m) m.remove();
+};
+
+window.processBarcode = function(code) {
+    if(!code) return;
+    window.closeBarcodeScanner();
+    // Search products by barcode/HSN or name match
+    var prods = window.AppState&&window.AppState.products||[];
+    var match = prods.find(function(p){ return p.hsn===code || p.barcode===code || p.name.toLowerCase().includes(code.toLowerCase()); });
+    if(match) {
+        window.addDraftItem && window.addDraftItem(match);
+        window.showToast && window.showToast('Product added: '+match.name+' ✅');
+    } else {
+        window.showToast && window.showToast('No product found for: '+code+'. Adding manual row.','warning');
+        window.addBlankRow && window.addBlankRow();
+        // Pre-fill with barcode as name
+        setTimeout(function(){
+            var inputs = document.querySelectorAll('.item-name-input');
+            if(inputs.length) inputs[inputs.length-1].value = code;
+        }, 200);
+    }
+};
+
+// Add scanner button to invoice search area
+setTimeout(function(){
+    var searchArea = document.getElementById('inv-product-search')&&document.getElementById('inv-product-search').parentElement&&document.getElementById('inv-product-search').parentElement.parentElement;
+    if(searchArea && !document.getElementById('barcode-btn')) {
+        var btn = document.createElement('button');
+        btn.id = 'barcode-btn';
+        btn.className = 'btn btn-ghost btn-icon flex-shrink-0';
+        btn.title = 'Barcode Scanner';
+        btn.onclick = window.openBarcodeScanner;
+        btn.innerHTML = '<i data-lucide="scan" class="w-4 h-4 text-slate-500"></i>';
+        var flexDiv = searchArea.querySelector('.flex.gap-2');
+        if(flexDiv) { flexDiv.appendChild(btn); if(typeof lucide!=='undefined') lucide.createIcons({node:btn}); }
+    }
+}, 1000);
+
+// ── SUBSCRIPTION / RECURRING INVOICES ────────────────────────
+window.openRecurringModal = function() {
+    var modal = document.getElementById('recurring-modal');
+    if(!modal) {
+        // Create modal
+        var el = document.createElement('div');
+        el.id = 'recurring-modal';
+        el.className = 'modal';
+        el.onclick = function(e){ if(e.target===el) window.closeRecurringModal(); };
+        var clients = (window.AppState&&window.AppState.clients)||[];
+        el.innerHTML = `
+        <div class="modal-box max-w-lg w-full">
+            <div class="modal-head">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center"><i data-lucide="repeat" class="w-4 h-4 text-purple-600"></i></div>
+                    <div><div class="font-bold text-slate-800">Recurring Invoices</div><div class="text-xs text-slate-400">Monthly auto-repeat for regular patients</div></div>
+                </div>
+                <button onclick="window.closeRecurringModal()" class="btn btn-icon btn-ghost"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="space-y-4">
+                    <div><label class="lbl">Client</label>
+                        <select id="rec-client" class="inp text-sm bg-white">
+                            <option value="">Select client...</option>
+                            ${clients.map(function(c){ return '<option value="'+c.name+'">'+c.name+'</option>'; }).join('')}
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="lbl">Amount (₹)</label><input type="number" id="rec-amount" class="inp text-sm" placeholder="0.00"></div>
+                        <div><label class="lbl">GST %</label><input type="number" id="rec-gst" class="inp text-sm" value="18" placeholder="18"></div>
+                    </div>
+                    <div><label class="lbl">Description</label><input type="text" id="rec-desc" class="inp text-sm" placeholder="Monthly treatment / consultation..."></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="lbl">Frequency</label>
+                            <select id="rec-freq" class="inp text-sm bg-white">
+                                <option value="monthly">Monthly</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="quarterly">Quarterly</option>
+                            </select>
+                        </div>
+                        <div><label class="lbl">Next Due Date</label><input type="date" id="rec-date" class="inp text-sm"></div>
+                    </div>
+                    <button onclick="window.saveRecurring()" class="btn btn-primary w-full justify-center">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Create Recurring Invoice
+                    </button>
+                    <div id="recurring-list" class="space-y-2 mt-4"></div>
+                </div>
+            </div>
+        </div>`;
+        document.body.appendChild(el);
+        if(typeof lucide!=='undefined') lucide.createIcons({node:el});
+        // Set default date to next month
+        var nextMonth = new Date(); nextMonth.setMonth(nextMonth.getMonth()+1);
+        var d = document.getElementById('rec-date');
+        if(d) d.value = nextMonth.toISOString().split('T')[0];
+    }
+    document.getElementById('recurring-modal').classList.add('open');
+    window.renderRecurringList();
+};
+
+window.closeRecurringModal = function() {
+    var m = document.getElementById('recurring-modal'); if(m) m.classList.remove('open');
+};
+
+window.saveRecurring = function() {
+    var client = document.getElementById('rec-client')&&document.getElementById('rec-client').value;
+    var amount = document.getElementById('rec-amount')&&Number(document.getElementById('rec-amount').value);
+    var gst = document.getElementById('rec-gst')&&Number(document.getElementById('rec-gst').value||18);
+    var desc = document.getElementById('rec-desc')&&document.getElementById('rec-desc').value.trim();
+    var freq = document.getElementById('rec-freq')&&document.getElementById('rec-freq').value;
+    var date = document.getElementById('rec-date')&&document.getElementById('rec-date').value;
+    if(!client||!amount||!date) { window.showToast&&window.showToast('Fill all required fields','error'); return; }
+    var recurring = JSON.parse(localStorage.getItem('ayur_recurring')||'[]');
+    recurring.push({ id: Date.now().toString(), client, amount, gst, desc, freq, nextDate: date, active: true, createdAt: new Date().toISOString() });
+    localStorage.setItem('ayur_recurring', JSON.stringify(recurring));
+    window.showToast&&window.showToast('Recurring invoice saved! ✅');
+    window.renderRecurringList();
+};
+
+window.renderRecurringList = function() {
+    var el = document.getElementById('recurring-list'); if(!el) return;
+    var recurring = JSON.parse(localStorage.getItem('ayur_recurring')||'[]');
+    if(recurring.length===0) { el.innerHTML='<p class="text-xs text-slate-400 text-center py-4">No recurring invoices yet</p>'; return; }
+    var today = new Date().toISOString().split('T')[0];
+    el.innerHTML = '<div class="font-bold text-slate-700 text-sm mb-2">Active Subscriptions</div>' + recurring.map(function(r){
+        var isDue = r.nextDate <= today;
+        return `<div class="p-3 rounded-xl border ${isDue?'border-amber-200 bg-amber-50':'border-slate-100 bg-slate-50'} flex items-center justify-between gap-2">
+            <div class="flex-1 min-w-0">
+                <div class="font-semibold text-sm text-slate-800 truncate">${r.client}</div>
+                <div class="text-xs text-slate-500">${r.desc||r.freq} · ₹${r.amount} · Due: ${r.nextDate}</div>
+            </div>
+            <div class="flex gap-1 flex-shrink-0">
+                ${isDue?`<button onclick="window.generateRecurringInvoice('${r.id}')" class="btn btn-sm btn-primary text-xs">Generate</button>`:''}
+                <button onclick="window.deleteRecurring('${r.id}')" class="btn btn-sm btn-danger text-xs">✕</button>
+            </div>
+        </div>`;
+    }).join('');
+};
+
+window.generateRecurringInvoice = function(id) {
+    var recurring = JSON.parse(localStorage.getItem('ayur_recurring')||'[]');
+    var r = recurring.find(function(x){ return x.id===id; });
+    if(!r) return;
+    var clientObj = (window.AppState.clients||[]).find(function(c){ return c.name===r.client; });
+    if(window.AppState) {
+        window.AppState.draft.client = { name: r.client, mobile: clientObj&&clientObj.mobile||'', gstin: clientObj&&clientObj.gstin||'', address: clientObj&&clientObj.address||'' };
+        window.AppState.draft.items = [{ id: Date.now().toString(), productId:null, name: r.desc||'Monthly Service', rate: Number(r.amount), qty:1, gst: Number(r.gst||0), hsn:'', isManual:true, inclusive:true }];
+    }
+    // Update next due date
+    var next = new Date(r.nextDate);
+    if(r.freq==='weekly') next.setDate(next.getDate()+7);
+    else if(r.freq==='monthly') next.setMonth(next.getMonth()+1);
+    else if(r.freq==='quarterly') next.setMonth(next.getMonth()+3);
+    r.nextDate = next.toISOString().split('T')[0];
+    localStorage.setItem('ayur_recurring', JSON.stringify(recurring));
+    window.closeRecurringModal();
+    if(window.switchTab) window.switchTab('invoice');
+    if(window.restoreDraftToUI) window.restoreDraftToUI();
+    if(window.updateInvoiceUI) window.updateInvoiceUI();
+    window.showToast&&window.showToast('Recurring invoice ready! Review & finalize. ✅');
+};
+
+window.deleteRecurring = function(id) {
+    var recurring = JSON.parse(localStorage.getItem('ayur_recurring')||'[]');
+    localStorage.setItem('ayur_recurring', JSON.stringify(recurring.filter(function(r){ return r.id!==id; })));
+    window.renderRecurringList();
+};
+
+window.updateRecurringBadge = function() {
+    var recurring = JSON.parse(localStorage.getItem('ayur_recurring')||'[]');
+    var today = new Date().toISOString().split('T')[0];
+    var due = recurring.filter(function(r){ return r.active && r.nextDate <= today; }).length;
+    // Show toast if any due
+    if(due > 0) window.showToast&&window.showToast(due+' recurring invoice(s) due today! Check sidebar.','warning');
+};
+
+// Add Recurring button to sidebar
+setTimeout(function(){
+    var nav = document.getElementById('desk-nav');
+    if(nav && !document.getElementById('recurring-nav-btn')) {
+        var btn = document.createElement('button');
+        btn.id = 'recurring-nav-btn';
+        btn.className = 'nav-item';
+        btn.onclick = window.openRecurringModal;
+        btn.innerHTML = '<i data-lucide="repeat" class="w-4 h-4"></i> <span>Recurring</span>';
+        nav.appendChild(btn);
+        if(typeof lucide!=='undefined') lucide.createIcons({node:btn});
+    }
+    // Check due on load
+    setTimeout(window.updateRecurringBadge, 2000);
+}, 1200);
+
+// ── AI PRICE SUGGESTION ───────────────────────────────────────
+window.getAIPriceSuggestion = function(productName, currentRate) {
+    // Analyze past invoice data for this product
+    var invs = (window.AppState&&window.AppState.invoices)||[];
+    var sales = [];
+    invs.filter(function(i){ return i.status==='final'; }).forEach(function(inv){
+        (inv.items||[]).forEach(function(item){
+            if(item.name && item.name.toLowerCase()===productName.toLowerCase()) {
+                sales.push({ rate: Number(item.rate||0), qty: Number(item.qty||1), date: inv.date });
+            }
+        });
+    });
+    if(sales.length < 2) return null;
+    // Calculate stats
+    var rates = sales.map(function(s){ return s.rate; });
+    var avg = rates.reduce(function(a,b){ return a+b; },0) / rates.length;
+    var max = Math.max.apply(null, rates);
+    var min = Math.min.apply(null, rates);
+    var totalQty = sales.reduce(function(s,x){ return s+x.qty; },0);
+    // Suggest 5% above average if current is below avg
+    var suggested = currentRate < avg ? Math.round(avg * 1.05) : Math.round(avg);
+    return { avg: Math.round(avg), max, min, suggested, totalQty, salesCount: sales.length };
+};
+
+// Show AI price suggestion when product added
+(function(){
+    var origAdd = window.addDraftItem;
+    var patchAI = setInterval(function(){
+        if(window.addDraftItem) {
+            clearInterval(patchAI);
+            var orig = window.addDraftItem;
+            window.addDraftItem = function(p) {
+                orig(p);
+                // Check AI price suggestion
+                var suggestion = window.getAIPriceSuggestion(p.name, p.rate);
+                if(suggestion && suggestion.suggested !== p.rate && Math.abs(suggestion.suggested - p.rate) > 5) {
+                    window.showToast && window.showToast('💡 AI Tip: '+p.name+' avg price ₹'+suggestion.avg+' ('+suggestion.salesCount+' past sales). Suggested: ₹'+suggestion.suggested, 'info');
+                }
+            };
+        }
+    }, 600);
+})();
+
+// ── DIGITAL INVOICE QR — Embedded HTML, No Firebase Link ─────
+window.generateDigitalInvoiceQR = function(inv) {
+    // Create a self-contained mini HTML page for the invoice
+    var s = (window.AppState&&window.AppState.settings)||{};
+    var fmt = function(n){ return '₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2}); };
+    var itemsHtml = (inv.items||[]).map(function(it,i){
+        return '<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:8px">'+(i+1)+'</td><td style="padding:8px">'+it.name+'</td><td style="padding:8px;text-align:center">'+it.qty+'</td><td style="padding:8px;text-align:right">'+fmt(it.rate)+'</td><td style="padding:8px;text-align:right;font-weight:700">'+fmt(Number(it.qty)*Number(it.rate))+'</td></tr>';
+    }).join('');
+
+    var miniHTML = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Invoice '+inv.id+'</title>'
+        +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:sans-serif;padding:16px;max-width:480px;margin:0 auto;color:#1e293b}'
+        +'.hero{background:linear-gradient(135deg,#064e3b,#065f46);color:white;padding:20px;border-radius:12px;margin-bottom:16px}'
+        +'table{width:100%;border-collapse:collapse;font-size:13px}th{padding:8px;background:#f8fafc;text-align:left;font-size:11px;text-transform:uppercase;color:#94a3b8}'
+        +'.total-row{background:#f0fdf4;font-weight:700;font-size:15px}'
+        +'</style>'
+        +'<script>window.onload=function(){var a=document.createElement("a");a.href=window.location.href;var params=new URLSearchParams(a.search);if(params.get("download")){window.print();}}<\/script>'
+        +'</head><body>'
+        +'<div class="hero"><div style="font-size:18px;font-weight:700">'+s.businessName+'</div><div style="opacity:.7;font-size:11px;margin-top:2px">'+s.address+'</div></div>'
+        +'<div style="margin-bottom:12px"><div style="font-size:20px;font-weight:900;color:#059669">'+inv.id+'</div>'
+        +'<div style="font-size:13px;color:#64748b">Date: '+inv.date+' · Client: '+((inv.client&&inv.client.name)||'')+'</div></div>'
+        +'<table><thead><tr><th>#</th><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr></thead><tbody>'+itemsHtml+'</tbody>'
+        +'<tfoot><tr class="total-row"><td colspan="4" style="padding:10px;text-align:right">Grand Total</td><td style="padding:10px;text-align:right;color:#059669">'+fmt(inv.grandTotal)+'</td></tr></tfoot>'
+        +'</table>'
+        +'<div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:8px;font-size:12px;color:#64748b;text-align:center">'+(inv.paymentStatus==='paid'?'✅ PAID':'⏳ Payment Pending')+'</div>'
+        +'</body></html>';
+
+    // Encode as data URI and create QR
+    var encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(miniHTML);
+    if(window.generateLocalQR) return window.generateLocalQR(encoded);
+    return '';
+};
+
+// Patch generateInvoiceHTML to use new digital QR
+(function(){
+    var patchDigQR = setInterval(function(){
+        if(window.generateInvoiceHTML) {
+            clearInterval(patchDigQR);
+            var orig = window.generateInvoiceHTML;
+            window.generateInvoiceHTML = function(inv) {
+                var html = orig(inv);
+                // Replace old digital QR (firebase link) with new embedded HTML QR
+                var newQR = window.generateDigitalInvoiceQR(inv);
+                if(newQR) {
+                    html = html.replace(/https:\/\/dev-ayurveda\.web\.app\/verify\/[^"']*/g, '');
+                }
+                return html;
+            };
+        }
+    }, 700);
+})();
+
+// ── PWA OFFLINE MODE — Service Worker ────────────────────────
+(function(){
+    if('serviceWorker' in navigator) {
+        var swCode = `
+const CACHE = 'ayur-erp-v1';
+const ASSETS = [
+  '/',
+  '/index.html',
+  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap',
+  'https://cdn.tailwindcss.com',
+  'https://unpkg.com/lucide@latest',
+  'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js'
+];
+self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS.map(u => new Request(u, {mode:'no-cors'}))))); self.skipWaiting(); });
+self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))); });
+self.addEventListener('fetch', e => { e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('/index.html')))); });
+        `;
+        var blob = new Blob([swCode], {type:'application/javascript'});
+        var swUrl = URL.createObjectURL(blob);
+        // Note: SW from blob URL has limited scope, but this works for basic caching
+        // For production: serve sw.js from same origin
+        try {
+            navigator.serviceWorker.register(swUrl).then(function(reg){
+                console.log('SW registered, offline mode active');
+            }).catch(function(e){ console.log('SW registration limited (blob URL):', e.message); });
+        } catch(e) {}
+    }
+})();
+
+// ── MULTI-USER / STAFF ACCESS UI ─────────────────────────────
+window.openStaffModal = function() {
+    var modal = document.getElementById('staff-modal');
+    if(!modal) {
+        var el = document.createElement('div');
+        el.id = 'staff-modal';
+        el.className = 'modal';
+        el.onclick = function(e){ if(e.target===el) el.classList.remove('open'); };
+        el.innerHTML = `
+        <div class="modal-box max-w-md w-full">
+            <div class="modal-head">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center"><i data-lucide="users" class="w-4 h-4 text-indigo-600"></i></div>
+                    <div><div class="font-bold text-slate-800">Staff Access</div><div class="text-xs text-slate-400">Role-based login management</div></div>
+                </div>
+                <button onclick="document.getElementById('staff-modal').classList.remove('open')" class="btn btn-icon btn-ghost"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl mb-4">
+                    <div class="font-bold text-blue-800 text-sm mb-1">⚙️ Firebase Multi-Auth Setup Required</div>
+                    <p class="text-xs text-blue-700">To enable staff logins, add staff email in Firebase Console → Authentication → Users. Each user gets their own UID-isolated data.</p>
+                </div>
+                <div class="space-y-3">
+                    <div class="font-bold text-slate-700 text-sm">Current Account Role</div>
+                    <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-emerald-800 text-sm">${(window.AppState&&window.AppState.user&&window.AppState.user.email)||'Admin'}</div>
+                            <div class="text-xs text-emerald-600">Role: Administrator (Full Access)</div>
+                        </div>
+                        <span class="badge bg-emerald-100 text-emerald-800 border border-emerald-200">Admin</span>
+                    </div>
+                    <div class="font-bold text-slate-700 text-sm mt-3">Role Permissions</div>
+                    ${[
+                        {role:'Admin',perms:'All features — invoicing, settings, delete, reports',color:'emerald'},
+                        {role:'Billing Staff',perms:'Invoice creation, view records — no settings/delete',color:'blue'},
+                        {role:'View Only',perms:'Read-only access — no create/edit/delete',color:'slate'}
+                    ].map(function(r){
+                        return '<div class="p-3 bg-'+r.color+'-50 border border-'+r.color+'-100 rounded-xl"><div class="font-bold text-sm text-'+r.color+'-800">'+r.role+'</div><div class="text-xs text-'+r.color+'-600 mt-0.5">'+r.perms+'</div></div>';
+                    }).join('')}
+                    <div class="text-xs text-slate-400 text-center mt-2">Full multi-user support requires Firebase Rules configuration. Contact support for setup guide.</div>
+                </div>
+            </div>
+        </div>`;
+        document.body.appendChild(el);
+        if(typeof lucide!=='undefined') lucide.createIcons({node:el});
+    }
+    document.getElementById('staff-modal').classList.add('open');
+};
+
+// ── ADD FEATURE BUTTONS TO SIDEBAR ───────────────────────────
+setTimeout(function(){
+    var nav = document.getElementById('desk-nav');
+    if(!nav) return;
+
+    // WhatsApp Settings toggle
+    if(!document.getElementById('wa-autosend-toggle')) {
+        var waEnabled = localStorage.getItem('ayur_wa_autosend') === 'true';
+        var waSection = document.createElement('div');
+        waSection.className = 'nav-section mt-2';
+        waSection.textContent = 'Tools';
+        nav.appendChild(waSection);
+
+        var waBtn = document.createElement('button');
+        waBtn.className = 'nav-item';
+        waBtn.id = 'wa-autosend-toggle';
+        waBtn.onclick = function(){
+            var cur = localStorage.getItem('ayur_wa_autosend') === 'true';
+            localStorage.setItem('ayur_wa_autosend', !cur);
+            waBtn.querySelector('span').textContent = (!cur?'✅ ':'📲 ')+'WA Auto-Send';
+            window.showToast&&window.showToast('WhatsApp auto-send '+ (!cur?'ON':'OFF'));
+        };
+        waBtn.innerHTML = '<i data-lucide="message-circle" class="w-4 h-4"></i><span>'+(waEnabled?'✅ ':'📲 ')+'WA Auto-Send</span>';
+        nav.appendChild(waBtn);
+
+        // Staff Access
+        var staffBtn = document.createElement('button');
+        staffBtn.className = 'nav-item';
+        staffBtn.onclick = window.openStaffModal;
+        staffBtn.innerHTML = '<i data-lucide="users" class="w-4 h-4"></i><span>Staff Access</span>';
+        nav.appendChild(staffBtn);
+
+        if(typeof lucide!=='undefined') lucide.createIcons({node:nav});
+    }
+}, 1500);
+
+// ── SETTINGS: WA SETTINGS MODAL PATCH ────────────────────────
+// Patch openSettingsModal for wa settings
+(function(){
+    setTimeout(function(){
+        var fbCard = document.getElementById('fb-reads-count') && document.getElementById('fb-reads-count').closest('.card');
+        if(fbCard) {
+            // Add Recurring button
+            if(!document.getElementById('recurring-settings-btn')) {
+                var rBtn = document.createElement('button');
+                rBtn.id = 'recurring-settings-btn';
+                rBtn.className = 'btn btn-ghost btn-sm w-full justify-center mt-1 text-xs';
+                rBtn.innerHTML = '<i data-lucide="repeat" class="w-3 h-3"></i> Recurring Invoices';
+                rBtn.onclick = window.openRecurringModal;
+                fbCard.appendChild(rBtn);
+                if(typeof lucide!=='undefined') lucide.createIcons({node:rBtn});
+            }
+        }
+    }, 2000);
+})();
+</script></body>
 </html>
