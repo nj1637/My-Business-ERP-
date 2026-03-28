@@ -932,279 +932,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
     </div>
   </div>
 </div>
-
-<!-- Service Drawer -->
-<div id="svc-drawer-bg" class="drawer-bg" onclick="window.closeServiceDrawer&&closeServiceDrawer()"></div>
-<div id="svc-drawer" class="drawer">
-  <div class="drawer-head">
-    <div class="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center mr-3">
-      <i data-lucide="sparkles" class="w-5 h-5 text-purple-600"></i>
-    </div>
-    <div class="flex-1">
-      <div class="font-bold text-slate-800" id="svc-drawer-title">Add Service</div>
-      <div class="text-xs text-slate-400" id="svc-drawer-sub">New service entry</div>
-    </div>
-    <button onclick="window.closeServiceDrawer&&closeServiceDrawer()" class="btn btn-icon btn-ghost ml-auto">
-      <i data-lucide="x" class="w-4 h-4"></i>
-    </button>
-  </div>
-  <div class="drawer-body space-y-4">
-    <div>
-      <label class="lbl">Service Name *</label>
-      <input type="text" id="svc-name" class="inp" placeholder="e.g. Panchakarma Consultation">
-    </div>
-    <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="lbl">Category</label>
-        <select id="svc-category" class="inp bg-white">
-          <option value="consultation">🩺 Consultation</option>
-          <option value="treatment">💆 Treatment</option>
-          <option value="therapy">🌿 Therapy</option>
-          <option value="package">📦 Package</option>
-          <option value="other">⚙️ Other</option>
-        </select>
-      </div>
-      <div>
-        <label class="lbl">Duration</label>
-        <select id="svc-duration" class="inp bg-white">
-          <option value="">N/A</option>
-          <option value="15 min">15 min</option>
-          <option value="30 min">30 min</option>
-          <option value="45 min">45 min</option>
-          <option value="1 hour">1 hour</option>
-          <option value="90 min">90 min</option>
-          <option value="2 hours">2 hours</option>
-          <option value="1 day">1 day</option>
-          <option value="Custom">Custom</option>
-        </select>
-      </div>
-    </div>
-    <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="lbl">Rate (₹) *</label>
-        <input type="number" id="svc-rate" class="inp" placeholder="500">
-      </div>
-      <div>
-        <label class="lbl">GST %</label>
-        <select id="svc-gst" class="inp bg-white">
-          <option value="0">0% (Exempt)</option>
-          <option value="5">5%</option>
-          <option value="12">12%</option>
-          <option value="18" selected>18%</option>
-          <option value="28">28%</option>
-        </select>
-      </div>
-    </div>
-    <div>
-      <label class="lbl">SAC Code <span class="text-slate-400 font-normal normal-case">(Service Accounting Code)</span></label>
-      <input type="text" id="svc-sac" class="inp" placeholder="e.g. 999311 for Medical Services">
-    </div>
-    <div>
-      <label class="lbl">Description</label>
-      <textarea id="svc-desc" rows="2" class="inp resize-none" placeholder="What does this service include?"></textarea>
-    </div>
-    <div>
-      <label class="lbl">Inclusions / What's Covered</label>
-      <textarea id="svc-inclusions" rows="2" class="inp resize-none" placeholder="e.g. Initial assessment, 3 sessions, follow-up..."></textarea>
-    </div>
-    <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="lbl">Available Days</label>
-        <input type="text" id="svc-days" class="inp text-sm" placeholder="Mon-Sat">
-      </div>
-      <div>
-        <label class="lbl">Timing</label>
-        <input type="text" id="svc-timing" class="inp text-sm" placeholder="9 AM – 6 PM">
-      </div>
-    </div>
-    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
-      <label class="toggle"><input type="checkbox" id="svc-active" checked><span class="toggle-track"></span></label>
-      <div>
-        <div class="text-sm font-semibold text-slate-700">Active / Available</div>
-        <div class="text-xs text-slate-400">Show in invoice search</div>
-      </div>
-    </div>
-  </div>
-  <div class="drawer-foot">
-    <button id="svc-delete-btn" class="btn btn-danger btn-sm mr-auto hidden" onclick="window.deleteService&&deleteService()">
-      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
-    </button>
-    <button onclick="window.closeServiceDrawer&&closeServiceDrawer()" class="btn btn-ghost">Cancel</button>
-    <button onclick="window.saveService&&saveService()" class="btn btn-primary">
-      <i data-lucide="save" class="w-4 h-4"></i> Save Service
-    </button>
-  </div>
-</div>
-    </button>
-  </div>
-</div>
-
-<!-- ===== EMPLOYEES ===== -->
-<div id="view-employees" class="tab">
-  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
-    <div>
-      <h2 class="text-xl font-bold text-slate-800">Employees</h2>
-      <p class="text-slate-400 text-sm">Staff management, roles & access control</p>
-    </div>
-    <button onclick="window.openEmployeeDrawer&&openEmployeeDrawer(null)" class="btn btn-primary btn-sm">
-      <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add Employee
-    </button>
-  </div>
-
-  <!-- Stats -->
-  <div class="grid grid-cols-3 gap-3 mb-5">
-    <div class="stat text-center p-3"><div class="text-xl font-black text-blue-600" id="emp-total">0</div><div class="text-xs text-slate-400 mt-1">Total Staff</div></div>
-    <div class="stat text-center p-3"><div class="text-xl font-black text-emerald-600" id="emp-active">0</div><div class="text-xs text-slate-400 mt-1">Active</div></div>
-    <div class="stat text-center p-3"><div class="text-xl font-black text-amber-600" id="emp-salary">₹0</div><div class="text-xs text-slate-400 mt-1">Monthly Salary</div></div>
-  </div>
-
-  <!-- Employees list -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="employees-list">
-    <div class="col-span-full p-8 text-center text-slate-400">
-      <i data-lucide="user-check" class="w-12 h-12 mx-auto mb-3 text-slate-200"></i>
-      <div class="font-semibold">No employees yet</div>
-      <div class="text-sm mt-1">Add your first employee to get started</div>
-      <button onclick="window.openEmployeeDrawer&&openEmployeeDrawer(null)" class="btn btn-primary btn-sm mt-4">
-        <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add First Employee
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Employee Drawer -->
-<div id="emp-drawer-bg" class="drawer-bg" onclick="window.closeEmployeeDrawer&&closeEmployeeDrawer()"></div>
-<div id="emp-drawer" class="drawer" style="max-width:600px">
-  <div class="drawer-head">
-    <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center mr-3 flex-shrink-0">
-      <i data-lucide="user-check" class="w-5 h-5 text-blue-600"></i>
-    </div>
-    <div class="flex-1">
-      <div class="font-bold text-slate-800" id="emp-drawer-title">Add Employee</div>
-      <div class="text-xs text-slate-400" id="emp-drawer-sub">New staff member</div>
-    </div>
-    <button onclick="window.closeEmployeeDrawer&&closeEmployeeDrawer()" class="btn btn-icon btn-ghost ml-2">
-      <i data-lucide="x" class="w-4 h-4"></i>
-    </button>
-  </div>
-
-  <!-- Drawer Tabs -->
-  <div class="border-b border-slate-100 px-4">
-    <div class="flex gap-0">
-      <button class="dtab-btn active" id="emptab-info-btn" onclick="window.switchEmpTab('info')">👤 Info</button>
-      <button class="dtab-btn" id="emptab-role-btn" onclick="window.switchEmpTab('role')">🔐 Role & Access</button>
-      <button class="dtab-btn" id="emptab-login-btn" onclick="window.switchEmpTab('login')">🔑 Login</button>
-    </div>
-  </div>
-
-  <div class="drawer-body">
-    <!-- INFO TAB -->
-    <div id="emptab-info" class="space-y-4">
-      <div class="grid grid-cols-2 gap-3">
-        <div class="col-span-2"><label class="lbl">Full Name *</label><input type="text" id="emp-name" class="inp" placeholder="Employee full name"></div>
-        <div><label class="lbl">Phone</label><input type="tel" id="emp-phone" class="inp" placeholder="Mobile number"></div>
-        <div><label class="lbl">Department</label>
-          <select id="emp-dept" class="inp bg-white">
-            <option value="billing">Billing / Invoicing</option>
-            <option value="reception">Reception</option>
-            <option value="therapy">Therapy / Treatment</option>
-            <option value="admin">Administration</option>
-            <option value="inventory">Inventory Manager</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-        <div><label class="lbl">Designation</label><input type="text" id="emp-designation" class="inp" placeholder="e.g. Billing Staff"></div>
-        <div><label class="lbl">Monthly Salary (₹)</label><input type="number" id="emp-salary" class="inp" placeholder="0"></div>
-        <div><label class="lbl">Join Date</label><input type="date" id="emp-join-date" class="inp"></div>
-        <div class="col-span-2"><label class="lbl">Address</label><input type="text" id="emp-address" class="inp" placeholder="Employee address"></div>
-        <div class="col-span-2"><label class="lbl">Notes</label><textarea id="emp-notes" rows="2" class="inp resize-none" placeholder="Any notes..."></textarea></div>
-      </div>
-      <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-        <label class="toggle"><input type="checkbox" id="emp-active" checked><span class="toggle-track"></span></label>
-        <div><div class="text-sm font-semibold text-slate-700">Active Employee</div><div class="text-xs text-slate-400">Can login and perform allowed actions</div></div>
-      </div>
-    </div>
-
-    <!-- ROLE TAB -->
-    <div id="emptab-role" class="hidden">
-      <div class="mb-4">
-        <label class="lbl">Quick Role Template</label>
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="window.applyRoleTemplate('admin')" class="p-3 border-2 border-slate-200 rounded-xl text-left hover:border-blue-400 transition-all">
-            <div class="font-bold text-blue-700 text-sm">👑 Admin</div>
-            <div class="text-xs text-slate-500 mt-0.5">Full access (same as owner)</div>
-          </button>
-          <button onclick="window.applyRoleTemplate('billing')" class="p-3 border-2 border-slate-200 rounded-xl text-left hover:border-emerald-400 transition-all">
-            <div class="font-bold text-emerald-700 text-sm">🧾 Billing Staff</div>
-            <div class="text-xs text-slate-500 mt-0.5">Invoice, clients, records only</div>
-          </button>
-          <button onclick="window.applyRoleTemplate('receptionist')" class="p-3 border-2 border-slate-200 rounded-xl text-left hover:border-purple-400 transition-all">
-            <div class="font-bold text-purple-700 text-sm">📋 Receptionist</div>
-            <div class="text-xs text-slate-500 mt-0.5">View clients & appointments</div>
-          </button>
-          <button onclick="window.applyRoleTemplate('viewer')" class="p-3 border-2 border-slate-200 rounded-xl text-left hover:border-slate-400 transition-all">
-            <div class="font-bold text-slate-700 text-sm">👁 View Only</div>
-            <div class="text-xs text-slate-500 mt-0.5">Read-only, no changes</div>
-          </button>
-        </div>
-      </div>
-      <!-- Detailed Permissions -->
-      <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Detailed Permissions</div>
-      <div id="role-permissions-list" class="space-y-1 max-h-96 overflow-y-auto pr-1"></div>
-    </div>
-
-    <!-- LOGIN TAB -->
-    <div id="emptab-login" class="hidden space-y-4">
-      <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl">
-        <div class="font-bold text-blue-800 text-sm mb-1">🔑 Employee Login Credentials</div>
-        <p class="text-xs text-blue-700">Set an email & password so this employee can log in. They will see the app with only their permitted features.</p>
-      </div>
-      <div><label class="lbl">Login Email *</label><input type="email" id="emp-email" class="inp" placeholder="employee@example.com"></div>
-      <div>
-        <label class="lbl">Password *</label>
-        <div class="relative">
-          <input type="password" id="emp-password" class="inp pr-11" placeholder="Min. 6 characters">
-          <button type="button" class="eye-btn absolute right-3 top-1/2 -translate-y-1/2" onclick="toggleEye('emp-password',this)"><i data-lucide="eye" class="w-4 h-4"></i></button>
-        </div>
-      </div>
-      <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl">
-        <div class="font-bold text-amber-800 text-sm mb-1">⚠️ Note</div>
-        <p class="text-xs text-amber-700">Employee will login using the "Employee Login" toggle on the login screen. The email/password here is stored locally. For full Firebase Auth integration, use Firebase Console to create the user account.</p>
-      </div>
-      <!-- Forgot password request -->
-      <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-        <div class="font-bold text-slate-700 text-sm mb-1">🔒 Forgot Password Policy</div>
-        <p class="text-xs text-slate-600">When an employee forgets their password, a request will be shown to the owner in the Employees section. Only the owner can reset it.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="drawer-foot">
-    <button id="emp-delete-btn" class="btn btn-danger btn-sm mr-auto hidden" onclick="window.deleteEmployee&&deleteEmployee()">
-      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Remove
-    </button>
-    <button onclick="window.closeEmployeeDrawer&&closeEmployeeDrawer()" class="btn btn-ghost">Cancel</button>
-    <button onclick="window.saveEmployee&&saveEmployee()" class="btn btn-primary">
-      <i data-lucide="save" class="w-4 h-4"></i> Save Employee
-    </button>
-  </div>
-</div>
-
-<!-- Employee Role Permission Modal (full detailed) -->
-<div id="emp-role-modal" class="modal" onclick="if(event.target===this)document.getElementById('emp-role-modal').classList.remove('open')">
-  <div class="modal-box max-w-2xl w-full">
-    <div class="modal-head">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center"><i data-lucide="shield" class="w-4 h-4 text-red-600"></i></div>
-        <div><div class="font-bold text-slate-800">Permission Settings</div><div class="text-xs text-slate-400" id="emp-role-modal-sub">Configure access level</div></div>
-      </div>
-      <button onclick="document.getElementById('emp-role-modal').classList.remove('open')" class="btn btn-icon btn-ghost"><i data-lucide="x" class="w-4 h-4"></i></button>
-    </div>
-    <div class="modal-body" id="emp-role-modal-body"></div>
-    <div class="modal-foot">
-      <button onclick="document.getElementById('emp-role-modal').classList.remove('open')" class="btn btn-ghost">Close</button>
-      <button onclick="window.saveRoleFromModal&&saveRoleFromModal()" class="btn btn-primary"><i data-lucide="shield-check" class="w-4 h-4"></i> Apply Permissions</button>
-    </div>
-  </div>
 </div>
 
 <div id="view-records" class="tab">
@@ -1502,6 +1229,323 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
 
   </main>
 </div><!-- end app -->
+<!-- Service Drawer -->
+<div id="svc-drawer-bg" class="drawer-bg" onclick="window.closeServiceDrawer&&closeServiceDrawer()"></div>
+<div id="svc-drawer" class="drawer">
+  <div class="drawer-head">
+    <div class="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center mr-3">
+      <i data-lucide="sparkles" class="w-5 h-5 text-purple-600"></i>
+    </div>
+    <div class="flex-1">
+      <div class="font-bold text-slate-800" id="svc-drawer-title">Add Service</div>
+      <div class="text-xs text-slate-400" id="svc-drawer-sub">New service entry</div>
+    </div>
+    <button onclick="window.closeServiceDrawer&&closeServiceDrawer()" class="btn btn-icon btn-ghost ml-auto">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  </div>
+  <div class="drawer-body space-y-4">
+    <div>
+      <label class="lbl">Service Name *</label>
+      <input type="text" id="svc-name" class="inp" placeholder="e.g. Panchakarma Consultation">
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="lbl">Category</label>
+        <select id="svc-category" class="inp bg-white">
+          <option value="consultation">🩺 Consultation</option>
+          <option value="treatment">💆 Treatment</option>
+          <option value="therapy">🌿 Therapy</option>
+          <option value="package">📦 Package</option>
+          <option value="other">⚙️ Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="lbl">Duration</label>
+        <select id="svc-duration" class="inp bg-white">
+          <option value="">N/A</option>
+          <option value="15 min">15 min</option>
+          <option value="30 min">30 min</option>
+          <option value="45 min">45 min</option>
+          <option value="1 hour">1 hour</option>
+          <option value="90 min">90 min</option>
+          <option value="2 hours">2 hours</option>
+          <option value="1 day">1 day</option>
+          <option value="Custom">Custom</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="lbl">Rate (₹) *</label>
+        <input type="number" id="svc-rate" class="inp" placeholder="500">
+      </div>
+      <div>
+        <label class="lbl">GST %</label>
+        <select id="svc-gst" class="inp bg-white">
+          <option value="0">0% (Exempt)</option>
+          <option value="5">5%</option>
+          <option value="12">12%</option>
+          <option value="18" selected>18%</option>
+          <option value="28">28%</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <label class="lbl">SAC Code <span class="text-slate-400 font-normal normal-case">(Service Accounting Code)</span></label>
+      <input type="text" id="svc-sac" class="inp" placeholder="e.g. 999311 for Medical Services">
+    </div>
+    <div>
+      <label class="lbl">Description</label>
+      <textarea id="svc-desc" rows="2" class="inp resize-none" placeholder="What does this service include?"></textarea>
+    </div>
+    <div>
+      <label class="lbl">Inclusions / What's Covered</label>
+      <textarea id="svc-inclusions" rows="2" class="inp resize-none" placeholder="e.g. Initial assessment, 3 sessions, follow-up..."></textarea>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="lbl">Available Days</label>
+        <input type="text" id="svc-days" class="inp text-sm" placeholder="Mon-Sat">
+      </div>
+      <div>
+        <label class="lbl">Timing</label>
+        <input type="text" id="svc-timing" class="inp text-sm" placeholder="9 AM – 6 PM">
+      </div>
+    </div>
+    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+      <label class="toggle"><input type="checkbox" id="svc-active" checked><span class="toggle-track"></span></label>
+      <div>
+        <div class="text-sm font-semibold text-slate-700">Active / Available</div>
+        <div class="text-xs text-slate-400">Show in invoice search</div>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button id="svc-delete-btn" class="btn btn-danger btn-sm mr-auto hidden" onclick="window.deleteService&&deleteService()">
+      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
+    </button>
+    <button onclick="window.closeServiceDrawer&&closeServiceDrawer()" class="btn btn-ghost">Cancel</button>
+    <button onclick="window.saveService&&saveService()" class="btn btn-primary">
+      <i data-lucide="save" class="w-4 h-4"></i> Save Service
+    </button>
+  </div>
+</div>
+    </button>
+  </div>
+</div>
+
+<!-- ===== EMPLOYEES ===== -->
+<div id="view-employees" class="tab">
+  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
+    <div>
+      <h2 class="text-xl font-bold text-slate-800">Employees</h2>
+      <p class="text-slate-400 text-sm">Staff management, roles & access control</p>
+    </div>
+    <button onclick="window.openEmployeeDrawer&&openEmployeeDrawer(null)" class="btn btn-primary btn-sm">
+      <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add Employee
+    </button>
+  </div>
+
+  <!-- Sub-tabs: Employees | Activity Monitor -->
+  <div class="flex gap-1 bg-slate-100 rounded-xl p-1 mb-5 w-fit">
+    <button id="emptab-list-btn" onclick="window.switchEmpMainTab('list')" class="px-4 py-2 rounded-lg text-sm font-bold bg-white text-slate-800 shadow">👥 Staff</button>
+    <button id="emptab-activity-btn" onclick="window.switchEmpMainTab('activity')" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-500">📊 Activity</button>
+    <button id="emptab-requests-btn" onclick="window.switchEmpMainTab('requests')" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-500 relative">
+      🔔 Requests <span id="emp-req-badge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">0</span>
+    </button>
+  </div>
+
+  <!-- STAFF LIST -->
+  <div id="emp-main-list">
+    <div class="grid grid-cols-3 gap-3 mb-5">
+      <div class="stat text-center p-3"><div class="text-xl font-black text-blue-600" id="emp-total">0</div><div class="text-xs text-slate-400 mt-1">Total Staff</div></div>
+      <div class="stat text-center p-3"><div class="text-xl font-black text-emerald-600" id="emp-active">0</div><div class="text-xs text-slate-400 mt-1">Active</div></div>
+      <div class="stat text-center p-3"><div class="text-xl font-black text-amber-600" id="emp-salary">₹0</div><div class="text-xs text-slate-400 mt-1">Monthly Salary</div></div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="employees-list">
+      <div class="col-span-full p-8 text-center text-slate-400">
+        <i data-lucide="user-check" class="w-12 h-12 mx-auto mb-3 text-slate-200"></i>
+        <div class="font-semibold">No employees yet</div>
+        <div class="text-sm mt-1">Add your first employee to get started</div>
+        <button onclick="window.openEmployeeDrawer&&openEmployeeDrawer(null)" class="btn btn-primary btn-sm mt-4">
+          <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add First Employee
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY MONITOR -->
+  <div id="emp-main-activity" class="hidden">
+    <div class="card p-4 mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <div class="font-bold text-slate-800 text-sm flex items-center gap-2">
+          <i data-lucide="activity" class="w-4 h-4 text-blue-600"></i> Employee Activity Log
+        </div>
+        <div class="flex gap-2">
+          <select id="activity-emp-filter" onchange="window.renderActivityLog()" class="inp text-xs w-auto py-1 bg-white">
+            <option value="">All Employees</option>
+          </select>
+          <button onclick="window.clearActivityLog()" class="btn btn-ghost btn-sm text-xs text-red-500">Clear</button>
+        </div>
+      </div>
+      <div id="activity-log-list" class="space-y-2 max-h-[60vh] overflow-y-auto">
+        <div class="text-center text-slate-400 text-sm py-8">No activity logged yet</div>
+      </div>
+    </div>
+
+    <div class="card p-4">
+      <div class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+        <i data-lucide="bar-chart-2" class="w-4 h-4 text-emerald-600"></i> Per-Employee Summary
+      </div>
+      <div id="activity-summary" class="space-y-3"></div>
+    </div>
+  </div>
+
+  <!-- REQUESTS -->
+  <div id="emp-main-requests" class="hidden">
+    <div class="space-y-4" id="emp-requests-list">
+      <div class="text-center text-slate-400 text-sm py-8">No pending requests</div>
+    </div>
+  </div>
+</div>
+
+<!-- Employee Drawer -->
+<div id="emp-drawer-bg" class="drawer-bg" onclick="window.closeEmployeeDrawer&&closeEmployeeDrawer()"></div>
+<div id="emp-drawer" class="drawer" style="max-width:600px">
+  <div class="drawer-head">
+    <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center mr-3 flex-shrink-0">
+      <i data-lucide="user-check" class="w-5 h-5 text-blue-600"></i>
+    </div>
+    <div class="flex-1">
+      <div class="font-bold text-slate-800" id="emp-drawer-title">Add Employee</div>
+      <div class="text-xs text-slate-400" id="emp-drawer-sub">New staff member</div>
+    </div>
+    <button onclick="window.closeEmployeeDrawer&&closeEmployeeDrawer()" class="btn btn-icon btn-ghost ml-2">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  </div>
+
+  <!-- Drawer Tabs -->
+  <div class="border-b border-slate-100 px-4">
+    <div class="flex gap-0">
+      <button class="dtab-btn active" id="emptab-info-btn" onclick="window.switchEmpTab('info')">👤 Info</button>
+      <button class="dtab-btn" id="emptab-role-btn" onclick="window.switchEmpTab('role')">🔐 Role & Access</button>
+      <button class="dtab-btn" id="emptab-login-btn" onclick="window.switchEmpTab('login')">🔑 Login</button>
+    </div>
+  </div>
+
+  <div class="drawer-body">
+    <!-- INFO TAB -->
+    <div id="emptab-info" class="space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="col-span-2"><label class="lbl">Full Name *</label><input type="text" id="emp-name" class="inp" placeholder="Employee full name"></div>
+        <div><label class="lbl">Phone</label><input type="tel" id="emp-phone" class="inp" placeholder="Mobile number"></div>
+        <div><label class="lbl">Department</label>
+          <select id="emp-dept" class="inp bg-white">
+            <option value="billing">Billing / Invoicing</option>
+            <option value="reception">Reception</option>
+            <option value="therapy">Therapy / Treatment</option>
+            <option value="admin">Administration</option>
+            <option value="inventory">Inventory Manager</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div><label class="lbl">Designation</label><input type="text" id="emp-designation" class="inp" placeholder="e.g. Billing Staff"></div>
+        <div><label class="lbl">Monthly Salary (₹)</label><input type="number" id="emp-salary" class="inp" placeholder="0"></div>
+        <div><label class="lbl">Join Date</label><input type="date" id="emp-join-date" class="inp"></div>
+        <div class="col-span-2"><label class="lbl">Address</label><input type="text" id="emp-address" class="inp" placeholder="Employee address"></div>
+        <div class="col-span-2"><label class="lbl">Notes</label><textarea id="emp-notes" rows="2" class="inp resize-none" placeholder="Any notes..."></textarea></div>
+      </div>
+      <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+        <label class="toggle"><input type="checkbox" id="emp-active" checked><span class="toggle-track"></span></label>
+        <div><div class="text-sm font-semibold text-slate-700">Active Employee</div><div class="text-xs text-slate-400">Can login and perform allowed actions</div></div>
+      </div>
+    </div>
+
+    <!-- ROLE TAB -->
+    <div id="emptab-role" class="hidden">
+      <div class="mb-4">
+        <label class="lbl">Quick Role Template</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="window.applyRoleTemplate('admin')" class="p-3 border-2 border-slate-200 rounded-xl text-left hover:border-blue-400 transition-all">
+            <div class="font-bold text-blue-700 text-sm">👑 Admin</div>
+            <div class="text-xs text-slate-500 mt-0.5">Full access (same as owner)</div>
+          </button>
+          <button onclick="window.applyRoleTemplate('billing')" class="p-3 border-2 border-slate-200 rounded-xl text-left hover:border-emerald-400 transition-all">
+            <div class="font-bold text-emerald-700 text-sm">🧾 Billing Staff</div>
+            <div class="text-xs text-slate-500 mt-0.5">Invoice, clients, records only</div>
+          </button>
+          <button onclick="window.applyRoleTemplate('receptionist')" class="p-3 border-2 border-slate-200 rounded-xl text-left hover:border-purple-400 transition-all">
+            <div class="font-bold text-purple-700 text-sm">📋 Receptionist</div>
+            <div class="text-xs text-slate-500 mt-0.5">View clients & appointments</div>
+          </button>
+          <button onclick="window.applyRoleTemplate('viewer')" class="p-3 border-2 border-slate-200 rounded-xl text-left hover:border-slate-400 transition-all">
+            <div class="font-bold text-slate-700 text-sm">👁 View Only</div>
+            <div class="text-xs text-slate-500 mt-0.5">Read-only, no changes</div>
+          </button>
+        </div>
+      </div>
+      <!-- Detailed Permissions -->
+      <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Detailed Permissions</div>
+      <div id="role-permissions-list" class="space-y-1 max-h-96 overflow-y-auto pr-1"></div>
+    </div>
+
+    <!-- LOGIN TAB -->
+    <div id="emptab-login" class="hidden space-y-4">
+      <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl">
+        <div class="font-bold text-blue-800 text-sm mb-1">🔑 Employee Login Credentials</div>
+        <p class="text-xs text-blue-700">Set an email & password so this employee can log in. They will see the app with only their permitted features.</p>
+      </div>
+      <div><label class="lbl">Login Email *</label><input type="email" id="emp-email" class="inp" placeholder="employee@example.com"></div>
+      <div>
+        <label class="lbl">Password *</label>
+        <div class="relative">
+          <input type="password" id="emp-password" class="inp pr-11" placeholder="Min. 6 characters">
+          <button type="button" class="eye-btn absolute right-3 top-1/2 -translate-y-1/2" onclick="toggleEye('emp-password',this)"><i data-lucide="eye" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+      <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+        <div class="font-bold text-amber-800 text-sm mb-1">⚠️ Note</div>
+        <p class="text-xs text-amber-700">Employee will login using the "Employee Login" toggle on the login screen. The email/password here is stored locally. For full Firebase Auth integration, use Firebase Console to create the user account.</p>
+      </div>
+      <!-- Forgot password request -->
+      <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+        <div class="font-bold text-slate-700 text-sm mb-1">🔒 Forgot Password Policy</div>
+        <p class="text-xs text-slate-600">When an employee forgets their password, a request will be shown to the owner in the Employees section. Only the owner can reset it.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-foot">
+    <button id="emp-delete-btn" class="btn btn-danger btn-sm mr-auto hidden" onclick="window.deleteEmployee&&deleteEmployee()">
+      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Remove
+    </button>
+    <button onclick="window.closeEmployeeDrawer&&closeEmployeeDrawer()" class="btn btn-ghost">Cancel</button>
+    <button onclick="window.saveEmployee&&saveEmployee()" class="btn btn-primary">
+      <i data-lucide="save" class="w-4 h-4"></i> Save Employee
+    </button>
+  </div>
+</div>
+
+<!-- Employee Role Permission Modal (full detailed) -->
+<div id="emp-role-modal" class="modal" onclick="if(event.target===this)document.getElementById('emp-role-modal').classList.remove('open')">
+  <div class="modal-box max-w-2xl w-full">
+    <div class="modal-head">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center"><i data-lucide="shield" class="w-4 h-4 text-red-600"></i></div>
+        <div><div class="font-bold text-slate-800">Permission Settings</div><div class="text-xs text-slate-400" id="emp-role-modal-sub">Configure access level</div></div>
+      </div>
+      <button onclick="document.getElementById('emp-role-modal').classList.remove('open')" class="btn btn-icon btn-ghost"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+    <div class="modal-body" id="emp-role-modal-body"></div>
+    <div class="modal-foot">
+      <button onclick="document.getElementById('emp-role-modal').classList.remove('open')" class="btn btn-ghost">Close</button>
+      <button onclick="window.saveRoleFromModal&&saveRoleFromModal()" class="btn btn-primary"><i data-lucide="shield-check" class="w-4 h-4"></i> Apply Permissions</button>
+    </div>
+  </div>
+
+
 
 <!-- FAB -->
 <button id="fab" onclick="window.switchTab&&switchTab('invoice')" title="New Invoice">
@@ -7822,3 +7866,308 @@ window.openPermissionRequest=function(empEmail){
 </script>
 </body>
 </html>
+
+<script>
+// ================================================================
+// EMPLOYEE MAIN TAB SWITCHER + ACTIVITY MONITOR + REQUESTS
+// ================================================================
+
+window.switchEmpMainTab = function(tab) {
+    ['list','activity','requests'].forEach(function(t) {
+        var el = document.getElementById('emp-main-'+t);
+        var btn = document.getElementById('emptab-'+t+'-btn');
+        if(el) el.classList.toggle('hidden', t !== tab);
+        if(btn) {
+            if(t === tab) {
+                btn.className = 'px-4 py-2 rounded-lg text-sm font-bold bg-white text-slate-800 shadow relative';
+            } else {
+                btn.className = 'px-4 py-2 rounded-lg text-sm font-bold text-slate-500 relative';
+            }
+        }
+    });
+    if(tab === 'activity') window.renderActivityLog();
+    if(tab === 'requests') window.renderEmpRequests();
+};
+
+// ── ACTIVITY LOG SYSTEM ───────────────────────────────────────
+window.logEmployeeActivity = function(action, details) {
+    if(!window._isEmployeeSession && !window.AppState?._isEmployee) return;
+    var emp = window._employeeData || window.AppState?._empData;
+    var bizUid = window._employeeOwnerUid;
+    if(!emp || !bizUid) return;
+    var logs = [];
+    try { logs = JSON.parse(localStorage.getItem('ayur_activity_'+bizUid) || '[]'); } catch(e) {}
+    logs.unshift({
+        empEmail: emp.email,
+        empName: emp.name,
+        action: action,
+        details: details || '',
+        timestamp: new Date().toISOString()
+    });
+    // Keep only last 500 entries
+    if(logs.length > 500) logs = logs.slice(0, 500);
+    try { localStorage.setItem('ayur_activity_'+bizUid, JSON.stringify(logs)); } catch(e) {}
+};
+
+// Patch key actions to log activity
+(function() {
+    var patchInterval = setInterval(function() {
+        if(!window.saveInvoice) return;
+        clearInterval(patchInterval);
+
+        // Patch saveInvoice
+        var origSave = window.saveInvoice;
+        window.saveInvoice = async function(status) {
+            var result = await origSave.apply(this, arguments);
+            if(window._isEmployeeSession) {
+                var draft = window.AppState && window.AppState.draft;
+                window.logEmployeeActivity(
+                    status === 'final' ? 'Invoice Finalized' : 'Invoice Saved as Draft',
+                    draft ? 'Client: ' + (draft.client && draft.client.name || 'N/A') + ' | Amount: ₹' + (draft.grandTotal || 0) : ''
+                );
+            }
+            return result;
+        };
+    }, 600);
+
+    // Patch addDoc for client creation
+    var origAddDoc = null;
+    var patchAdd = setInterval(function() {
+        if(window._addDoc && !window._addDoc._activityPatched) {
+            window._addDoc._activityPatched = true;
+            clearInterval(patchAdd);
+            var orig = window._addDoc;
+            window._addDoc = async function() {
+                var result = await orig.apply(this, arguments);
+                if(window._isEmployeeSession) {
+                    var collRef = arguments[1];
+                    var collName = typeof collRef === 'object' ? (collRef._path && collRef._path.segments && collRef._path.segments[collRef._path.segments.length-1]) : '';
+                    if(collName === 'clients') window.logEmployeeActivity('Client Added', 'New client created');
+                    if(collName === 'expenses') window.logEmployeeActivity('Expense Logged', 'New expense entry');
+                }
+                return result;
+            };
+        }
+    }, 800);
+})();
+
+// ── RENDER ACTIVITY LOG (owner view) ─────────────────────────
+window.renderActivityLog = function() {
+    var uid = window.AppState && window.AppState.user && window.AppState.user.uid;
+    if(!uid) return;
+    var logs = [];
+    try { logs = JSON.parse(localStorage.getItem('ayur_activity_'+uid) || '[]'); } catch(e) {}
+
+    var filter = (document.getElementById('activity-emp-filter') || {}).value || '';
+
+    // Update filter dropdown
+    var emps = window.loadEmployees ? window.loadEmployees() : [];
+    var filterEl = document.getElementById('activity-emp-filter');
+    if(filterEl && filterEl.options.length < 2) {
+        emps.forEach(function(e) {
+            var opt = document.createElement('option');
+            opt.value = e.email; opt.textContent = e.name;
+            filterEl.appendChild(opt);
+        });
+    }
+
+    var filtered = filter ? logs.filter(function(l) { return l.empEmail === filter; }) : logs;
+
+    var listEl = document.getElementById('activity-log-list');
+    if(!listEl) return;
+
+    if(!filtered.length) {
+        listEl.innerHTML = '<div class="text-center text-slate-400 text-sm py-8">No activity logged yet</div>';
+        return;
+    }
+
+    var actionIcons = {
+        'Invoice Finalized': '✅', 'Invoice Saved as Draft': '📝',
+        'Client Added': '👤', 'Expense Logged': '💸',
+        'Product Added': '📦', 'Login': '🔑', 'Logout': '🚪'
+    };
+
+    listEl.innerHTML = filtered.map(function(log) {
+        var icon = actionIcons[log.action] || '📋';
+        var time = new Date(log.timestamp);
+        var timeStr = time.toLocaleDateString('en-IN') + ' ' + time.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+        return '<div class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">'
+            + '<span class="text-lg flex-shrink-0">' + icon + '</span>'
+            + '<div class="flex-1 min-w-0">'
+            + '<div class="flex items-center justify-between gap-2">'
+            + '<div class="font-semibold text-slate-800 text-sm">' + log.empName + '</div>'
+            + '<div class="text-[10px] text-slate-400 flex-shrink-0">' + timeStr + '</div>'
+            + '</div>'
+            + '<div class="text-xs text-blue-700 font-medium">' + log.action + '</div>'
+            + (log.details ? '<div class="text-xs text-slate-500 mt-0.5 truncate">' + log.details + '</div>' : '')
+            + '</div></div>';
+    }).join('');
+
+    // Summary
+    window.renderActivitySummary(logs, emps);
+};
+
+window.renderActivitySummary = function(logs, emps) {
+    var summaryEl = document.getElementById('activity-summary');
+    if(!summaryEl) return;
+
+    var empStats = {};
+    logs.forEach(function(l) {
+        if(!empStats[l.empEmail]) empStats[l.empEmail] = { name: l.empName, total: 0, invoices: 0, clients: 0, expenses: 0, last: null };
+        empStats[l.empEmail].total++;
+        if(l.action === 'Invoice Finalized') empStats[l.empEmail].invoices++;
+        if(l.action === 'Client Added') empStats[l.empEmail].clients++;
+        if(l.action === 'Expense Logged') empStats[l.empEmail].expenses++;
+        if(!empStats[l.empEmail].last) empStats[l.empEmail].last = l.timestamp;
+    });
+
+    if(!Object.keys(empStats).length) {
+        summaryEl.innerHTML = '<div class="text-center text-slate-400 text-sm py-4">No activity data</div>';
+        return;
+    }
+
+    summaryEl.innerHTML = Object.values(empStats).map(function(s) {
+        var lastTime = s.last ? new Date(s.last).toLocaleDateString('en-IN') : 'Never';
+        return '<div class="p-3 bg-slate-50 rounded-xl border border-slate-100">'
+            + '<div class="flex items-center justify-between mb-2">'
+            + '<div class="font-bold text-slate-800 text-sm">' + s.name + '</div>'
+            + '<div class="text-[10px] text-slate-400">Last active: ' + lastTime + '</div>'
+            + '</div>'
+            + '<div class="grid grid-cols-4 gap-2 text-center">'
+            + '<div class="bg-white rounded-lg p-2"><div class="font-black text-slate-800">' + s.total + '</div><div class="text-[9px] text-slate-400">Actions</div></div>'
+            + '<div class="bg-emerald-50 rounded-lg p-2"><div class="font-black text-emerald-700">' + s.invoices + '</div><div class="text-[9px] text-slate-400">Invoices</div></div>'
+            + '<div class="bg-blue-50 rounded-lg p-2"><div class="font-black text-blue-700">' + s.clients + '</div><div class="text-[9px] text-slate-400">Clients</div></div>'
+            + '<div class="bg-red-50 rounded-lg p-2"><div class="font-black text-red-700">' + s.expenses + '</div><div class="text-[9px] text-slate-400">Expenses</div></div>'
+            + '</div></div>';
+    }).join('');
+};
+
+window.clearActivityLog = function() {
+    var uid = window.AppState && window.AppState.user && window.AppState.user.uid;
+    if(!uid || !confirm('Clear all activity logs?')) return;
+    localStorage.removeItem('ayur_activity_'+uid);
+    window.renderActivityLog();
+    window.showToast && window.showToast('Activity log cleared');
+};
+
+// ── RENDER REQUESTS (owner view) ──────────────────────────────
+window.renderEmpRequests = function() {
+    var uid = window.AppState && window.AppState.user && window.AppState.user.uid;
+    if(!uid) return;
+    var pwReqs = [];
+    var pmReqs = [];
+    try { pwReqs = JSON.parse(localStorage.getItem('ayur_pw_requests_'+uid) || '[]'); } catch(e) {}
+    try { pmReqs = JSON.parse(localStorage.getItem('ayur_perm_requests_'+uid) || '[]'); } catch(e) {}
+
+    var pendPw = pwReqs.filter(function(r) { return r.status === 'pending'; });
+    var pendPm = pmReqs.filter(function(r) { return r.status === 'pending'; });
+    var totalPending = pendPw.length + pendPm.length;
+
+    // Update badge
+    var badge = document.getElementById('emp-req-badge');
+    if(badge) {
+        badge.textContent = totalPending;
+        badge.classList.toggle('hidden', totalPending === 0);
+    }
+
+    var listEl = document.getElementById('emp-requests-list');
+    if(!listEl) return;
+
+    if(!totalPending) {
+        listEl.innerHTML = '<div class="card p-8 text-center text-slate-400"><div class="text-4xl mb-3">✅</div><div class="font-semibold">No pending requests</div><div class="text-sm mt-1">All employee requests have been handled</div></div>';
+        return;
+    }
+
+    var html = '';
+
+    if(pendPw.length) {
+        html += '<div class="font-bold text-slate-700 text-sm mb-2 flex items-center gap-2"><i data-lucide="key" class="w-4 h-4 text-amber-500"></i> Password Reset Requests</div>';
+        html += pendPw.map(function(r) {
+            return '<div class="card p-4 border-amber-200 bg-amber-50 mb-3">'
+                + '<div class="flex items-center justify-between mb-2">'
+                + '<div><div class="font-bold text-amber-900 text-sm">🔑 Password Reset</div>'
+                + '<div class="text-xs text-amber-700">From: ' + r.email + '</div>'
+                + '<div class="text-xs text-amber-600">' + new Date(r.requestedAt).toLocaleString('en-IN') + '</div></div>'
+                + '<button onclick="window.handlePwResetRequest(\'' + r.email + '\')" class="btn btn-primary btn-sm text-xs">Reset Now</button>'
+                + '</div></div>';
+        }).join('');
+    }
+
+    if(pendPm.length) {
+        html += '<div class="font-bold text-slate-700 text-sm mb-2 mt-4 flex items-center gap-2"><i data-lucide="shield" class="w-4 h-4 text-blue-500"></i> Permission Expansion Requests</div>';
+        html += pendPm.map(function(r) {
+            return '<div class="card p-4 border-blue-200 bg-blue-50 mb-3">'
+                + '<div class="flex items-center justify-between mb-2">'
+                + '<div><div class="font-bold text-blue-900 text-sm">🔓 More Access Requested</div>'
+                + '<div class="text-xs text-blue-700">From: ' + r.empName + ' (' + r.empEmail + ')</div>'
+                + '<div class="text-xs text-blue-600">' + new Date(r.requestedAt).toLocaleString('en-IN') + '</div></div>'
+                + '<button onclick="window.openPermissionRequest(\'' + r.empEmail + '\')" class="btn btn-sm text-xs" style="background:#3b82f6;color:white">Review Roles</button>'
+                + '</div>'
+                + '<div class="flex gap-2 mt-2">'
+                + '<button onclick="window.dismissPermRequest(\'' + r.empEmail + '\')" class="btn btn-ghost btn-sm text-xs flex-1 justify-center text-red-500">Dismiss</button>'
+                + '</div></div>';
+        }).join('');
+    }
+
+    listEl.innerHTML = html;
+    if(typeof lucide !== 'undefined') lucide.createIcons({node: listEl});
+};
+
+window.dismissPermRequest = function(empEmail) {
+    var uid = window.AppState && window.AppState.user && window.AppState.user.uid;
+    if(!uid) return;
+    var reqs = JSON.parse(localStorage.getItem('ayur_perm_requests_'+uid) || '[]');
+    reqs = reqs.map(function(r) { return r.empEmail === empEmail ? Object.assign(r, {status:'dismissed'}) : r; });
+    localStorage.setItem('ayur_perm_requests_'+uid, JSON.stringify(reqs));
+    window.renderEmpRequests();
+    window.showToast && window.showToast('Request dismissed');
+};
+
+// ── UPDATE REQUESTS BADGE ON EMPLOYEES TAB OPEN ──────────────
+(function() {
+    var iv = setInterval(function() {
+        if(window.switchTab && !window.switchTab._empReqPatch) {
+            window.switchTab._empReqPatch = true;
+            var orig = window.switchTab;
+            window.switchTab = function(tabId) {
+                orig(tabId);
+                if(tabId === 'employees') {
+                    // Update request badge count
+                    setTimeout(function() {
+                        var uid = window.AppState && window.AppState.user && window.AppState.user.uid;
+                        if(!uid) return;
+                        var pw = JSON.parse(localStorage.getItem('ayur_pw_requests_'+uid) || '[]').filter(function(r) { return r.status === 'pending'; }).length;
+                        var pm = JSON.parse(localStorage.getItem('ayur_perm_requests_'+uid) || '[]').filter(function(r) { return r.status === 'pending'; }).length;
+                        var badge = document.getElementById('emp-req-badge');
+                        if(badge) { badge.textContent = pw + pm; badge.classList.toggle('hidden', (pw+pm) === 0); }
+                    }, 200);
+                }
+            };
+            clearInterval(iv);
+        }
+    }, 500);
+})();
+
+// Also update renderEmployees to use new sub-tab structure
+var _origRenderEmployees = window.renderEmployees;
+window.renderEmployees = function() {
+    if(_origRenderEmployees) _origRenderEmployees.apply(this, arguments);
+    // Update requests badge
+    var uid = window.AppState && window.AppState.user && window.AppState.user.uid;
+    if(!uid) return;
+    var pw = JSON.parse(localStorage.getItem('ayur_pw_requests_'+uid) || '[]').filter(function(r) { return r.status === 'pending'; }).length;
+    var pm = JSON.parse(localStorage.getItem('ayur_perm_requests_'+uid) || '[]').filter(function(r) { return r.status === 'pending'; }).length;
+    var badge = document.getElementById('emp-req-badge');
+    if(badge) { badge.textContent = pw + pm; badge.classList.toggle('hidden', (pw+pm) === 0); }
+};
+
+// ── LOG EMPLOYEE LOGIN ────────────────────────────────────────
+var _origEmpLogin = window.handleEmployeeLogin;
+window.handleEmployeeLogin = async function(e) {
+    if(_origEmpLogin) await _origEmpLogin.apply(this, arguments);
+    // Log the login activity
+    setTimeout(function() {
+        window.logEmployeeActivity('Login', 'Employee logged in');
+    }, 1000);
+};
+</script>
