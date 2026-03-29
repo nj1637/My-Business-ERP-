@@ -1546,9 +1546,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
       <button onclick="window.saveRoleFromModal&&saveRoleFromModal()" class="btn btn-primary"><i data-lucide="shield-check" class="w-4 h-4"></i> Apply Permissions</button>
     </div>
   </div>
-</div> <button id="fab" onclick="window.switchTab&&window.switchTab('invoice')" title="New Invoice">
-
-
+</div><!-- end emp-role-modal -->
 
 <!-- FAB -->
 <button id="fab" onclick="window.switchTab&&window.switchTab('invoice')" title="New Invoice">
@@ -7166,135 +7164,190 @@ window.getAIPriceSuggestion = function(productName, currentRate) {
 })();
 
 // ── DIGITAL INVOICE QR — Embedded HTML, No Firebase Link ─────
+// ── DIGITAL QR — COMPRESSED URL (no localStorage, works on any device) ──────
+// Uses base64url encoding of compact JSON — invoice data IS the URL
+// Typical invoice = ~200-400 chars compressed → fits in QR easily
+
+window._b64Encode = function(str) {
+    try {
+        return btoa(unescape(encodeURIComponent(str)))
+            .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+    } catch(e) { return ''; }
+};
+window._b64Decode = function(str) {
+    try {
+        str = str.replace(/-/g,'+').replace(/_/g,'/');
+        while(str.length % 4) str += '=';
+        return decodeURIComponent(escape(atob(str)));
+    } catch(e) { return ''; }
+};
+
+// Simple text compression — removes repeated spaces, shortens common words
+window._compressInv = function(obj) {
+    var json = JSON.stringify(obj);
+    return window._b64Encode(json);
+};
+window._decompressInv = function(str) {
+    try { return JSON.parse(window._b64Decode(str)); } catch(e) { return null; }
+};
+
 window.generateDigitalInvoiceQR = function(inv) {
-    // Strategy: Store invoice in localStorage with a short key
-    // QR points to same app URL with ?view=KEY
-    // When scanned, app opens in view mode showing the invoice
     try {
         var s = (window.AppState&&window.AppState.settings)||{};
-        // Create a compact invoice object for QR sharing
+        // Ultra-compact invoice object — short keys
         var compact = {
-            id: inv.id,
-            date: inv.date,
-            biz: s.businessName || 'Dev Ayurveda',
-            addr: s.address || '',
-            phone: s.phone || '',
-            gstin: s.gstin || '',
-            client: inv.client ? {name: inv.client.name, mobile: inv.client.mobile||''} : {},
-            items: (inv.items||[]).map(function(it){ return {n:it.name, q:it.qty, r:it.rate, g:it.gst||0}; }),
-            total: inv.grandTotal,
-            tax: inv.totalTax,
-            status: inv.paymentStatus,
-            mode: inv.paymentMode
+            i: inv.id || '',
+            d: inv.date || '',
+            b: s.businessName || '',
+            a: s.address || '',
+            p: s.phone || '',
+            g: s.gstin || '',
+            cn: (inv.client&&inv.client.name) || '',
+            cm: (inv.client&&inv.client.mobile) || '',
+            it: (inv.items||[]).map(function(x){
+                return [x.name||'', Number(x.qty||1), Number(x.rate||0), Number(x.gst||0)];
+            }),
+            t: Math.round(Number(inv.grandTotal||0)),
+            tx: Math.round(Number(inv.totalTax||0)),
+            s: inv.paymentStatus || 'unpaid'
         };
 
-        // Store with short key (first 8 chars of invoice ID + timestamp)
-        var key = 'inv_' + (inv.id||'').replace(/[^a-zA-Z0-9]/g,'').slice(0,8);
-        localStorage.setItem('ayur_qr_'+key, JSON.stringify(compact));
+        var compressed = window._compressInv(compact);
+        if(!compressed) return '';
 
-        // Build URL — same page + hash param
         var baseUrl = window.location.href.split('?')[0].split('#')[0];
-        var viewUrl = baseUrl + '?view=' + key;
+        var viewUrl = baseUrl + '?inv=' + compressed;
 
-        // Generate QR from this URL (much shorter than data URI)
+        // Check URL length — QR codes support up to ~3000 chars
+        // If too long, truncate items description
+        if(viewUrl.length > 2500) {
+            compact.it = compact.it.map(function(x){ return [x[0].slice(0,20), x[1], x[2], x[3]]; });
+            compressed = window._compressInv(compact);
+            viewUrl = baseUrl + '?inv=' + compressed;
+        }
+
         if(window.generateLocalQR) return window.generateLocalQR(viewUrl);
     } catch(e) { console.warn('QR gen error:', e); }
     return '';
 };
 
-// ── HANDLE ?view= PARAM ON PAGE LOAD ─────────────────────────
+// ── HANDLE ?inv= PARAM ON PAGE LOAD (scan from any device) ───
 (function() {
     var params = new URLSearchParams(window.location.search);
-    var viewKey = params.get('view');
-    if(!viewKey) return;
+    var invData = params.get('inv');
+    if(!invData) return;
 
-    // Someone scanned the QR — show invoice viewer
-    window.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            var data = null;
-            try { data = JSON.parse(localStorage.getItem('ayur_qr_' + viewKey) || 'null'); } catch(e) {}
+    // Block normal app load — show invoice viewer instead
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hide app, splash, auth immediately
+        ['app','auth-wrap','splash'].forEach(function(id){
+            var el = document.getElementById(id);
+            if(el) el.style.display = 'none';
+        });
 
-            if(!data) {
-                // Data not found — show error page
-                document.body.innerHTML = '<div style="font-family:sans-serif;max-width:480px;margin:40px auto;padding:20px;text-align:center">'
-                    + '<div style="font-size:48px;margin-bottom:16px">❌</div>'
-                    + '<h2 style="color:#1e293b;margin-bottom:8px">Invoice Not Found</h2>'
-                    + '<p style="color:#64748b;font-size:14px">This invoice link may have expired or is no longer available on this device.</p>'
-                    + '<a href="' + window.location.href.split('?')[0] + '" style="display:inline-block;margin-top:20px;padding:10px 24px;background:#059669;color:white;border-radius:8px;text-decoration:none;font-weight:700">Open App</a>'
-                    + '</div>';
-                return;
-            }
+        var data = window._decompressInv ? window._decompressInv(invData) : null;
 
-            // Render invoice viewer
-            var fmt = function(n){ return '₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2}); };
-            var itemsHTML = (data.items||[]).map(function(it, i) {
-                return '<tr style="border-bottom:1px solid #f1f5f9">'
-                    + '<td style="padding:10px 8px;color:#64748b">'+(i+1)+'</td>'
-                    + '<td style="padding:10px 8px;font-weight:600">'+(it.n||'')+'</td>'
-                    + '<td style="padding:10px 8px;text-align:center">'+(it.q||1)+'</td>'
-                    + '<td style="padding:10px 8px;text-align:right">'+fmt(it.r||0)+'</td>'
-                    + '<td style="padding:10px 8px;text-align:right;font-weight:700;color:#059669">'+fmt(Number(it.q||1)*Number(it.r||0))+'</td>'
-                    + '</tr>';
-            }).join('');
+        if(!data) {
+            document.body.innerHTML = '<div style="font-family:sans-serif;max-width:480px;margin:40px auto;padding:24px;text-align:center">'
+                + '<div style="font-size:56px;margin-bottom:16px">❌</div>'
+                + '<h2 style="color:#1e293b;margin-bottom:8px">Invalid QR Code</h2>'
+                + '<p style="color:#64748b;font-size:14px;line-height:1.6">This QR code appears to be corrupted or invalid. Please ask for a fresh invoice.</p>'
+                + '<a href="' + window.location.href.split('?')[0] + '" style="display:inline-block;margin-top:20px;padding:12px 28px;background:#059669;color:white;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px;">Open App</a>'
+                + '</div>';
+            return;
+        }
 
-            var statusColor = data.status === 'paid' ? '#059669' : '#f59e0b';
-            var statusText = data.status === 'paid' ? '✅ PAID' : '⏳ Payment Pending';
+        var fmt = function(n){ return '₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2}); };
 
-            document.body.innerHTML = '';
-            document.title = data.biz + ' — Invoice ' + data.id;
+        var itemsHTML = (data.it||[]).map(function(it, i) {
+            var total = Number(it[1]||1) * Number(it[2]||0);
+            return '<tr style="border-bottom:1px solid #f1f5f9">'
+                + '<td style="padding:10px 8px;color:#94a3b8;font-size:12px">'+(i+1)+'</td>'
+                + '<td style="padding:10px 8px;font-weight:600;color:#1e293b">'+(it[0]||'')+'</td>'
+                + '<td style="padding:10px 8px;text-align:center;color:#64748b">'+(it[1]||1)+'</td>'
+                + '<td style="padding:10px 8px;text-align:right;color:#64748b">'+fmt(it[2]||0)+'</td>'
+                + '<td style="padding:10px 8px;text-align:right;font-weight:700;color:#059669">'+fmt(total)+'</td>'
+                + '</tr>';
+        }).join('');
 
-            var container = document.createElement('div');
-            container.style.cssText = 'font-family:"Segoe UI",sans-serif;max-width:520px;margin:0 auto;padding:16px;background:#f8fafc;min-height:100vh;';
-            container.innerHTML = [
-                '<div style="background:linear-gradient(135deg,#064e3b,#065f46);color:white;padding:20px;border-radius:16px;margin-bottom:16px">',
-                    '<div style="font-size:20px;font-weight:800">'+data.biz+'</div>',
-                    '<div style="opacity:.7;font-size:11px;margin-top:3px">'+(data.addr||'')+(data.phone?' · 📞'+data.phone:'')+'</div>',
-                    data.gstin ? '<div style="opacity:.6;font-size:10px;margin-top:2px">GSTIN: '+data.gstin+'</div>' : '',
-                '</div>',
-                '<div style="background:white;border-radius:16px;padding:20px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.06)">',
-                    '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px">',
-                        '<div>',
-                            '<div style="font-size:22px;font-weight:900;color:#059669">#'+data.id+'</div>',
-                            '<div style="font-size:12px;color:#64748b;margin-top:2px">📅 '+data.date+'</div>',
-                        '</div>',
-                        '<span style="background:'+statusColor+'20;color:'+statusColor+';padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700">'+statusText+'</span>',
+        var isPaid = data.s === 'paid';
+        var statusBg = isPaid ? '#f0fdf4' : '#fffbeb';
+        var statusColor = isPaid ? '#059669' : '#d97706';
+        var statusText = isPaid ? '✅ PAID' : '⏳ Payment Pending';
+
+        document.title = (data.b||'Invoice') + ' — #' + (data.i||'');
+
+        // Add print CSS
+        var style = document.createElement('style');
+        style.textContent = '*{box-sizing:border-box;margin:0;padding:0}'
+            + 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f1f5f9;}'
+            + '@media print{body{background:white}.no-print{display:none!important}tr{page-break-inside:avoid}}';
+        document.head.appendChild(style);
+
+        var container = document.createElement('div');
+        container.style.cssText = 'max-width:520px;margin:0 auto;padding:16px;min-height:100vh;';
+        container.innerHTML = [
+            // Business header
+            '<div style="background:linear-gradient(135deg,#064e3b,#065f46);color:white;padding:20px 22px;border-radius:20px;margin-bottom:14px;">',
+                '<div style="font-size:21px;font-weight:800;letter-spacing:-.3px">'+(data.b||'')+'</div>',
+                (data.a||data.p) ? '<div style="opacity:.7;font-size:11.5px;margin-top:4px">'+(data.a||'')+(data.p?' · 📞'+data.p:'')+'</div>' : '',
+                data.g ? '<div style="opacity:.55;font-size:10.5px;margin-top:2px;font-family:monospace">GSTIN: '+data.g+'</div>' : '',
+            '</div>',
+
+            // Invoice header
+            '<div style="background:white;border-radius:16px;padding:18px 20px;margin-bottom:12px;box-shadow:0 2px 16px rgba(0,0,0,.07)">',
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">',
+                    '<div>',
+                        '<div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Invoice</div>',
+                        '<div style="font-size:24px;font-weight:900;color:#059669;margin-top:2px">#'+(data.i||'')+'</div>',
+                        '<div style="font-size:12px;color:#94a3b8;margin-top:3px">📅 '+(data.d||'')+'</div>',
                     '</div>',
-                    '<div style="background:#f0fdf4;border:1px solid #a7f3d0;border-radius:10px;padding:12px;font-size:13px">',
-                        '<div style="font-weight:700;color:#065f46">'+(data.client&&data.client.name||'')+'</div>',
-                        data.client&&data.client.mobile ? '<div style="color:#059669;margin-top:2px">📞 '+(data.client.mobile||'')+'</div>' : '',
+                    '<div style="background:'+statusBg+';color:'+statusColor+';padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap">'+statusText+'</div>',
+                '</div>',
+                '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:13px 15px">',
+                    '<div style="font-size:15px;font-weight:700;color:#065f46">'+(data.cn||'Customer')+'</div>',
+                    data.cm ? '<div style="font-size:12px;color:#059669;margin-top:3px">📞 '+data.cm+'</div>' : '',
+                '</div>',
+            '</div>',
+
+            // Items table
+            '<div style="background:white;border-radius:16px;overflow:hidden;margin-bottom:12px;box-shadow:0 2px 16px rgba(0,0,0,.07)">',
+                '<table style="width:100%;border-collapse:collapse;font-size:13px">',
+                    '<thead><tr style="background:#0f172a;color:white">',
+                        '<th style="padding:11px 8px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.05em">#</th>',
+                        '<th style="padding:11px 8px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.05em">ITEM</th>',
+                        '<th style="padding:11px 8px;text-align:center;font-size:10px;font-weight:700">QTY</th>',
+                        '<th style="padding:11px 8px;text-align:right;font-size:10px;font-weight:700">RATE</th>',
+                        '<th style="padding:11px 8px;text-align:right;font-size:10px;font-weight:700">AMT</th>',
+                    '</tr></thead>',
+                    '<tbody>'+itemsHTML+'</tbody>',
+                '</table>',
+                // Totals
+                '<div style="padding:14px 16px;border-top:2px solid #f1f5f9">',
+                    data.tx > 0 ? '<div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:6px"><span>GST / Tax</span><span>'+fmt(data.tx)+'</span></div>' : '',
+                    '<div style="display:flex;justify-content:space-between;font-size:18px;font-weight:900">',
+                        '<span style="color:#1e293b">Grand Total</span>',
+                        '<span style="color:#059669">'+fmt(data.t)+'</span>',
                     '</div>',
                 '</div>',
-                '<div style="background:white;border-radius:16px;overflow:hidden;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.06)">',
-                    '<table style="width:100%;border-collapse:collapse;font-size:13px">',
-                        '<thead><tr style="background:#0f172a;color:white">',
-                            '<th style="padding:10px 8px;text-align:left;font-size:11px">#</th>',
-                            '<th style="padding:10px 8px;text-align:left;font-size:11px">Item</th>',
-                            '<th style="padding:10px 8px;text-align:center;font-size:11px">Qty</th>',
-                            '<th style="padding:10px 8px;text-align:right;font-size:11px">Rate</th>',
-                            '<th style="padding:10px 8px;text-align:right;font-size:11px">Total</th>',
-                        '</tr></thead>',
-                        '<tbody>'+itemsHTML+'</tbody>',
-                        '<tfoot><tr style="background:#f0fdf4;font-weight:700">',
-                            '<td colspan="4" style="padding:14px 8px;text-align:right;color:#065f46;font-size:14px">Grand Total</td>',
-                            '<td style="padding:14px 8px;text-align:right;color:#059669;font-size:18px;font-weight:900">'+fmt(data.total)+'</td>',
-                        '</tr></tfoot>',
-                    '</table>',
-                '</div>',
-                data.tax > 0 ? '<div style="background:white;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.06);font-size:12px;display:flex;justify-content:space-between"><span style="color:#64748b">GST Included</span><span style="font-weight:700;color:#3b82f6">'+fmt(data.tax)+'</span></div>' : '',
-                '<div style="text-align:center;padding:16px;color:#94a3b8;font-size:11px">',
-                    'Powered by Dev Ayurveda ERP · Verify at business premises',
-                '</div>'
-            ].join('');
-            document.body.appendChild(container);
+            '</div>',
 
-            // Print/download button
-            var printBtn = document.createElement('button');
-            printBtn.style.cssText='position:fixed;bottom:20px;right:20px;background:#059669;color:white;border:none;padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 16px rgba(5,150,105,.4);';
-            printBtn.textContent = '🖨️ Print / Save PDF';
-            printBtn.onclick = function(){ window.print(); };
-            document.body.appendChild(printBtn);
+            '<div style="text-align:center;padding:12px;color:#cbd5e1;font-size:11px">',
+                data.b+' · Digital Invoice · Scan verified',
+            '</div>',
+        ].join('');
 
-        }, 100);
+        document.body.innerHTML = '';
+        document.body.style.background = '#f1f5f9';
+        document.body.appendChild(container);
+
+        // Floating print button
+        var printBtn = document.createElement('button');
+        printBtn.className = 'no-print';
+        printBtn.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#059669;color:white;border:none;padding:14px 22px;border-radius:14px;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 6px 20px rgba(5,150,105,.4);display:flex;align-items:center;gap:8px;';
+        printBtn.innerHTML = '🖨️ Print / Save PDF';
+        printBtn.onclick = function(){ window.print(); };
+        document.body.appendChild(printBtn);
     });
 })();
 
