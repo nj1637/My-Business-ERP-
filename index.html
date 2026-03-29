@@ -2576,23 +2576,9 @@ window.setTemplate = function(tpl) {
     });
 };
 
-// ── SWITCHAB TITLE PATCH ──
-var _tabTitles = {dashboard:'Dashboard',daybook:'Daybook',invoice:'New Invoice',records:'Sales Records',inventory:'Inventory',expenses:'Expenses',clients:'Clients CRM',settings:'Settings'};
-var _patchTitleInterval = setInterval(function() {
-    if(window.switchTab && !window.switchTab._titled) {
-        window.switchTab._titled = true;
-        var orig = window.switchTab;
-        window.switchTab = function(tabId) {
-            orig(tabId);
-            var el = document.getElementById('page-title');
-            if(el) el.textContent = _tabTitles[tabId]||tabId;
-            updateFabPos();
-            // Patch: sync tab class to new class names
-            document.querySelectorAll('.tab-content').forEach(function(el){ el.classList.remove('active'); el.classList.add('tab'); el.classList.remove('tab-content'); });
-        };
-        clearInterval(_patchTitleInterval);
-    }
-}, 200);
+// ── SWITCHAB TITLE PATCH ── (integrated into master switchTab below)
+var _tabTitles = {dashboard:'Dashboard',daybook:'Daybook',invoice:'New Invoice',records:'Sales Records',inventory:'Inventory',services:'Services',expenses:'Expenses',clients:'Clients CRM',employees:'Employees',settings:'Settings','ai-report':'AI Report'};
+// Title update called from master switchTab
 
 // Fix: renderNavigation uses mobile-nav id, map to bottom-nav
 // Nav patch - no bottom nav needed, sidebar handles all navigation
@@ -3470,25 +3456,76 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
+        // ── MASTER SWITCH TAB — handles all routing, employee restrictions, tab callbacks ──
+        var EMP_TAB_PERMS = {
+            'dashboard':'dash_view', 'daybook':'daybook_view', 'invoice':'inv_create',
+            'records':'rec_view', 'inventory':'inv_tab', 'services':'svc_view',
+            'expenses':'exp_view', 'clients':'client_view', 'employees':'emp_view',
+            'ai-report':'ai_report', 'settings':'settings_view'
+        };
+
         window.switchTab = function(tabId) {
+            // Employee permission check
+            if(window._isEmployeeSession) {
+                var reqPerm = EMP_TAB_PERMS[tabId];
+                if(reqPerm && !window._employeePermissions[reqPerm]) {
+                    window.showToast && window.showToast('🔒 Access denied: ' + tabId, 'error');
+                    // Go to first allowed tab instead
+                    if(tabId !== 'dashboard') {
+                        var allowed = Object.keys(EMP_TAB_PERMS).find(function(t){
+                            var p = EMP_TAB_PERMS[t];
+                            return !p || window._employeePermissions[p];
+                        });
+                        if(allowed && allowed !== tabId) window.switchTab(allowed);
+                    }
+                    return;
+                }
+            }
+
             window.AppState.activeTab = tabId;
             document.querySelectorAll('.tab,.tab-content').forEach(el => el.classList.remove('active'));
-            const view = document.getElementById(`view-${tabId}`);
+            const view = document.getElementById('view-'+tabId);
             if(view) { view.classList.add('active'); view.classList.add('tab'); }
             
-            renderNavigation(); window.applyFeatureVisibility();
+            renderNavigation(); 
+            window.applyFeatureVisibility && window.applyFeatureVisibility();
             
-            if(tabId === 'dashboard') window.updateDashboard();
+            if(tabId === 'dashboard') window.updateDashboard && window.updateDashboard();
             if(tabId === 'daybook' && window.renderDaybook) window.renderDaybook();
-            if(tabId === 'invoice') { window.restoreDraftToUI(); window.updateInvoiceUI(); }
+            if(tabId === 'invoice') { window.restoreDraftToUI && window.restoreDraftToUI(); window.updateInvoiceUI && window.updateInvoiceUI(); }
             if(tabId === 'inventory' && window.renderInventory) window.renderInventory();
             if(tabId === 'expenses' && window.renderExpenses) window.renderExpenses();
-            if(tabId === 'records') { window.populateClientFilter(); window.renderRecords(); }
-            if(tabId === 'clients') window.renderClients();
+            if(tabId === 'records') { window.populateClientFilter && window.populateClientFilter(); window.renderRecords && window.renderRecords(); }
+            if(tabId === 'clients') window.renderClients && window.renderClients();
             if(tabId === 'services') window.renderServices && window.renderServices();
             if(tabId === 'employees') window.renderEmployees && window.renderEmployees();
-            if(tabId === 'settings') window.populateSettingsUI();
-            
+            if(tabId === 'settings') window.populateSettingsUI && window.populateSettingsUI();
+            if(tabId === 'ai-report') { window.updateAIReportPreview && window.updateAIReportPreview(); if(typeof lucide!=='undefined') lucide.createIcons(); }
+            if(tabId === 'invoice') { setTimeout(function(){ window.setInvoiceMode && window.setInvoiceMode(window._svcInvoiceMode||'goods'); }, 80); }
+            if(tabId === 'services') { window.loadServices && window.loadServices(); }
+            if(tabId === 'employees') {
+                setTimeout(function(){
+                    var uid = window.AppState && window.AppState.user && window.AppState.user.uid;
+                    if(!uid) return;
+                    var pw = JSON.parse(localStorage.getItem('ayur_pw_requests_'+uid)||'[]').filter(function(r){return r.status==='pending';}).length;
+                    var pm = JSON.parse(localStorage.getItem('ayur_perm_requests_'+uid)||'[]').filter(function(r){return r.status==='pending';}).length;
+                    var badge = document.getElementById('emp-req-badge');
+                    if(badge){ badge.textContent=pw+pm; badge.classList.toggle('hidden',(pw+pm)===0); }
+                }, 100);
+            }
+
+            // Push browser history for back button
+            try { if(window.history && window.history.pushState) history.pushState({tab:tabId},'',''); } catch(e){}
+
+            // Update page title
+            if(window._tabTitles) {
+                var titleEl = document.getElementById('page-title');
+                if(titleEl) titleEl.textContent = window._tabTitles[tabId] || tabId;
+            }
+            // Sync any legacy tab-content classes
+            document.querySelectorAll('.tab-content').forEach(function(el){ el.classList.remove('active'); el.classList.add('tab'); el.classList.remove('tab-content'); });
+            if(window.updateFabPos) window.updateFabPos();
+
             window.scrollTo(0,0);
         }
 
@@ -5739,23 +5776,8 @@ window.updateDailyTarget = function() {
         }
     });
 
-    // Patch switchTab to push history
-    var patchBackBtn = setInterval(function(){
-        if(window.switchTab && !window.switchTab._backPatched) {
-            window.switchTab._backPatched = true;
-            var orig = window.switchTab;
-            window.switchTab = function(tabId) {
-                orig(tabId);
-                // Push state for back navigation
-                if(tabHistory[tabHistory.length-1] !== tabId) {
-                    tabHistory.push(tabId);
-                    if(tabHistory.length > 20) tabHistory.shift();
-                    try { history.pushState({tab: tabId}, '', ''); } catch(e){}
-                }
-            };
-            clearInterval(patchBackBtn);
-        }
-    }, 400);
+    // History push now handled in master switchTab
+    var patchBackBtn = null; // removed
 
     // Close modals on back press
     document.addEventListener('backbutton', function(e) {
@@ -6725,17 +6747,7 @@ new Chart(document.getElementById('expChart'), {
 
 // Update preview when switching to AI report tab
 var _origSwitchTab = window.switchTab;
-// Patch after page load
-setTimeout(function(){
-  if(window.switchTab && !window.switchTab._airPatch) {
-    window.switchTab._airPatch = true;
-    var orig = window.switchTab;
-    window.switchTab = function(tabId) {
-      orig(tabId);
-      if(tabId === 'ai-report') { updateAIReportPreview(); if(typeof lucide!=='undefined') lucide.createIcons(); }
-    };
-  }
-}, 500);
+// ai-report tab now handled in master switchTab
 </script>
 
 <script>
@@ -7465,21 +7477,7 @@ window.setInvoiceMode = function(mode) {
     }
 };
 
-// Apply mode on invoice open
-(function(){
-    var iv = setInterval(function(){
-        if(window.switchTab && !window.switchTab._svcModePatch) {
-            window.switchTab._svcModePatch = true;
-            var orig = window.switchTab;
-            window.switchTab = function(tabId) {
-                orig(tabId);
-                if(tabId === 'invoice') setTimeout(function(){ window.setInvoiceMode(window._svcInvoiceMode||'goods'); }, 150);
-                if(tabId === 'services') { window.loadServices(); setTimeout(window.renderServices, 200); }
-            };
-            clearInterval(iv);
-        }
-    }, 300);
-})();
+// invoice/services tab now handled in master switchTab
 
 // Patch updateInvoiceUI to store totals on draft
 (function(){
@@ -7870,22 +7868,7 @@ window.applyEmployeeRestrictions=function(){
         'settings': 'settings_view'
     };
 
-    // Override switchTab to block restricted tabs
-    if(!window.switchTab._empRestricted) {
-        window.switchTab._empRestricted = true;
-        var origSwitch = window.switchTab;
-        window.switchTab = function(tabId) {
-            if(window._isEmployeeSession) {
-                var required = navPerms[tabId];
-                if(required && !window._employeePermissions[required]) {
-                    window.showToast&&window.showToast('Access not allowed: ' + tabId, 'error');
-                    window._showAccessDenied(tabId);
-                    return;
-                }
-            }
-            origSwitch(tabId);
-        };
-    }
+    // Tab restriction now handled in master switchTab
 
     // Hide nav items immediately (before render)
     var applyNavHide = function() {
@@ -8479,29 +8462,7 @@ window.dismissPermRequest = function(empEmail) {
 };
 
 // ── UPDATE REQUESTS BADGE ON EMPLOYEES TAB OPEN ──────────────
-(function() {
-    var iv = setInterval(function() {
-        if(window.switchTab && !window.switchTab._empReqPatch) {
-            window.switchTab._empReqPatch = true;
-            var orig = window.switchTab;
-            window.switchTab = function(tabId) {
-                orig(tabId);
-                if(tabId === 'employees') {
-                    // Update request badge count
-                    setTimeout(function() {
-                        var uid = window.AppState && window.AppState.user && window.AppState.user.uid;
-                        if(!uid) return;
-                        var pw = JSON.parse(localStorage.getItem('ayur_pw_requests_'+uid) || '[]').filter(function(r) { return r.status === 'pending'; }).length;
-                        var pm = JSON.parse(localStorage.getItem('ayur_perm_requests_'+uid) || '[]').filter(function(r) { return r.status === 'pending'; }).length;
-                        var badge = document.getElementById('emp-req-badge');
-                        if(badge) { badge.textContent = pw + pm; badge.classList.toggle('hidden', (pw+pm) === 0); }
-                    }, 200);
-                }
-            };
-            clearInterval(iv);
-        }
-    }, 500);
-})();
+// employees tab badge update now in renderEmployees
 
 // Also update renderEmployees to use new sub-tab structure
 var _origRenderEmployees = window.renderEmployees;
