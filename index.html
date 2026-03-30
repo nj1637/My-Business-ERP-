@@ -7163,242 +7163,242 @@ window.getAIPriceSuggestion = function(productName, currentRate) {
     }, 600);
 })();
 
-// ── DIGITAL INVOICE QR — Embedded HTML, No Firebase Link ─────
-// ── DIGITAL QR — COMPRESSED URL (no localStorage, works on any device) ──────
-// Uses base64url encoding of compact JSON — invoice data IS the URL
-// Typical invoice = ~200-400 chars compressed → fits in QR easily
+// ── DIGITAL QR — Full invoice data in URL, renders exact template ──────────
+// Encodes all invoice + settings data as base64url JSON in ?inv= param
+// Viewer reconstructs same AppState and calls generateInvoiceHTML directly
 
 window._b64Encode = function(str) {
-    try {
-        return btoa(unescape(encodeURIComponent(str)))
-            .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-    } catch(e) { return ''; }
+    try { return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,''); }
+    catch(e) { return ''; }
 };
 window._b64Decode = function(str) {
-    try {
-        str = str.replace(/-/g,'+').replace(/_/g,'/');
-        while(str.length % 4) str += '=';
-        return decodeURIComponent(escape(atob(str)));
-    } catch(e) { return ''; }
-};
-
-// Simple text compression — removes repeated spaces, shortens common words
-window._compressInv = function(obj) {
-    var json = JSON.stringify(obj);
-    return window._b64Encode(json);
-};
-window._decompressInv = function(str) {
-    try { return JSON.parse(window._b64Decode(str)); } catch(e) { return null; }
+    try { str = str.replace(/-/g,'+').replace(/_/g,'/'); while(str.length%4) str+='='; return decodeURIComponent(escape(atob(str))); }
+    catch(e) { return ''; }
 };
 
 window.generateDigitalInvoiceQR = function(inv) {
     try {
-        var s = (window.AppState&&window.AppState.settings)||{};
-        // Full invoice data compressed — enough to render exact same invoice
-        var compact = {
-            // Invoice fields
-            i: inv.id||'', d: inv.date||'', dt: inv.docType||'Tax Invoice',
+        var s = (window.AppState && window.AppState.settings) || {};
+        // Pack full invoice + settings needed to render the exact template
+        var pack = {
+            // Invoice data
+            id: inv.id||'', date: inv.date||'', docType: inv.docType||'Tax Invoice',
+            currency: inv.currency||'INR', paymentMode: inv.paymentMode||'cash',
+            paymentStatus: inv.paymentStatus||'unpaid', notes: inv.notes||'',
+            discount: inv.discountAmountCalculated||0,
+            grandTotal: inv.grandTotal||0, totalTax: inv.totalTax||0, subtotal: inv.subtotal||0,
             // Client
-            cn: (inv.client&&inv.client.name)||'',
-            cm: (inv.client&&inv.client.mobile)||'',
-            cg: (inv.client&&inv.client.gstin)||'',
-            ca: (inv.client&&inv.client.address)||'',
-            // Items — full data
-            it: (inv.items||[]).map(function(x){
-                return {n:x.name||'',q:Number(x.qty||1),r:Number(x.rate||0),g:Number(x.gst||0),h:x.hsn||''};
+            client: {
+                name: (inv.client&&inv.client.name)||'',
+                mobile: (inv.client&&inv.client.mobile)||'',
+                gstin: (inv.client&&inv.client.gstin)||'',
+                address: (inv.client&&inv.client.address)||''
+            },
+            // Items — full fields
+            items: (inv.items||[]).map(function(x){
+                return { name:x.name||'', qty:Number(x.qty||1), rate:Number(x.rate||0),
+                    gst:Number(x.gst||0), hsn:x.hsn||'', batch:x.batch||'', expiry:x.expiry||'' };
             }),
-            // Totals
-            t: Number(inv.grandTotal||0),
-            tx: Number(inv.totalTax||0),
-            sub: Number(inv.subtotal||0),
-            disc: Number(inv.discountAmountCalculated||0),
-            s: inv.paymentStatus||'unpaid',
-            pm: inv.paymentMode||'cash',
-            notes: inv.notes||'',
-            // Business settings needed for rendering
-            biz: s.businessName||'',
-            badr: s.address||'',
-            bph: s.phone||'',
-            bgstin: s.gstin||'',
-            btpl: s.template||'modern',
-            bbank: s.bankName||'',
-            bacc: s.bankAcc||'',
-            bifsc: s.bankIfsc||'',
-            bupi: s.upi||'',
-            bterms: s.customTerms||''
+            // Settings needed for rendering
+            s: {
+                businessName: s.businessName||'', address: s.address||'', phone: s.phone||'',
+                gstin: s.gstin||'', email: s.email||'', template: s.template||'modern',
+                bankName: s.bankName||'', bankAcc: s.bankAcc||'', bankIfsc: s.bankIfsc||'',
+                upi: s.upi||'', customTerms: s.customTerms||'',
+                logoDisplay: s.logoDisplay||'name',
+                // Include logo only if it's small enough (svg or tiny png)
+                logo: (s.logo && s.logo.length < 8000) ? s.logo : '',
+                signature: (s.signature && s.signature.length < 8000) ? s.signature : ''
+            }
         };
 
-        var compressed = window._compressInv(compact);
-        if(!compressed) return '';
-        var baseUrl = window.location.href.split('?')[0].split('#')[0];
-        var viewUrl = baseUrl + '?inv=' + compressed;
+        var encoded = window._b64Encode(JSON.stringify(pack));
+        if(!encoded) return '';
 
-        // If too long (>2800 chars), trim item names and drop optional fields
-        if(viewUrl.length > 2800) {
-            compact.it = compact.it.map(function(x){ return {n:x.n.slice(0,25),q:x.q,r:x.r,g:x.g}; });
-            compact.bterms=''; compact.notes='';
-            compressed = window._compressInv(compact);
-            viewUrl = baseUrl + '?inv=' + compressed;
+        var baseUrl = window.location.href.split('?')[0].split('#')[0];
+        var url = baseUrl + '?inv=' + encoded;
+
+        // QR supports ~3000 chars safely. If over, strip optional fields
+        if(url.length > 2800) {
+            pack.s.logo = ''; pack.s.signature = '';
+            pack.s.customTerms = ''; pack.notes = '';
+            encoded = window._b64Encode(JSON.stringify(pack));
+            url = baseUrl + '?inv=' + encoded;
+        }
+        if(url.length > 2800) {
+            // Further trim: shorten item names, drop batch/expiry
+            pack.items = pack.items.map(function(x){
+                return { name:x.name.slice(0,30), qty:x.qty, rate:x.rate, gst:x.gst, hsn:x.hsn };
+            });
+            encoded = window._b64Encode(JSON.stringify(pack));
+            url = baseUrl + '?inv=' + encoded;
         }
 
-        if(window.generateLocalQR) return window.generateLocalQR(viewUrl);
+        if(window.generateLocalQR) return window.generateLocalQR(url);
     } catch(e) { console.warn('QR gen error:', e); }
     return '';
 };
 
-// ── HANDLE ?inv= PARAM — Render EXACT same invoice ───────────
+// ── INVOICE VIEWER — triggered when ?inv= param present ──────
 (function() {
     var params = new URLSearchParams(window.location.search);
-    var invData = params.get('inv');
-    if(!invData) return;
+    var invParam = params.get('inv');
+    if(!invParam) return;
 
-    // Intercept page load — show invoice viewer instead of app
-    document.addEventListener('DOMContentLoaded', function() {
-        // Hide everything immediately
-        document.body.style.visibility = 'hidden';
-        ['app','auth-wrap','splash'].forEach(function(id){
-            var el=document.getElementById(id); if(el) el.style.display='none';
-        });
+    // This is a QR scan — intercept everything and show invoice
+    // Hide app immediately before DOM is ready
+    var hideStyle = document.createElement('style');
+    hideStyle.textContent = '#app,#auth-wrap,#splash,#fab{display:none!important}body{background:#e2e8f0}';
+    document.head.appendChild(hideStyle);
 
-        var raw = window._decompressInv ? window._decompressInv(invData) : null;
-        if(!raw) {
-            document.body.style.visibility='visible';
+    var pack = null;
+    try { pack = JSON.parse(window._b64Decode(invParam)); } catch(e) {}
+
+    if(!pack) {
+        document.addEventListener('DOMContentLoaded', function() {
             document.body.innerHTML = '<div style="font-family:sans-serif;max-width:480px;margin:60px auto;padding:24px;text-align:center">'
                 +'<div style="font-size:56px">❌</div><h2 style="margin:16px 0 8px;color:#1e293b">Invalid QR Code</h2>'
-                +'<p style="color:#64748b;font-size:14px">This QR appears corrupted. Ask for a fresh invoice.</p>'
-                +'<a href="'+window.location.href.split('?')[0]+'" style="display:inline-block;margin-top:20px;padding:12px 28px;background:#059669;color:white;border-radius:12px;text-decoration:none;font-weight:700;">Open App</a>'
+                +'<p style="color:#64748b;font-size:14px">This QR is corrupted. Ask for a fresh invoice.</p>'
+                +'<a href="'+window.location.href.split('?')[0]+'" style="display:inline-block;margin-top:20px;padding:12px 28px;background:#059669;color:white;border-radius:12px;text-decoration:none;font-weight:700">Open App</a>'
                 +'</div>';
-            return;
-        }
+        });
+        return;
+    }
 
-        // Reconstruct full invoice object
-        var inv = {
-            id: raw.i, date: raw.d, docType: raw.dt||'Tax Invoice',
-            client: { name:raw.cn, mobile:raw.cm, gstin:raw.cg, address:raw.ca },
-            items: (raw.it||[]).map(function(x){
-                return { name:x.n, qty:x.q, rate:x.r, gst:x.g, hsn:x.h||'', inclusive:true };
-            }),
-            grandTotal: raw.t, totalTax: raw.tx, subtotal: raw.sub,
-            discountAmountCalculated: raw.disc||0,
-            paymentStatus: raw.s, paymentMode: raw.pm,
-            notes: raw.notes||'',
-            status: 'final'
-        };
+    // Reconstruct the full invoice object (same shape generateInvoiceHTML expects)
+    var inv = {
+        id: pack.id, date: pack.date, docType: pack.docType||'Tax Invoice',
+        currency: pack.currency||'INR', paymentMode: pack.paymentMode,
+        paymentStatus: pack.paymentStatus, notes: pack.notes||'',
+        discountAmountCalculated: pack.discount||0,
+        grandTotal: pack.grandTotal, totalTax: pack.totalTax, subtotal: pack.subtotal,
+        client: pack.client,
+        items: pack.items,
+        status: 'final'
+    };
 
-        // Reconstruct settings object
-        var fakeSettings = {
-            businessName: raw.biz, address: raw.badr, phone: raw.bph,
-            gstin: raw.bgstin, template: raw.btpl||'modern',
-            bankName: raw.bbank, bankAcc: raw.bacc, bankIfsc: raw.bifsc,
-            upi: raw.bupi, customTerms: raw.bterms,
-            logoDisplay: 'name' // No logo in QR (too large)
-        };
+    // Reconstruct settings
+    var fakeS = Object.assign({
+        features: { hsn: true, batch: true }
+    }, pack.s);
 
-        // Wait for generateInvoiceHTML to be available (loaded in module script)
-        var attempts = 0;
-        var tryRender = setInterval(function() {
-            attempts++;
-            if(attempts > 30) { // 3 second timeout
-                clearInterval(tryRender);
-                renderFallbackViewer(inv, raw);
+    document.addEventListener('DOMContentLoaded', function() {
+        document.title = (fakeS.businessName||'Invoice') + ' — #' + inv.id;
+
+        // Wait for generateInvoiceHTML to load (it's in a module script)
+        var waited = 0;
+        var render = setInterval(function() {
+            waited += 100;
+            if(waited > 5000) {
+                clearInterval(render);
+                showSimpleFallback(inv, fakeS);
                 return;
             }
-            if(!window.generateInvoiceHTML) return;
-            clearInterval(tryRender);
+            if(!window.generateInvoiceHTML || !window.formatCurrency || !window.isFeatureEnabled) return;
+            clearInterval(render);
 
-            // Temporarily override AppState.settings for rendering
+            // Set fake AppState so generateInvoiceHTML works
             if(!window.AppState) window.AppState = {};
-            var origSettings = window.AppState.settings;
-            window.AppState.settings = fakeSettings;
+            window.AppState.settings = fakeS;
+            // Disable digital QR in viewer (prevent infinite recursion)
+            window.generateDigitalInvoiceQR = function(){ return ''; };
 
-            var html = window.generateInvoiceHTML(inv);
-            window.AppState.settings = origSettings; // restore
+            var invoiceHTML = '';
+            try { invoiceHTML = window.generateInvoiceHTML(inv); }
+            catch(e) { showSimpleFallback(inv, fakeS); return; }
 
-            // Add print/share CSS
-            var style = document.createElement('style');
-            style.textContent = [
-                '*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}',
-                'body{margin:0;padding:0;background:#e2e8f0}',
-                '.viewer-wrap{max-width:210mm;margin:0 auto;padding:12px}',
-                '.no-print{position:fixed;bottom:20px;right:20px;z-index:9999}',
-                '@media print{body{background:white}.no-print{display:none!important}.viewer-wrap{padding:0;max-width:100%}}',
-                '@media(max-width:600px){.viewer-wrap{padding:6px}}'
+            // Build viewer page
+            var printCSS = [
+                '@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap");',
+                '*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box}',
+                'body{margin:0;padding:0;background:#e2e8f0;font-family:"Plus Jakarta Sans",sans-serif}',
+                '.inv-wrap{max-width:210mm;margin:0 auto;padding:12px}',
+                '.action-bar{position:fixed;bottom:0;left:0;right:0;padding:12px 16px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-top:1px solid #e2e8f0;display:flex;gap:10px;justify-content:center;z-index:9999}',
+                '@media print{body{background:white}.action-bar{display:none!important}.inv-wrap{padding:0;max-width:100%}}'
             ].join('');
+
+            var style = document.createElement('style');
+            style.textContent = printCSS;
             document.head.appendChild(style);
 
-            // Inject Tailwind and Lucide for template rendering
+            // Load Tailwind for template classes
             var tw = document.createElement('script');
             tw.src = 'https://cdn.tailwindcss.com';
             document.head.appendChild(tw);
 
+            // Load Lucide for icons in templates
+            var lucideScript = document.createElement('script');
+            lucideScript.src = 'https://unpkg.com/lucide@latest';
+            lucideScript.onload = function(){
+                if(window.lucide) window.lucide.createIcons();
+            };
+            document.head.appendChild(lucideScript);
+
             document.body.innerHTML = '';
-            document.body.style.visibility = 'visible';
             document.body.style.background = '#e2e8f0';
 
             var wrap = document.createElement('div');
-            wrap.className = 'viewer-wrap';
-            wrap.innerHTML = html;
+            wrap.className = 'inv-wrap';
+            wrap.innerHTML = invoiceHTML;
             document.body.appendChild(wrap);
 
-            document.title = (raw.biz||'Invoice') + ' — #' + (raw.i||'');
-
-            // Action bar
+            // Action bar at bottom
             var bar = document.createElement('div');
-            bar.className = 'no-print';
-            bar.style.cssText = 'display:flex;gap:10px;flex-direction:column;align-items:flex-end;';
+            bar.className = 'action-bar';
             bar.innerHTML = [
-                '<button onclick="window.print()" style="background:#059669;color:white;border:none;padding:13px 22px;border-radius:14px;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 6px 20px rgba(5,150,105,.4);display:flex;align-items:center;gap:8px;">🖨️ Print / Save PDF</button>',
-                '<button onclick="if(navigator.share)navigator.share({title:\'Invoice #'+raw.i+'\',url:window.location.href})" style="background:#3b82f6;color:white;border:none;padding:10px 18px;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(59,130,246,.4);">📤 Share Invoice</button>'
+                '<button onclick="window.print()" style="flex:1;max-width:200px;padding:13px;background:#059669;color:white;border:none;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;">',
+                    '🖨️ Print / Save PDF',
+                '</button>',
+                navigator.share ? '<button onclick="navigator.share({title:\'Invoice #'+inv.id+'\',url:window.location.href})" style="flex:1;max-width:160px;padding:13px;background:#3b82f6;color:white;border:none;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;">📤 Share</button>' : '',
             ].join('');
             document.body.appendChild(bar);
+
+            // Extra bottom padding so content not hidden behind action bar
+            wrap.style.paddingBottom = '80px';
+
+            // Re-init lucide icons after template renders
+            setTimeout(function(){
+                if(window.lucide) window.lucide.createIcons();
+            }, 500);
         }, 100);
     });
 
-    // Fallback simple viewer if generateInvoiceHTML not available
-    function renderFallbackViewer(inv, raw) {
-        var fmt = function(n){ return '₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2}); };
+    function showSimpleFallback(inv, s) {
+        var fmt = function(n){ return '\u20b9'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2}); };
         var rows = (inv.items||[]).map(function(it,i){
-            return '<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:10px 8px;color:#94a3b8">'+(i+1)+'</td>'
-            +'<td style="padding:10px 8px;font-weight:600">'+it.name+'</td>'
-            +'<td style="padding:10px 8px;text-align:center">'+it.qty+'</td>'
-            +'<td style="padding:10px 8px;text-align:right">'+fmt(it.rate)+'</td>'
-            +'<td style="padding:10px 8px;text-align:right;font-weight:700;color:#059669">'+fmt(it.qty*it.rate)+'</td></tr>';
+            return '<tr style="border-bottom:1px solid #f1f5f9">'
+                +'<td style="padding:10px 8px;color:#94a3b8;font-size:12px">'+(i+1)+'</td>'
+                +'<td style="padding:10px 8px;font-weight:600;color:#1e293b">'+it.name+'</td>'
+                +'<td style="padding:10px 8px;text-align:center;color:#64748b">'+it.qty+'</td>'
+                +'<td style="padding:10px 8px;text-align:right;color:#64748b">'+fmt(it.rate)+'</td>'
+                +'<td style="padding:10px 8px;text-align:right;font-weight:700;color:#059669">'+fmt(it.qty*it.rate)+'</td>'
+                +'</tr>';
         }).join('');
-        document.body.style.visibility='visible';
-        document.body.innerHTML = '<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:16px;background:#f8fafc;min-height:100vh">'
+        document.body.innerHTML = '<div style="max-width:520px;margin:0 auto;padding:16px;font-family:sans-serif">'
             +'<div style="background:linear-gradient(135deg,#064e3b,#065f46);color:white;padding:20px;border-radius:16px;margin-bottom:14px">'
-            +'<div style="font-size:20px;font-weight:800">'+(raw.biz||'')+'</div>'
-            +'<div style="opacity:.7;font-size:11px;margin-top:3px">'+(raw.badr||'')+(raw.bph?' · '+raw.bph:'')+'</div></div>'
-            +'<div style="background:white;border-radius:16px;padding:18px;margin-bottom:12px">'
-            +'<div style="font-size:22px;font-weight:900;color:#059669">#'+inv.id+'</div>'
-            +'<div style="font-size:12px;color:#64748b">'+inv.date+'</div>'
-            +'<div style="font-weight:700;margin-top:10px">'+inv.client.name+'</div></div>'
-            +'<div style="background:white;border-radius:16px;overflow:hidden;margin-bottom:12px">'
+            +'<div style="font-size:20px;font-weight:800">'+(s.businessName||'')+'</div>'
+            +'<div style="opacity:.7;font-size:11px;margin-top:3px">'+(s.address||'')+(s.phone?' · '+s.phone:'')+'</div>'
+            +(s.gstin?'<div style="opacity:.6;font-size:10px;margin-top:2px">GSTIN: '+s.gstin+'</div>':'')
+            +'</div>'
+            +'<div style="background:white;border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.08)">'
+            +'<div style="font-size:24px;font-weight:900;color:#059669">#'+inv.id+'</div>'
+            +'<div style="font-size:12px;color:#94a3b8;margin-top:2px">'+inv.date+'</div>'
+            +'<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-top:12px">'
+            +'<div style="font-weight:700;color:#065f46">'+(inv.client&&inv.client.name||'')+'</div>'
+            +(inv.client&&inv.client.mobile?'<div style="font-size:12px;color:#059669;margin-top:2px">'+inv.client.mobile+'</div>':'')
+            +'</div></div>'
+            +'<div style="background:white;border-radius:16px;overflow:hidden;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.08)">'
             +'<table style="width:100%;border-collapse:collapse;font-size:13px">'
-            +'<thead><tr style="background:#0f172a;color:white"><th style="padding:10px 8px;text-align:left;font-size:10px">#</th><th style="padding:10px 8px;text-align:left;font-size:10px">ITEM</th><th style="padding:10px 8px;text-align:center;font-size:10px">QTY</th><th style="padding:10px 8px;text-align:right;font-size:10px">RATE</th><th style="padding:10px 8px;text-align:right;font-size:10px">AMT</th></tr></thead>'
-            +'<tbody>'+rows+'</tbody></table>'
-            +'<div style="padding:14px;border-top:2px solid #f1f5f9;display:flex;justify-content:space-between;font-size:16px;font-weight:800"><span>Grand Total</span><span style="color:#059669">'+fmt(inv.grandTotal)+'</span></div></div>'
-            +'<button onclick="window.print()" style="width:100%;padding:14px;background:#059669;color:white;border:none;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;">🖨️ Print / Save PDF</button></div>';
+            +'<thead><tr style="background:#0f172a;color:white"><th style="padding:10px 8px;text-align:left;font-size:10px">#</th><th style="padding:10px 8px;text-align:left;font-size:10px">ITEM</th><th style="padding:10px 8px;text-align:center;font-size:10px">QTY</th><th style="padding:10px 8px;text-align:right;font-size:10px">RATE</th><th style="padding:10px 8px;text-align:right;font-size:10px">AMOUNT</th></tr></thead>'
+            +'<tbody>'+rows+'</tbody>'
+            +'</table>'
+            +'<div style="padding:14px 16px;border-top:2px solid #f1f5f9">'
+            +(inv.totalTax>0?'<div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:6px"><span>GST / Tax</span><span>'+fmt(inv.totalTax)+'</span></div>':'')
+            +'<div style="display:flex;justify-content:space-between;font-size:18px;font-weight:900"><span>Grand Total</span><span style="color:#059669">'+fmt(inv.grandTotal)+'</span></div>'
+            +'</div></div>'
+            +'<button onclick="window.print()" style="width:100%;padding:14px;background:#059669;color:white;border:none;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;">🖨️ Print / Save PDF</button>'
+            +'</div>';
     }
-})();
-
-// Patch generateInvoiceHTML to use new digital QR
-(function(){
-    var patchDigQR = setInterval(function(){
-        if(window.generateInvoiceHTML) {
-            clearInterval(patchDigQR);
-            var orig = window.generateInvoiceHTML;
-            window.generateInvoiceHTML = function(inv) {
-                var html = orig(inv);
-                // Replace old digital QR (firebase link) with new embedded HTML QR
-                var newQR = window.generateDigitalInvoiceQR(inv);
-                if(newQR) {
-                    html = html.replace(/https:\/\/dev-ayurveda\.web\.app\/verify\/[^"']*/g, '');
-                }
-                return html;
-            };
-        }
-    }, 700);
 })();
 
 // ── PWA OFFLINE MODE — Service Worker ────────────────────────
