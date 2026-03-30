@@ -7179,21 +7179,58 @@ window._b64Decode = function(str) {
 window.generateDigitalInvoiceQR = function(inv) {
     try {
         var s = (window.AppState && window.AppState.settings) || {};
-        // Pack full invoice + settings needed to render the exact template
+        
+        // Compress the payload using short keys (1-2 letters) to prevent URL truncation
         var pack = {
-            // Invoice data
-            id: inv.id||'', date: inv.date||'', docType: inv.docType||'Tax Invoice',
-            currency: inv.currency||'INR', paymentMode: inv.paymentMode||'cash',
-            paymentStatus: inv.paymentStatus||'unpaid', notes: inv.notes||'',
-            discount: inv.discountAmountCalculated||0,
-            grandTotal: inv.grandTotal||0, totalTax: inv.totalTax||0, subtotal: inv.subtotal||0,
-            // Client
-            client: {
-                name: (inv.client&&inv.client.name)||'',
-                mobile: (inv.client&&inv.client.mobile)||'',
-                gstin: (inv.client&&inv.client.gstin)||'',
-                address: (inv.client&&inv.client.address)||''
+            i: inv.id || 'Draft',
+            d: inv.date || new Date().toISOString().split('T')[0],
+            t: inv.docType || 'Tax Invoice',
+            c: inv.currency || 'INR',
+            m: inv.paymentMode || 'cash',
+            p: inv.paymentStatus || 'unpaid',
+            n: (inv.notes || '').substring(0, 50), // Truncate long notes
+            dc: inv.discountAmountCalculated || 0,
+            g: inv.grandTotal || 0,
+            x: inv.totalTax || 0,
+            st: inv.subtotal || 0,
+            cl: {
+                n: (inv.client && inv.client.name) || 'Unknown Client',
+                m: (inv.client && inv.client.mobile) || '',
+                g: (inv.client && inv.client.gstin) || '',
+                a: ((inv.client && inv.client.address) || '').substring(0, 50)
             },
+            it: (inv.items || []).map(function(x){
+                return { 
+                    n: (x.name || 'Item').substring(0, 30), 
+                    q: Number(x.qty || 1), 
+                    r: Number(x.rate || 0), 
+                    g: Number(x.gst || 0), 
+                    h: x.hsn || '' 
+                };
+            }),
+            s: {
+                bn: s.businessName || 'My Business',
+                a: (s.address || '').substring(0, 50),
+                p: s.phone || '',
+                g: s.gstin || '',
+                e: s.email || '',
+                t: s.template || 'modern',
+                ld: s.logoDisplay || 'name'
+            }
+        };
+
+        var encoded = window._b64Encode(JSON.stringify(pack));
+        var baseUrl = window.location.href.split('?')[0].split('#')[0];
+        var url = baseUrl + '?inv=' + encoded;
+
+        // If the URL is still dangerously long, return empty to prevent corrupted scans
+        if(url.length > 2500) return '';
+
+        if(window.generateLocalQR) return window.generateLocalQR(url);
+    } catch(e) { console.warn('QR gen error:', e); }
+    return '';
+};
+
             // Items — full fields
             items: (inv.items||[]).map(function(x){
                 return { name:x.name||'', qty:Number(x.qty||1), rate:Number(x.rate||0),
@@ -7241,49 +7278,50 @@ window.generateDigitalInvoiceQR = function(inv) {
 
 // ── INVOICE VIEWER — triggered when ?inv= param present ──────
 (function() {
-    var params = new URLSearchParams(window.location.search);
-    var invParam = params.get('inv');
-    if(!invParam) return;
-
-    // This is a QR scan — intercept everything and show invoice
-    // Hide app immediately before DOM is ready
-    var hideStyle = document.createElement('style');
-    hideStyle.textContent = '#app,#auth-wrap,#splash,#fab{display:none!important}body{background:#e2e8f0}';
-    document.head.appendChild(hideStyle);
-
-    var pack = null;
-    try { pack = JSON.parse(window._b64Decode(invParam)); } catch(e) {}
-
-    if(!pack) {
-        document.addEventListener('DOMContentLoaded', function() {
-            document.body.innerHTML = '<div style="font-family:sans-serif;max-width:480px;margin:60px auto;padding:24px;text-align:center">'
-                +'<div style="font-size:56px">❌</div><h2 style="margin:16px 0 8px;color:#1e293b">Invalid QR Code</h2>'
-                +'<p style="color:#64748b;font-size:14px">This QR is corrupted. Ask for a fresh invoice.</p>'
-                +'<a href="'+window.location.href.split('?')[0]+'" style="display:inline-block;margin-top:20px;padding:12px 28px;background:#059669;color:white;border-radius:12px;text-decoration:none;font-weight:700">Open App</a>'
-                +'</div>';
-        });
-        return;
-    }
-
-    // Reconstruct the full invoice object (same shape generateInvoiceHTML expects)
+       // Reconstruct the full invoice object safely with fallbacks
     var inv = {
-        id: pack.id, date: pack.date, docType: pack.docType||'Tax Invoice',
-        currency: pack.currency||'INR', paymentMode: pack.paymentMode,
-        paymentStatus: pack.paymentStatus, notes: pack.notes||'',
-        discountAmountCalculated: pack.discount||0,
-        grandTotal: pack.grandTotal, totalTax: pack.totalTax, subtotal: pack.subtotal,
-        client: pack.client,
-        items: pack.items,
+        id: pack.i || pack.id || 'N/A',
+        date: pack.d || pack.date || 'N/A',
+        docType: pack.t || pack.docType || 'Tax Invoice',
+        currency: pack.c || pack.currency || 'INR',
+        paymentMode: pack.m || pack.paymentMode || 'cash',
+        paymentStatus: pack.p || pack.paymentStatus || 'unpaid',
+        notes: pack.n || pack.notes || '',
+        discountAmountCalculated: pack.dc || pack.discount || 0,
+        grandTotal: pack.g || pack.grandTotal || 0,
+        totalTax: pack.x || pack.totalTax || 0,
+        subtotal: pack.st || pack.subtotal || 0,
+        client: {
+            name: (pack.cl && pack.cl.n) || (pack.client && pack.client.name) || 'Unknown Client',
+            mobile: (pack.cl && pack.cl.m) || (pack.client && pack.client.mobile) || '',
+            gstin: (pack.cl && pack.cl.g) || (pack.client && pack.client.gstin) || '',
+            address: (pack.cl && pack.cl.a) || (pack.client && pack.client.address) || ''
+        },
+        items: (pack.it || pack.items || []).map(function(x) {
+            return {
+                name: x.n || x.name || 'Item',
+                qty: x.q || x.qty || 1,
+                rate: x.r || x.rate || 0,
+                gst: x.g || x.gst || 0,
+                hsn: x.h || x.hsn || ''
+            };
+        }),
         status: 'final'
     };
 
-    // Reconstruct settings
+    // Reconstruct settings safely
     var fakeS = Object.assign({
         features: { hsn: true, batch: true }
-    }, pack.s);
+    }, pack.s ? {
+        businessName: pack.s.bn || pack.s.businessName || 'My Business',
+        address: pack.s.a || pack.s.address || '',
+        phone: pack.s.p || pack.s.phone || '',
+        gstin: pack.s.g || pack.s.gstin || '',
+        email: pack.s.e || pack.s.email || '',
+        template: pack.s.t || pack.s.template || 'modern',
+        logoDisplay: pack.s.ld || pack.s.logoDisplay || 'name'
+    } : {});
 
-    document.addEventListener('DOMContentLoaded', function() {
-        document.title = (fakeS.businessName||'Invoice') + ' — #' + inv.id;
 
         // Wait for generateInvoiceHTML to load (it's in a module script)
         var waited = 0;
