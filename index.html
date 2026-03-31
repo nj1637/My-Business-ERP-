@@ -7372,94 +7372,91 @@ window._b64d = function(s) {
 window.generateDigitalInvoiceQR = function(inv) {
     try {
         var s = (window.AppState && window.AppState.settings) || {};
-        // Data + Current Template encode karna
+        
+        // Data chhota kar rahe hain (bz = business name, cl = client, it = items)
         var compact = {
             id: inv.id,
-            date: inv.date,
-            biz: s.businessName || 'Dev Ayurveda',
-            addr: s.address || '',
-            phone: s.phone || '',
-            gstin: s.gstin || '',
-            // Saare important fields pack karein jo generateInvoiceHTML ko chahiye
-            client: inv.client || {},
-            items: inv.items || [],
-            total: inv.grandTotal,
-            tax: inv.totalTax,
-            discount: inv.discount || 0,
-            discountType: inv.discountType || 'fixed',
-            status: inv.paymentStatus,
-            mode: inv.paymentMode,
-            currency: inv.currency || 'INR',
-            tpl: s.template || 'modern' // Ye line design yaad rakhegi
+            dt: inv.date,
+            bz: s.businessName || '',
+            ad: s.address || '',
+            ph: s.phone || '',
+            gs: s.gstin || '',
+            cl: { n: inv.client.name, m: inv.client.mobile || '' },
+            it: (inv.items || []).map(function(i) { 
+                return { n: i.name, q: i.qty, r: i.rate, g: i.gst || 0, h: i.hsn || '' }; 
+            }),
+            tt: inv.grandTotal,
+            tx: inv.totalTax,
+            ds: inv.discount || 0,
+            tp: s.template || 'modern'
         };
 
-        var encodedData = btoa(encodeURIComponent(JSON.stringify(compact)));
+        var encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(compact))));
         var baseUrl = window.location.href.split('?')[0].split('#')[0];
         var viewUrl = baseUrl + '?d=' + encodedData;
 
-        if(window.generateLocalQR) return window.generateLocalQR(viewUrl);
-    } catch(e) { console.warn('QR gen error:', e); }
-    return '';
+        // QR generate karne ka sabse sahi tareeka index-17 ke liye:
+        const qr = new QRious({
+            value: viewUrl,
+            size: 250,
+            level: 'M' // Medium level taaki scan fast ho
+        });
+        return qr.toDataURL();
+        
+    } catch(e) { 
+        console.error('QR Error:', e); 
+        return '';
+    }
 };
-
 
 // ── INVOICE VIEWER — runs AFTER full app initializes ─────────────────────────
 // Strategy: Let the full page load normally (Tailwind, Firebase module, everything).
 // Then detect ?inv= param and overlay the invoice on top of the app.
 (function() {
     var params = new URLSearchParams(window.location.search);
-    var encodedData = params.get('d');
-
-    if(!encodedData) return;
+    var d = params.get('d');
+    if(!d) return;
 
     window.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
-            var data = null;
             try {
-                data = JSON.parse(decodeURIComponent(atob(encodedData)));
-            } catch(e) { 
-                document.body.innerHTML = '<div style="text-align:center;padding:50px;">Invalid Link</div>';
-                return;
+                // Base64 decode aur JSON parse
+                var c = JSON.parse(decodeURIComponent(escape(atob(d))));
+                
+                // Data ko ERP ke format mein wapas lana
+                var inv = {
+                    id: c.id, date: c.dt, grandTotal: c.tt, totalTax: c.tx,
+                    discount: c.ds, currency: 'INR', paymentStatus: 'paid',
+                    client: { name: c.cl.n, mobile: c.cl.m },
+                    items: c.it.map(function(i){ 
+                        return { name: i.n, qty: i.q, rate: i.r, gst: i.g, hsn: i.h }; 
+                    })
+                };
+
+                // Template aur Settings restore karna
+                if(!window.AppState) window.AppState = { settings: {} };
+                window.AppState.settings = { 
+                    template: c.tp, businessName: c.bz, address: c.ad, 
+                    phone: c.ph, gstin: c.gs, logoDisplay: 'both' 
+                };
+
+                // Asli ERP ka HTML generator use karna
+                var html = window.generateInvoiceHTML ? window.generateInvoiceHTML(inv) : "Error";
+
+                document.body.innerHTML = `
+                    <div style="background:#f3f4f6; padding:20px; min-height:100vh; display:flex; flex-direction:column; align-items:center;">
+                        <div style="background:white; width:100%; max-width:800px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.1); border-radius:8px;">
+                            ${html}
+                        </div>
+                        <button onclick="window.print()" style="margin-top:20px; padding:12px 30px; background:#059669; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-family:sans-serif;">
+                            🖨️ Print / Save PDF
+                        </button>
+                    </div>`;
+            } catch(e) {
+                console.error(e);
+                document.body.innerHTML = "<div style='text-align:center; padding:50px;'>Invalid Invoice Link</div>";
             }
-
-            // 1. App State ko temporary update karna taaki template sahi uthaye
-            if(!window.AppState) window.AppState = { settings: {} };
-            window.AppState.settings.template = data.tpl || 'modern';
-            window.AppState.settings.businessName = data.biz;
-            window.AppState.settings.address = data.addr;
-            window.AppState.settings.phone = data.phone;
-            window.AppState.settings.gstin = data.gstin;
-
-            // 2. Apne ERP ka asli design function call karna
-            var invoiceHTML = "";
-            if(window.generateInvoiceHTML) {
-                // Hamara encoded data hi hamara 'inv' object hai
-                invoiceHTML = window.generateInvoiceHTML(data);
-            }
-
-            // 3. Poori screen par design dikhana
-            document.body.innerHTML = '';
-            document.title = "Invoice #" + data.id;
-
-            var viewer = document.createElement('div');
-            viewer.style.cssText = 'background:#f0f2f5; min-height:100vh; padding:20px; display:flex; justify-content:center;';
-            
-            // Container jo A4 size jaisa dikhe
-            var paper = document.createElement('div');
-            paper.style.cssText = 'background:white; width:210mm; padding:10mm; box-shadow:0 10px 30px rgba(0,0,0,0.1); border-radius:8px;';
-            paper.innerHTML = invoiceHTML;
-            
-            viewer.appendChild(paper);
-            document.body.appendChild(viewer);
-
-            // Floating Print Button
-            var btn = document.createElement('button');
-            btn.innerHTML = "🖨️ Print Invoice";
-            btn.style.cssText = 'position:fixed; bottom:20px; right:20px; padding:12px 24px; background:#059669; color:white; border:none; border-radius:50px; font-weight:bold; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:9999;';
-            btn.onclick = function() { window.print(); };
-            document.body.appendChild(btn);
-
-        }, 200); // 200ms wait taaki ERP functions load ho jayein
+        }, 400); // Thoda extra time taaki generateInvoiceHTML load ho jaye
     });
 })();
 
