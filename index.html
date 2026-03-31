@@ -461,7 +461,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
     <div class="modal-body space-y-4">
       <!-- App Info -->
       <div class="p-4 rounded-xl text-white text-sm" style="background:linear-gradient(135deg,#064e3b,#065f46)">
-        <div class="font-bold text-lg mb-1">🌿 My business  ERP</div>
+        <div class="font-bold text-lg mb-1">⚡ My business  ERP</div>
         <div class="opacity-80 text-xs leading-relaxed">A complete business management system built for Ayurvedic clinics, wellness centers, and service businesses. Manage invoices, inventory, clients, employees and finances — all in one place.</div>
         <div class="mt-3 flex flex-wrap gap-2">
           <span class="bg-white/20 px-2 py-0.5 rounded-lg text-[10px] font-bold">v10 Modular Pro</span>
@@ -1080,7 +1080,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
     <button onclick="window.filterServiceCat('all')" id="scat-all" class="btn btn-primary btn-sm flex-shrink-0">All</button>
     <button onclick="window.filterServiceCat('consultation')" id="scat-consultation" class="btn btn-ghost btn-sm flex-shrink-0">🩺 Consultation</button>
     <button onclick="window.filterServiceCat('treatment')" id="scat-treatment" class="btn btn-ghost btn-sm flex-shrink-0">💆 Treatment</button>
-    <button onclick="window.filterServiceCat('therapy')" id="scat-therapy" class="btn btn-ghost btn-sm flex-shrink-0">🌿 Therapy</button>
+    <button onclick="window.filterServiceCat('therapy')" id="scat-therapy" class="btn btn-ghost btn-sm flex-shrink-0">⚡ Therapy</button>
     <button onclick="window.filterServiceCat('package')" id="scat-package" class="btn btn-ghost btn-sm flex-shrink-0">📦 Package</button>
     <button onclick="window.filterServiceCat('other')" id="scat-other" class="btn btn-ghost btn-sm flex-shrink-0">⚙️ Other</button>
   </div>
@@ -1511,7 +1511,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
         <select id="svc-category" class="inp bg-white">
           <option value="consultation">🩺 Consultation</option>
           <option value="treatment">💆 Treatment</option>
-          <option value="therapy">🌿 Therapy</option>
+          <option value="therapy">⚡ Therapy</option>
           <option value="package">📦 Package</option>
           <option value="other">⚙️ Other</option>
         </select>
@@ -2166,7 +2166,7 @@ async function shareInvoiceWA() {
     if(!inv) return;
     var biz = (window.AppState.settings && window.AppState.settings.businessName) || 'My Business ';
     var fmt = window.formatCurrency || function(a){ return '₹'+Number(a).toFixed(2); };
-    var msg = '🌿 *' + biz + '*'
+    var msg = '⚡ *' + biz + '*'
         + '\n\nHello ' + inv.client.name + ','
         + '\n\nYour *' + (inv.docType||'Invoice') + '* is ready.'
         + '\n\n📋 *' + inv.id + '*'
@@ -2334,7 +2334,7 @@ async function shareInvoiceWA() {
 
     var biz = (window.AppState.settings && window.AppState.settings.businessName) || 'My Business ';
     var fmt = window.formatCurrency || function(a){ return '₹' + Number(a).toFixed(2); };
-    var msg = '🌿 *' + biz + '*'
+    var msg = '⚡ *' + biz + '*'
         + '\n\nHello ' + inv.client.name + ','
         + '\n\n📋 Invoice: *' + inv.id + '*'
         + '\n📅 Date: ' + inv.date
@@ -4848,7 +4848,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if(tpl === 'nature') {
             // Organic green with botanical feel
             wrapperStyle = 'border:1px solid #d1fae5;';
-            headerStyles = '<div style="background:linear-gradient(135deg,#064e3b,#065f46);margin:-8mm -10mm 20px;padding:16px;position:relative;overflow:hidden;"><div style="position:absolute;right:-20px;top:-20px;width:80px;height:80px;background:rgba(255,255,255,0.05);border-radius:50%;"></div><div style="display:flex;justify-content:space-between;align-items:flex-end;"><div><p style="color:#6ee7b7;font-size:9px;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:4px;">🌿 Natural Wellness</p><h1 style="color:white;font-size:18px;font-weight:700;">'+(s.businessName||'')+'</h1></div><p style="color:#6ee7b7;font-size:9px;text-transform:uppercase;">Tax Invoice</p></div></div>';
+            headerStyles = '<div style="background:linear-gradient(135deg,#064e3b,#065f46);margin:-8mm -10mm 20px;padding:16px;position:relative;overflow:hidden;"><div style="position:absolute;right:-20px;top:-20px;width:80px;height:80px;background:rgba(255,255,255,0.05);border-radius:50%;"></div><div style="display:flex;justify-content:space-between;align-items:flex-end;"><div><p style="color:#6ee7b7;font-size:9px;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:4px;">⚡ Natural Wellness</p><h1 style="color:white;font-size:18px;font-weight:700;">'+(s.businessName||'')+'</h1></div><p style="color:#6ee7b7;font-size:9px;text-transform:uppercase;">Tax Invoice</p></div></div>';
             tableHeadStyles = 'background:#064e3b;color:#a7f3d0;font-size:11px;';
             totalStyles = 'color:#065f46;';
             billToStyle = 'background:#f0fdf4;border:1px solid #a7f3d0;border-radius:6px;padding:10px 14px;';
@@ -4868,7 +4868,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if(tpl === 'ayurveda') {
             // My Business special - warm green herbal theme
             wrapperStyle = 'border-top:6px solid #065f46;';
-            headerStyles = '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;margin-bottom:20px;border-bottom:1px solid #d1fae5;"><div style="display:flex;align-items:center;gap:12px;">'+(s.logo?`<img src="${s.logo}" style="height:50px;object-fit:contain;">`:'<div style="width:44px;height:44px;background:#d1fae5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;">🌿</div>')+`<div><h1 style="font-size:18px;font-weight:800;color:#064e3b;">${s.businessName}</h1><p style="font-size:9px;color:#059669;text-transform:uppercase;letter-spacing:0.15em;margin-top:2px;">Ayurvedic Wellness Center</p></div></div><div style="text-align:right;"><div style="background:#064e3b;color:white;padding:6px 12px;border-radius:6px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Tax Invoice</div><p style="font-size:9px;color:#64748b;margin-top:6px;">${s.phone?'📞 '+s.phone:''}</p></div></div>`;
+            headerStyles = '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;margin-bottom:20px;border-bottom:1px solid #d1fae5;"><div style="display:flex;align-items:center;gap:12px;">'+(s.logo?`<img src="${s.logo}" style="height:50px;object-fit:contain;">`:'<div style="width:44px;height:44px;background:#d1fae5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;">⚡</div>')+`<div><h1 style="font-size:18px;font-weight:800;color:#064e3b;">${s.businessName}</h1><p style="font-size:9px;color:#059669;text-transform:uppercase;letter-spacing:0.15em;margin-top:2px;">Ayurvedic Wellness Center</p></div></div><div style="text-align:right;"><div style="background:#064e3b;color:white;padding:6px 12px;border-radius:6px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Tax Invoice</div><p style="font-size:9px;color:#64748b;margin-top:6px;">${s.phone?'📞 '+s.phone:''}</p></div></div>`;
             tableHeadStyles = 'background:#065f46;color:#a7f3d0;font-size:11px;font-weight:600;';
             totalStyles = 'color:#065f46;';
             billToStyle = 'background:#f0fdf4;border:1.5px solid #6ee7b7;border-radius:8px;padding:12px 14px;';
@@ -6189,7 +6189,7 @@ window.sendReminderWA = function(clientId) {
     var bizName = (window.AppState.settings&&window.AppState.settings.businessName)||'My business ';
     var ids = unpaidInvs.map(function(i){ return i.id; }).join(', ');
     var fmt = function(n){ return '₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2}); };
-    var msg = '🌿 *'+bizName+'*\n\nDear '+client.name+',\n\nThis is a friendly reminder regarding your outstanding payment:\n\n📋 Invoice(s): '+ids+'\n💰 Total Due: *'+fmt(total)+'*\n\nKindly arrange payment at your earliest convenience.\n\nThank you for your trust! 🙏';
+    var msg = '⚡ *'+bizName+'*\n\nDear '+client.name+',\n\nThis is a friendly reminder regarding your outstanding payment:\n\n📋 Invoice(s): '+ids+'\n💰 Total Due: *'+fmt(total)+'*\n\nKindly arrange payment at your earliest convenience.\n\nThank you for your trust! 🙏';
     var mobile = (client.mobile||'').replace(/\D/g,'');
     var num = mobile.length===10 ? '91'+mobile : mobile;
     window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg), '_blank');
@@ -6277,7 +6277,7 @@ window.updateBirthdayReminders = function() {
         list.innerHTML = matches.map(function(c){
             var num = (c.mobile||'').replace(/\D/g,'');
             var waNum = num.length===10?'91'+num:num;
-            var msg = '🎂 Happy Birthday '+c.name+'! Wishing you great health and happiness. 🌿\n\n— '+((window.AppState.settings&&window.AppState.settings.businessName)||'My business ');
+            var msg = '🎂 Happy Birthday '+c.name+'! Wishing you great health and happiness. ⚡\n\n— '+((window.AppState.settings&&window.AppState.settings.businessName)||'My business ');
             return '<div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-pink-100 shadow-sm"><div class="flex items-center gap-2"><div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center text-pink-600 font-bold text-sm">'+c.name.charAt(0)+'</div><div><div class="text-sm font-bold text-slate-800">'+c.name+'</div><div class="text-xs text-pink-500">🎂 Birthday Today!</div></div></div><a href="https://wa.me/'+waNum+'?text='+encodeURIComponent(msg)+'" target="_blank" class="btn btn-sm text-xs" style="background:#25D366;color:white;border:none">Wish 🎉</a></div>';
         }).join('');
     } else {
@@ -6606,7 +6606,7 @@ var _settingsModals = {
       var tpl = s.template||'modern';
       var terms = (s.customTerms||'').replace(/"/g,'&quot;');
       var tpls = ['modern','classic','minimal','compact','elegant','bold','nature','corporate','ayurveda','premium','tricolor','grunge','sidebar-red','waterwave','vintage'];
-      var tplLabels = {modern:'Modern',classic:'Classic',minimal:'Minimal',compact:'Compact',elegant:'Elegant',bold:'Bold',nature:'🌿 Nature',corporate:'Corporate',ayurveda:'🌿 Ayurveda',premium:'⭐ Premium',tricolor:'🇮🇳 Tricolor',grunge:'🔥 Grunge','sidebar-red':'📋 Sidebar',waterwave:'🌊 WaveFlow',vintage:'📜 Vintage'};
+      var tplLabels = {modern:'Modern',classic:'Classic',minimal:'Minimal',compact:'Compact',elegant:'Elegant',bold:'Bold',nature:'⚡ Nature',corporate:'Corporate',ayurveda:'⚡ Ayurveda',premium:'⭐ Premium',tricolor:'🇮🇳 Tricolor',grunge:'🔥 Grunge','sidebar-red':'📋 Sidebar',waterwave:'🌊 WaveFlow',vintage:'📜 Vintage'};
       return `<div class="space-y-4">
         <div><label class="lbl">Footer / T&C</label><textarea id="smod-biz-terms" rows="3" class="inp text-sm resize-none" placeholder="Thank you...">${s.customTerms||''}</textarea></div>
         <div><label class="lbl">PDF Template</label>
@@ -6803,7 +6803,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#1e293b}
 </head>
 <body>
 <div class="hero">
-  <div class="badge">🌿 My business  ERP · AI Report</div>
+  <div class="badge">⚡ My business  ERP · AI Report</div>
   <h1>${bizName}</h1>
   <p>${period.type === 'weekly' ? 'Weekly' : 'Monthly'} Business Intelligence Report</p>
   <p style="color:#475569;font-size:.78rem;margin-top:8px">Generated: ${now}</p>
@@ -7032,7 +7032,7 @@ window.autoSendWAInvoice = async function() {
     if(!latest) return;
     var biz = (window.AppState.settings&&window.AppState.settings.businessName)||'My business ';
     var fmt = function(n){ return '₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2}); };
-    var msg = '🌿 *'+biz+'*\n\nDear '+latest.client.name+',\n\nYour invoice is ready:\n\n📋 *'+latest.id+'*\n📅 '+latest.date+'\n💰 *'+fmt(latest.grandTotal)+'*\n\n'+(latest.paymentStatus==='paid'?'✅ Paid':'⏳ Payment Pending')+'\n\nThank you! 🙏';
+    var msg = '⚡ *'+biz+'*\n\nDear '+latest.client.name+',\n\nYour invoice is ready:\n\n📋 *'+latest.id+'*\n📅 '+latest.date+'\n💰 *'+fmt(latest.grandTotal)+'*\n\n'+(latest.paymentStatus==='paid'?'✅ Paid':'⏳ Payment Pending')+'\n\nThank you! 🙏';
     var mobile = (latest.client&&latest.client.mobile||'').replace(/\D/g,'');
     var num = mobile.length===10?'91'+mobile:mobile;
 
@@ -7372,7 +7372,7 @@ window._b64d = function(s) {
 window.generateDigitalInvoiceQR = function(inv) {
     try {
         var s = (window.AppState && window.AppState.settings) || {};
-        // Data ko chhota (compact) banana taaki QR simple rahe
+        // Data + Current Template encode karna
         var compact = {
             id: inv.id,
             date: inv.date,
@@ -7380,202 +7380,89 @@ window.generateDigitalInvoiceQR = function(inv) {
             addr: s.address || '',
             phone: s.phone || '',
             gstin: s.gstin || '',
-            client: inv.client ? {name: inv.client.name, mobile: inv.client.mobile||''} : {},
-            items: (inv.items||[]).map(function(it){ return {n:it.name, q:it.qty, r:it.rate, g:it.gst||0}; }),
+            // Saare important fields pack karein jo generateInvoiceHTML ko chahiye
+            client: inv.client || {},
+            items: inv.items || [],
             total: inv.grandTotal,
             tax: inv.totalTax,
+            discount: inv.discount || 0,
+            discountType: inv.discountType || 'fixed',
             status: inv.paymentStatus,
-            mode: inv.paymentMode
+            mode: inv.paymentMode,
+            currency: inv.currency || 'INR',
+            tpl: s.template || 'modern' // Ye line design yaad rakhegi
         };
 
-        // Saare data ko Base64 string mein badalna (Global access ke liye)
         var encodedData = btoa(encodeURIComponent(JSON.stringify(compact)));
-
-        // URL structure: current link + ?d=DATA
         var baseUrl = window.location.href.split('?')[0].split('#')[0];
         var viewUrl = baseUrl + '?d=' + encodedData;
 
-        // QR Generate karna
         if(window.generateLocalQR) return window.generateLocalQR(viewUrl);
     } catch(e) { console.warn('QR gen error:', e); }
     return '';
 };
+
 
 // ── INVOICE VIEWER — runs AFTER full app initializes ─────────────────────────
 // Strategy: Let the full page load normally (Tailwind, Firebase module, everything).
 // Then detect ?inv= param and overlay the invoice on top of the app.
 (function() {
     var params = new URLSearchParams(window.location.search);
-    var invParam = params.get('inv');
-    if(!invParam) return; // Normal app load — do nothing
+    var encodedData = params.get('d');
 
-    var pack = null;
-    try { pack = JSON.parse(window._b64d(invParam)); } catch(e) {}
+    if(!encodedData) return;
 
-    // Wait for generateInvoiceHTML to be available (loaded by Firebase module script)
-    var attempts = 0;
-    var waitAndRender = setInterval(function() {
-        attempts++;
-        // Timeout after 15 seconds — show fallback
-        if(attempts > 150) {
-            clearInterval(waitAndRender);
-            if(pack) showQRFallback(pack);
-            else showQRError();
-            return;
-        }
-        // All 4 functions must be available
-        if(!window.generateInvoiceHTML) return;
-        if(!window.formatCurrency) return;
-        if(!window.isFeatureEnabled) return;
-        if(!window.generateLocalQR) return;
-        clearInterval(waitAndRender);
-        renderQRInvoice(pack);
-    }, 100);
-
-    function renderQRInvoice(pack) {
-        if(!pack) { showQRError(); return; }
-
-        // Reconstruct invoice object (exact shape generateInvoiceHTML expects)
-        var inv = {
-            id:pack.id, date:pack.date, docType:pack.docType||'Tax Invoice',
-            currency:pack.currency||'INR', paymentMode:pack.paymentMode,
-            paymentStatus:pack.paymentStatus, notes:pack.notes||'',
-            discountAmountCalculated:pack.discount||0,
-            grandTotal:pack.grandTotal, totalTax:pack.totalTax, subtotal:pack.subtotal,
-            client:pack.client,
-            items:pack.items||[],
-            status:'final'
-        };
-
-        // Build full settings object for rendering
-        var qrSettings = Object.assign({}, pack.settings||{}, {
-            // Ensure features object exists so isFeatureEnabled works
-            features: {
-                hsn: !!(pack.items && pack.items[0] && pack.items[0].hsn),
-                batch: !!(pack.items && pack.items.some(function(x){ return x.batch; })),
-                stamp: false
+    window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            var data = null;
+            try {
+                data = JSON.parse(decodeURIComponent(atob(encodedData)));
+            } catch(e) { 
+                document.body.innerHTML = '<div style="text-align:center;padding:50px;">Invalid Link</div>';
+                return;
             }
-        });
 
-        // Fully set up AppState for template rendering
-        if(!window.AppState) window.AppState = {};
-        var originalSettings = window.AppState.settings;
-        window.AppState.settings = qrSettings;
+            // 1. App State ko temporary update karna taaki template sahi uthaye
+            if(!window.AppState) window.AppState = { settings: {} };
+            window.AppState.settings.template = data.tpl || 'modern';
+            window.AppState.settings.businessName = data.biz;
+            window.AppState.settings.address = data.addr;
+            window.AppState.settings.phone = data.phone;
+            window.AppState.settings.gstin = data.gstin;
 
-        // Disable QR generation inside viewer (prevent recursion)
-        var origGenQR = window.generateDigitalInvoiceQR;
-        window.generateDigitalInvoiceQR = function(){ return ''; };
+            // 2. Apne ERP ka asli design function call karna
+            var invoiceHTML = "";
+            if(window.generateInvoiceHTML) {
+                // Hamara encoded data hi hamara 'inv' object hai
+                invoiceHTML = window.generateInvoiceHTML(data);
+            }
 
-        var invoiceHTML = '';
-        try {
-            invoiceHTML = window.generateInvoiceHTML(inv);
-        } catch(e) {
-            console.error('Invoice render error:', e);
-            window.AppState.settings = originalSettings;
-            window.generateDigitalInvoiceQR = origGenQR;
-            showQRFallback(pack);
-            return;
-        }
+            // 3. Poori screen par design dikhana
+            document.body.innerHTML = '';
+            document.title = "Invoice #" + data.id;
 
-        // Restore original settings
-        window.AppState.settings = originalSettings;
-        window.generateDigitalInvoiceQR = origGenQR;
+            var viewer = document.createElement('div');
+            viewer.style.cssText = 'background:#f0f2f5; min-height:100vh; padding:20px; display:flex; justify-content:center;';
+            
+            // Container jo A4 size jaisa dikhe
+            var paper = document.createElement('div');
+            paper.style.cssText = 'background:white; width:210mm; padding:10mm; box-shadow:0 10px 30px rgba(0,0,0,0.1); border-radius:8px;';
+            paper.innerHTML = invoiceHTML;
+            
+            viewer.appendChild(paper);
+            document.body.appendChild(viewer);
 
-        if(!invoiceHTML) { showQRFallback(pack); return; }
+            // Floating Print Button
+            var btn = document.createElement('button');
+            btn.innerHTML = "🖨️ Print Invoice";
+            btn.style.cssText = 'position:fixed; bottom:20px; right:20px; padding:12px 24px; background:#059669; color:white; border:none; border-radius:50px; font-weight:bold; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:9999;';
+            btn.onclick = function() { window.print(); };
+            document.body.appendChild(btn);
 
-        // Build full-screen overlay
-        var overlay = document.createElement('div');
-        overlay.id = 'qr-invoice-overlay';
-        overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#e2e8f0;overflow-y:auto;-webkit-overflow-scrolling:touch;';
-
-        // Action bar at top
-        var topBar = document.createElement('div');
-        topBar.style.cssText = 'position:sticky;top:0;z-index:10;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-bottom:1px solid #e2e8f0;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
-        topBar.innerHTML = '<div style="font-size:13px;font-weight:700;color:#1e293b;">📄 Digital Invoice</div>'
-            +'<div style="display:flex;gap:8px;">'
-            +'<button onclick="window.print()" style="padding:9px 16px;background:#059669;color:white;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;">🖨️ Print / PDF</button>'
-            +(navigator.share?'<button onclick="navigator.share({title:\'Invoice #'+pack.id+'\',url:window.location.href})" style="padding:9px 14px;background:#3b82f6;color:white;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;">📤 Share</button>':'')
-            +'</div>';
-
-        var invoiceWrap = document.createElement('div');
-        invoiceWrap.style.cssText = 'max-width:210mm;margin:12px auto;padding:0 8px 40px;';
-        invoiceWrap.innerHTML = invoiceHTML;
-
-        overlay.appendChild(topBar);
-        overlay.appendChild(invoiceWrap);
-        document.body.appendChild(overlay);
-
-        // Add print-specific styles
-        var printStyle = document.createElement('style');
-        printStyle.id = 'qr-print-style';
-        printStyle.textContent = '@media print{'
-            +'#qr-invoice-overlay{position:static!important;overflow:visible!important;background:white!important}'
-            +'#qr-invoice-overlay>div:first-child{display:none!important}'
-            +'body>*:not(#qr-invoice-overlay){display:none!important}'
-            +'.inv-id-tracker{page-break-inside:avoid}'
-            +'-webkit-print-color-adjust:exact;print-color-adjust:exact'
-            +'}';
-        document.head.appendChild(printStyle);
-
-        // Trigger lucide icon refresh for template icons
-        setTimeout(function(){ if(window.lucide) window.lucide.createIcons({node:overlay}); else if(typeof lucide!=='undefined') lucide.createIcons({node:overlay}); }, 200);
-
-        document.title = (pack.settings&&pack.settings.businessName||'Invoice') + ' — #' + pack.id;
-    }
-
-    function showQRError() {
-        document.body.innerHTML = '<div style="font-family:sans-serif;max-width:420px;margin:80px auto;padding:24px;text-align:center">'
-            +'<div style="font-size:56px">❌</div>'
-            +'<h2 style="margin:16px 0 8px;color:#1e293b">Invalid QR Code</h2>'
-            +'<p style="color:#64748b;font-size:14px">This QR is corrupted. Ask for a fresh invoice.</p>'
-            +'<a href="'+window.location.href.split('?')[0]+'" style="display:inline-block;margin-top:20px;padding:12px 28px;background:#059669;color:white;border-radius:12px;text-decoration:none;font-weight:700">Open App</a>'
-            +'</div>';
-    }
-
-    function showQRFallback(pack) {
-        // Clean fallback when template rendering fails
-        var s = pack.settings||{};
-        var fmt = function(n){ return '\u20b9'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2}); };
-        var rows = (pack.items||[]).map(function(it,i){
-            return '<tr><td style="padding:10px 8px;color:#94a3b8;border-bottom:1px solid #f1f5f9">'+(i+1)+'</td>'
-                +'<td style="padding:10px 8px;font-weight:600;border-bottom:1px solid #f1f5f9">'+it.name+(it.hsn?'<br><span style="font-size:10px;color:#94a3b8">HSN:'+it.hsn+'</span>':'')+'</td>'
-                +'<td style="padding:10px 8px;text-align:center;border-bottom:1px solid #f1f5f9">'+it.qty+'</td>'
-                +'<td style="padding:10px 8px;text-align:right;border-bottom:1px solid #f1f5f9">'+fmt(it.rate)+'</td>'
-                +'<td style="padding:10px 8px;text-align:right;font-weight:700;color:#059669;border-bottom:1px solid #f1f5f9">'+fmt(it.qty*it.rate)+'</td>'
-                +'</tr>';
-        }).join('');
-        var overlay = document.createElement('div');
-        overlay.style.cssText='position:fixed;inset:0;z-index:99999;background:#e2e8f0;overflow-y:auto;font-family:"Segoe UI",sans-serif';
-        overlay.innerHTML = '<div style="max-width:520px;margin:0 auto;padding:16px 14px 60px">'
-            +'<div style="background:linear-gradient(135deg,#064e3b,#065f46);color:white;padding:20px;border-radius:16px;margin-bottom:14px">'
-            +'<div style="font-size:20px;font-weight:800">'+(s.businessName||'')+'</div>'
-            +'<div style="opacity:.7;font-size:11px;margin-top:3px">'+(s.address||'')+(s.phone?' \u00b7 '+s.phone:'')+'</div>'
-            +(s.gstin?'<div style="opacity:.6;font-size:10px;margin-top:2px;font-family:monospace">GSTIN: '+s.gstin+'</div>':'')+'</div>'
-            +'<div style="background:white;border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.08)">'
-            +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
-            +'<div><div style="font-size:22px;font-weight:900;color:#059669">#'+pack.id+'</div><div style="font-size:12px;color:#94a3b8;margin-top:2px">'+pack.date+'</div></div>'
-            +'<div style="background:'+(pack.paymentStatus==='paid'?'#f0fdf4':'#fffbeb')+';color:'+(pack.paymentStatus==='paid'?'#059669':'#d97706')+';padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700">'+(pack.paymentStatus==='paid'?'✅ PAID':'⏳ Pending')+'</div></div>'
-            +'<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px">'
-            +'<div style="font-weight:700;color:#065f46">'+(pack.client&&pack.client.name||'')+'</div>'
-            +(pack.client&&pack.client.mobile?'<div style="font-size:12px;color:#059669;margin-top:2px">'+pack.client.mobile+'</div>':'')
-            +(pack.client&&pack.client.address?'<div style="font-size:11px;color:#64748b;margin-top:2px">'+pack.client.address+'</div>':'')
-            +'</div></div>'
-            +'<div style="background:white;border-radius:16px;overflow:hidden;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.08)">'
-            +'<table style="width:100%;border-collapse:collapse;font-size:13px">'
-            +'<thead><tr style="background:#0f172a;color:white"><th style="padding:10px 8px;text-align:left;font-size:10px;font-weight:700">#</th><th style="padding:10px 8px;text-align:left;font-size:10px;font-weight:700">ITEM</th><th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700">QTY</th><th style="padding:10px 8px;text-align:right;font-size:10px;font-weight:700">RATE</th><th style="padding:10px 8px;text-align:right;font-size:10px;font-weight:700">AMT</th></tr></thead>'
-            +'<tbody>'+rows+'</tbody></table>'
-            +'<div style="padding:14px 16px;border-top:2px solid #f1f5f9">'
-            +(pack.totalTax>0?'<div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:6px"><span>GST / Tax</span><span>'+fmt(pack.totalTax)+'</span></div>':'')
-            +(pack.discount>0?'<div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:6px"><span>Discount</span><span>-'+fmt(pack.discount)+'</span></div>':'')
-            +'<div style="display:flex;justify-content:space-between;font-size:18px;font-weight:900"><span style="color:#1e293b">Grand Total</span><span style="color:#059669">'+fmt(pack.grandTotal)+'</span></div></div></div>'
-            +(s.bankName?'<div style="background:white;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);font-size:12px;color:#64748b"><div style="font-weight:700;color:#1e293b;margin-bottom:6px">Bank Details</div><div>'+s.bankName+'</div><div>A/C: '+s.bankAcc+'</div><div>IFSC: '+s.bankIfsc+'</div></div>':'')
-            +(pack.notes?'<div style="background:white;border-radius:12px;padding:14px;margin-bottom:12px;font-size:12px;color:#64748b"><div style="font-weight:700;color:#1e293b;margin-bottom:4px">Notes</div>'+pack.notes+'</div>':'')
-            +'<button onclick="window.print()" style="width:100%;padding:15px;background:#059669;color:white;border:none;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;box-shadow:0 4px 16px rgba(5,150,105,.35);">🖨️ Print / Save PDF</button>'
-            +'</div>';
-        document.body.appendChild(overlay);
-        document.title=(s.businessName||'Invoice')+' — #'+pack.id;
-    }
+        }, 200); // 200ms wait taaki ERP functions load ho jayein
+    });
 })();
+
 
 // ── PWA OFFLINE MODE — Service Worker ────────────────────────
 (function(){
@@ -7881,7 +7768,7 @@ window.renderServices = function() {
     var billed=((window.AppState&&window.AppState.invoices)||[]).reduce(function(sum,inv){ return inv.status!=='final'?sum:sum+(inv.items||[]).filter(function(it){ return it.isService; }).reduce(function(s,it){ return s+Number(it.qty||1)*Number(it.rate||0); },0); },0);
     var el3=document.getElementById('svc-total-billed'); if(el3) el3.textContent=fmt(billed);
     var listEl=document.getElementById('services-list'); if(!listEl) return;
-    var icons={consultation:'🩺',treatment:'💆',therapy:'🌿',package:'📦',other:'⚙️'};
+    var icons={consultation:'🩺',treatment:'💆',therapy:'⚡',package:'📦',other:'⚙️'};
     if(!filtered.length){ listEl.innerHTML='<div class="col-span-full p-8 text-center text-slate-400 flex flex-col items-center gap-2"><span class="text-4xl">✨</span><div class="font-semibold">No services found</div><button onclick="window.openServiceDrawer&&openServiceDrawer(null)" class="btn btn-primary btn-sm mt-2"><i data-lucide=\'plus\' class=\'w-3.5 h-3.5\'></i> Add Service</button></div>'; if(typeof lucide!=='undefined') lucide.createIcons({node:listEl}); return; }
     listEl.innerHTML=filtered.map(function(s){
         return '<div class="card card-hover p-4 '+(s.active===false?'opacity-60':'')+'">'
