@@ -7368,61 +7368,36 @@ window._b64d = function(s) {
     catch(e) { return ''; }
 };
 
+// Index-17 mein ise replace karein
 window.generateDigitalInvoiceQR = function(inv) {
     try {
-        var s = (window.AppState&&window.AppState.settings)||{};
-        var pack = {
-            id:inv.id||'', date:inv.date||'', docType:inv.docType||'Tax Invoice',
-            currency:inv.currency||'INR', paymentMode:inv.paymentMode||'cash',
-            paymentStatus:inv.paymentStatus||'unpaid', notes:inv.notes||'',
-            discount:Number(inv.discountAmountCalculated||0),
-            grandTotal:Number(inv.grandTotal||0), totalTax:Number(inv.totalTax||0),
-            subtotal:Number(inv.subtotal||0),
-            client:{
-                name:(inv.client&&inv.client.name)||'',
-                mobile:(inv.client&&inv.client.mobile)||'',
-                gstin:(inv.client&&inv.client.gstin)||'',
-                address:(inv.client&&inv.client.address)||''
-            },
-            items:(inv.items||[]).map(function(x){
-                return {name:x.name||'',qty:Number(x.qty||1),rate:Number(x.rate||0),
-                    gst:Number(x.gst||0),hsn:x.hsn||'',batch:x.batch||'',expiry:x.expiry||''};
-            }),
-            // All settings needed to render the template exactly
-            settings:{
-                businessName:s.businessName||'', address:s.address||'',
-                phone:s.phone||'', gstin:s.gstin||'', email:s.email||'',
-                template:s.template||'modern', logoDisplay:s.logoDisplay||'name',
-                bankName:s.bankName||'', bankAcc:s.bankAcc||'', bankIfsc:s.bankIfsc||'',
-                upi:s.upi||'', customTerms:s.customTerms||'',
-                // Embed logo/signature only if small enough
-                logo:(s.logo&&s.logo.length<6000)?s.logo:'',
-                signature:(s.signature&&s.signature.length<4000)?s.signature:''
-            }
+        var s = (window.AppState && window.AppState.settings) || {};
+        // Data ko chhota (compact) banana taaki QR simple rahe
+        var compact = {
+            id: inv.id,
+            date: inv.date,
+            biz: s.businessName || 'Dev Ayurveda',
+            addr: s.address || '',
+            phone: s.phone || '',
+            gstin: s.gstin || '',
+            client: inv.client ? {name: inv.client.name, mobile: inv.client.mobile||''} : {},
+            items: (inv.items||[]).map(function(it){ return {n:it.name, q:it.qty, r:it.rate, g:it.gst||0}; }),
+            total: inv.grandTotal,
+            tax: inv.totalTax,
+            status: inv.paymentStatus,
+            mode: inv.paymentMode
         };
 
-        var encoded = window._b64e(JSON.stringify(pack));
+        // Saare data ko Base64 string mein badalna (Global access ke liye)
+        var encodedData = btoa(encodeURIComponent(JSON.stringify(compact)));
+
+        // URL structure: current link + ?d=DATA
         var baseUrl = window.location.href.split('?')[0].split('#')[0];
-        var url = baseUrl + '?inv=' + encoded;
+        var viewUrl = baseUrl + '?d=' + encodedData;
 
-        // If too long, strip large fields progressively
-        if(url.length > 2800) {
-            pack.settings.logo=''; pack.settings.signature='';
-            pack.settings.customTerms=''; pack.notes='';
-            encoded = window._b64e(JSON.stringify(pack));
-            url = baseUrl + '?inv=' + encoded;
-        }
-        if(url.length > 2800) {
-            pack.items = pack.items.map(function(x){
-                return {name:x.name.slice(0,25),qty:x.qty,rate:x.rate,gst:x.gst,hsn:x.hsn};
-            });
-            pack.client.address='';
-            encoded = window._b64e(JSON.stringify(pack));
-            url = baseUrl + '?inv=' + encoded;
-        }
-
-        if(window.generateLocalQR) return window.generateLocalQR(url);
-    } catch(e) { console.warn('QR:', e); }
+        // QR Generate karna
+        if(window.generateLocalQR) return window.generateLocalQR(viewUrl);
+    } catch(e) { console.warn('QR gen error:', e); }
     return '';
 };
 
