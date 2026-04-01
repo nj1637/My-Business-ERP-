@@ -3653,7 +3653,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         window.generateLocalQR = function(text) {
             if(!text) return '';
-            try { const qr = new QRious({ value: text, size: 300, level: 'H' }); return qr.toDataURL('image/png'); } 
+            try {
+                // Use level 'L' for maximum data capacity (~4296 chars)
+                var level = text.length > 1000 ? 'L' : 'M';
+                var qr = new QRious({ value: text, size: 300, level: level });
+                return qr.toDataURL('image/png');
+            }
             catch(e) { return ''; }
         }
 
@@ -7432,54 +7437,53 @@ window._b64d = function(s) {
 };
 
 window.generateDigitalInvoiceQR = function(inv) {
+    if(window.isFeatureEnabled && !window.isFeatureEnabled('digitalQROnInvoice')) return '';
     try {
         var s = (window.AppState&&window.AppState.settings)||{};
+
+        // Ultra-compact pack — shortest possible keys, no empty strings
         var pack = {
-            id:inv.id||'', date:inv.date||'', docType:inv.docType||'Tax Invoice',
-            currency:inv.currency||'INR', paymentMode:inv.paymentMode||'cash',
-            paymentStatus:inv.paymentStatus||'unpaid', notes:inv.notes||'',
-            discount:Number(inv.discountAmountCalculated||0),
-            grandTotal:Number(inv.grandTotal||0), totalTax:Number(inv.totalTax||0),
-            subtotal:Number(inv.subtotal||0),
-            client:{
-                name:(inv.client&&inv.client.name)||'',
-                mobile:(inv.client&&inv.client.mobile)||'',
-                gstin:(inv.client&&inv.client.gstin)||'',
-                address:(inv.client&&inv.client.address)||''
-            },
-            items:(inv.items||[]).map(function(x){
-                return {name:x.name||'',qty:Number(x.qty||1),rate:Number(x.rate||0),
-                    gst:Number(x.gst||0),hsn:x.hsn||'',batch:x.batch||'',expiry:x.expiry||''};
+            v:1,  // version
+            id:inv.id||'',
+            dt:inv.date||'',
+            tp:s.template||'modern',
+            pm:inv.paymentMode||'cash',
+            ps:inv.paymentStatus||'unpaid',
+            gt:Math.round(Number(inv.grandTotal||0)),
+            tx:Math.round(Number(inv.totalTax||0)),
+            // Client — only non-empty
+            cn:(inv.client&&inv.client.name)||'',
+            cm:(inv.client&&inv.client.mobile)||'',
+            // Items — array of arrays [name, qty, rate, gst]
+            it:(inv.items||[]).map(function(x){
+                var row=[x.name||'',Number(x.qty||1),Number(x.rate||0),Number(x.gst||0)];
+                if(x.hsn) row.push(x.hsn);
+                return row;
             }),
-            // All settings needed to render the template exactly
-            settings:{
-                businessName:s.businessName||'', address:s.address||'',
-                phone:s.phone||'', gstin:s.gstin||'', email:s.email||'',
-                template:s.template||'modern', logoDisplay:s.logoDisplay||'name',
-                bankName:s.bankName||'', bankAcc:s.bankAcc||'', bankIfsc:s.bankIfsc||'',
-                upi:s.upi||'', customTerms:s.customTerms||'',
-                // Embed logo/signature only if small enough
-                logo:(s.logo&&s.logo.length<6000)?s.logo:'',
-                signature:(s.signature&&s.signature.length<4000)?s.signature:''
-            }
+            // Business — only essentials for rendering
+            bn:s.businessName||'',
+            ba:s.address||'',
+            bp:s.phone||'',
+            bg:s.gstin||'',
+            bk:s.bankName||'',
+            bc:s.bankAcc||'',
+            bi:s.bankIfsc||''
         };
 
-        var encoded = window._b64e(JSON.stringify(pack));
+        // Remove empty strings to save space
+        Object.keys(pack).forEach(function(k){
+            if(pack[k]==='') delete pack[k];
+        });
+
+        var json = JSON.stringify(pack);
+        var encoded = window._b64e(json);
         var baseUrl = window.location.href.split('?')[0].split('#')[0];
         var url = baseUrl + '?inv=' + encoded;
 
-        // If too long, strip large fields progressively
-        if(url.length > 2800) {
-            pack.settings.logo=''; pack.settings.signature='';
-            pack.settings.customTerms=''; pack.notes='';
-            encoded = window._b64e(JSON.stringify(pack));
-            url = baseUrl + '?inv=' + encoded;
-        }
-        if(url.length > 2800) {
-            pack.items = pack.items.map(function(x){
-                return {name:x.name.slice(0,25),qty:x.qty,rate:x.rate,gst:x.gst,hsn:x.hsn};
-            });
-            pack.client.address='';
+        // Safety check — if still too long, trim item names
+        if(url.length > 2000) {
+            pack.it = (pack.it||[]).map(function(x){ return [x[0].slice(0,20),x[1],x[2],x[3]]; });
+            delete pack.bk; delete pack.bc; delete pack.bi; // drop bank details
             encoded = window._b64e(JSON.stringify(pack));
             url = baseUrl + '?inv=' + encoded;
         }
@@ -7523,27 +7527,55 @@ window.generateDigitalInvoiceQR = function(inv) {
     function renderQRInvoice(pack) {
         if(!pack) { showQRError(); return; }
 
-        // Reconstruct invoice object (exact shape generateInvoiceHTML expects)
+        // Handle both old format (pack.items as objects) and new compact format (arrays)
+        var items = (pack.it || pack.items || []).map(function(x){
+            if(Array.isArray(x)) {
+                // New compact format: [name, qty, rate, gst, hsn?]
+                return { name:x[0]||'', qty:Number(x[1]||1), rate:Number(x[2]||0), gst:Number(x[3]||0), hsn:x[4]||'' };
+            }
+            return x; // old object format
+        });
+
+        // Reconstruct invoice object
         var inv = {
-            id:pack.id, date:pack.date, docType:pack.docType||'Tax Invoice',
-            currency:pack.currency||'INR', paymentMode:pack.paymentMode,
-            paymentStatus:pack.paymentStatus, notes:pack.notes||'',
-            discountAmountCalculated:pack.discount||0,
-            grandTotal:pack.grandTotal, totalTax:pack.totalTax, subtotal:pack.subtotal,
-            client:pack.client,
-            items:pack.items||[],
-            status:'final'
+            id: pack.id||'',
+            date: pack.dt||pack.date||'',
+            docType: pack.docType||'Tax Invoice',
+            currency: pack.currency||'INR',
+            paymentMode: pack.pm||pack.paymentMode||'cash',
+            paymentStatus: pack.ps||pack.paymentStatus||'unpaid',
+            notes: pack.notes||'',
+            discountAmountCalculated: pack.discount||0,
+            grandTotal: pack.gt||pack.grandTotal||0,
+            totalTax: pack.tx||pack.totalTax||0,
+            subtotal: (pack.gt||0) - (pack.tx||0),
+            client: pack.client || { name:pack.cn||'', mobile:pack.cm||'' },
+            items: items,
+            status: 'final'
         };
 
-        // Build full settings object for rendering
-        var qrSettings = Object.assign({}, pack.settings||{}, {
-            // Ensure features object exists so isFeatureEnabled works
+        // Build settings from compact or full format
+        var rawS = pack.settings || {};
+        var qrSettings = {
+            businessName: pack.bn||rawS.businessName||'',
+            address:      pack.ba||rawS.address||'',
+            phone:        pack.bp||rawS.phone||'',
+            gstin:        pack.bg||rawS.gstin||'',
+            bankName:     pack.bk||rawS.bankName||'',
+            bankAcc:      pack.bc||rawS.bankAcc||'',
+            bankIfsc:     pack.bi||rawS.bankIfsc||'',
+            upi:          rawS.upi||'',
+            customTerms:  rawS.customTerms||'',
+            template:     pack.tp||rawS.template||'modern',
+            logoDisplay:  rawS.logoDisplay||'name',
+            logo:         rawS.logo||'',
+            signature:    rawS.signature||'',
             features: {
-                hsn: !!(pack.items && pack.items[0] && pack.items[0].hsn),
-                batch: !!(pack.items && pack.items.some(function(x){ return x.batch; })),
+                hsn: !!(items[0]&&items[0].hsn),
+                batch: items.some(function(x){ return x.batch; }),
                 stamp: false
             }
-        });
+        };
 
         // Fully set up AppState for template rendering
         if(!window.AppState) window.AppState = {};
@@ -8204,6 +8236,8 @@ window._startEmployeeSession = function(emp, bizUid) {
 
     if(window.renderNavigation) window.renderNavigation();
     window.applyEmployeeRestrictions();
+    // Wrap restricted functions ONCE
+    window._wrapRestrictedFunctions && window._wrapRestrictedFunctions();
 
     // ── STEP 5: Log activity ──────────────────────────────────
     setTimeout(function(){
@@ -8915,102 +8949,152 @@ window.switchAboutTab = function(tab) {
 // ─────────────────────────────────────────────────────────────────
 // 1. EMPLOYEE PERMISSION ENFORCEMENT ON UI ELEMENTS
 // ─────────────────────────────────────────────────────────────────
+// ─── EMPLOYEE PERMISSION ENFORCEMENT ────────────────────────────────────────
+// Functions wrapped ONCE at startup. UI elements hidden on every tab switch.
+// This is the single source of truth for employee restrictions.
+
+// Step 1: Wrap all restricted functions ONCE (called when employee logs in)
+window._wrapRestrictedFunctions = function() {
+    if(window._restrictedFnsWrapped) return;
+    window._restrictedFnsWrapped = true;
+    var deny = function(msg){ return function(){ if(window._isEmployeeSession){ window.showToast&&window.showToast('🔒 '+msg+' — permission required','error'); return; } var orig=window['_orig_'+msg.replace(/ /g,'_')]; if(orig) return orig.apply(this,arguments); }; };
+
+    // Store originals and wrap
+    var fns = [
+        ['exportCSV',           'inv_csv',          'CSV Export'],
+        ['bulkExportPDF',       'inv_bulk_pdf',      'Bulk PDF Export'],
+        ['downloadLocalBackup', 'backup_download',   'Backup Download'],
+        ['exportInventoryCSV',  'prod_export',       'Inventory Export'],
+        ['exportClientsCSV',    'client_export',     'Client Export'],
+        ['exportServicesCSV',   'svc_view',          'Service Export'],
+        ['exportToTally',       'tally_export',      'Tally Export'],
+        ['handleExcelImport',   'prod_import',       'Excel Import'],
+    ];
+    fns.forEach(function(f) {
+        var fnName=f[0], permKey=f[1], label=f[2];
+        var orig = window[fnName];
+        if(!orig) return;
+        window[fnName] = function() {
+            if(window._isEmployeeSession && !(window._employeePermissions&&window._employeePermissions[permKey])) {
+                window.showToast&&window.showToast('🔒 '+label+' — no permission','error');
+                return;
+            }
+            return orig.apply(this, arguments);
+        };
+        window[fnName]._permWrapped = true;
+    });
+
+    // Wrap saveInvoice for finalize + discount check
+    var origSave = window.saveInvoice;
+    if(origSave && !origSave._permWrapped) {
+        window.saveInvoice = async function(status) {
+            if(window._isEmployeeSession) {
+                var p = window._employeePermissions||{};
+                if(!p['inv_create'] && !p['inv_finalize']) {
+                    window.showToast&&window.showToast('🔒 Invoice permission required','error'); return;
+                }
+                if(status==='final' && !p['inv_finalize']) {
+                    window.showToast&&window.showToast('🔒 Finalize permission required','error'); return;
+                }
+                // Block discount if not allowed
+                var discVal = Number((document.getElementById('inv-discount')||{}).value||0);
+                if(discVal > 0 && !p['inv_discount']) {
+                    window.showToast&&window.showToast('🔒 Discount not allowed for your role','error');
+                    // Zero out discount
+                    if(window.AppState&&window.AppState.draft) { window.AppState.draft.discount=0; window.AppState.draft.discountAmountCalculated=0; }
+                    var discEl=document.getElementById('inv-discount'); if(discEl) discEl.value=0;
+                }
+            }
+            var invId = window.AppState&&window.AppState.draft&&window.AppState.draft.id;
+            var result = await origSave.apply(this, arguments);
+            if(status==='final' && invId) window._showInvoiceFinalizedBanner&&window._showInvoiceFinalizedBanner(invId);
+            return result;
+        };
+        window.saveInvoice._permWrapped = true;
+    }
+};
+
+// Step 2: Hide UI elements on current tab (called after every tab render)
 window._enforceEmployeeUI = function() {
     if(!window._isEmployeeSession) return;
     var p = window._employeePermissions || {};
 
-    // Map: permission key → array of element selectors to hide
-    var rules = [
-        // Discount fields
-        { perm:'inv_discount', selectors:['#inv-discount','#inv-discount-type','[data-discount-wrapper]'], hide: true },
-        // CSV export buttons (Records)
-        { perm:'inv_csv', selectors:['button[onclick*="exportCSV"]'], hide: true },
-        // Bulk PDF
-        { perm:'inv_bulk_pdf', selectors:['button[onclick*="bulkExportPDF"]'], hide: true },
-        // Inventory import/export
-        { perm:'prod_import', selectors:['button[onclick*="excel-import-input"]','#excel-import-input'], hide: true },
-        { perm:'prod_export', selectors:['button[onclick*="exportInventoryCSV"]'], hide: true },
-        // Client export
-        { perm:'client_export', selectors:['button[onclick*="exportClientsCSV"]'], hide: true },
-        // Backup download
-        { perm:'backup_download', selectors:['button[onclick*="downloadLocalBackup"]'], hide: true },
-        // Delete buttons
-        { perm:'inv_delete', selectors:['button[onclick*="softDeleteInvoice"]','button[title="Delete"]'], hide: true },
-        // Settings
-        { perm:'settings_edit', selectors:['button[onclick*="saveSettingsSection"]','button[onclick*="openSettingsModal"]'], hide: true },
-        // Tally export
-        { perm:'tally_export', selectors:['#tally-export-btn'], hide: true },
-        // Void invoice
-        { perm:'inv_void', selectors:['button[onclick*="voidInvoice"]'], hide: true },
-        // Add product
-        { perm:'prod_add', selectors:['button[onclick*="openProductDrawer(null"]'], hide: true },
-        // Add client
-        { perm:'client_add', selectors:['button[onclick*="openClientDrawer(null"]'], hide: true },
-    ];
+    // Map perm → CSS selector patterns to hide
+    var hideMap = {
+        'inv_csv':        ['button[onclick*="exportCSV"]'],
+        'inv_bulk_pdf':   ['button[onclick*="bulkExportPDF"]'],
+        'inv_delete':     ['button[onclick*="softDeleteInvoice"]','button[title="Delete"]'],
+        'inv_void':       ['button[onclick*="voidInvoice"]'],
+        'inv_discount':   [],  // handled separately below
+        'inv_credit':     ['#btn-mode-credit'],
+        'prod_import':    ['button[onclick*="excel-import-input"]'],
+        'prod_export':    ['button[onclick*="exportInventoryCSV"]'],
+        'prod_add':       ['button[onclick*="openProductDrawer(null)"]','button[onclick*="openProductDrawer(null,"]'],
+        'client_add':     ['button[onclick*="openClientDrawer(null"]'],
+        'client_export':  ['button[onclick*="exportClientsCSV"]'],
+        'backup_download':['button[onclick*="downloadLocalBackup"]'],
+        'tally_export':   ['#tally-export-btn','button[onclick*="exportToTally"]'],
+        'svc_add':        ['button[onclick*="openServiceDrawer(null"]'],
+        'svc_delete':     ['#svc-delete-btn'],
+        'settings_view':  [],  // tab already blocked
+        'report_view':    ['button[onclick*="openFinancialReports"]'],
+        'exp_add':        ['button[onclick*="addExpense"]','button[onclick*="openExpenseModal"]'],
+        'rec_export':     ['button[onclick*="exportCSV"]'],
+    };
 
-    rules.forEach(function(rule) {
-        if(!p[rule.perm]) {
-            rule.selectors.forEach(function(sel) {
+    Object.keys(hideMap).forEach(function(perm) {
+        if(!p[perm]) {
+            hideMap[perm].forEach(function(sel) {
                 document.querySelectorAll(sel).forEach(function(el) {
-                    el.style.display = 'none';
-                    el.setAttribute('data-emp-hidden','1');
+                    el.style.display='none';
                 });
             });
         }
     });
 
-    // Disable discount inputs (not just hide)
+    // Discount field — disable+grey if no permission
+    var discEl = document.getElementById('inv-discount');
+    var discType = document.getElementById('inv-discount-type');
     if(!p['inv_discount']) {
-        var disc = document.getElementById('inv-discount');
-        if(disc) { disc.disabled = true; disc.title = 'Permission required'; disc.style.opacity='0.4'; }
-        var discType = document.getElementById('inv-discount-type');
-        if(discType) { discType.disabled = true; discType.style.opacity='0.4'; }
+        if(discEl) { discEl.disabled=true; discEl.style.opacity='0.3'; discEl.style.pointerEvents='none'; discEl.title='No permission'; }
+        if(discType) { discType.disabled=true; discType.style.opacity='0.3'; discType.style.pointerEvents='none'; }
     }
 
-    // Override functions that require permission
-    var origExportCSV = window.exportCSV;
-    window.exportCSV = function() {
-        if(window._isEmployeeSession && !p['inv_csv']) { window.showToast && window.showToast('🔒 CSV export permission required','error'); return; }
-        if(origExportCSV) origExportCSV.apply(this, arguments);
-    };
-    var origBulkPDF = window.bulkExportPDF;
-    window.bulkExportPDF = function() {
-        if(window._isEmployeeSession && !p['inv_bulk_pdf']) { window.showToast && window.showToast('🔒 Bulk PDF permission required','error'); return; }
-        if(origBulkPDF) origBulkPDF.apply(this, arguments);
-    };
-    var origDownloadBackup = window.downloadLocalBackup;
-    window.downloadLocalBackup = function() {
-        if(window._isEmployeeSession && !p['backup_download']) { window.showToast && window.showToast('🔒 Backup download permission required','error'); return; }
-        if(origDownloadBackup) origDownloadBackup.apply(this, arguments);
-    };
-    var origExportInventory = window.exportInventoryCSV;
-    window.exportInventoryCSV = function() {
-        if(window._isEmployeeSession && !p['prod_export']) { window.showToast && window.showToast('🔒 Export permission required','error'); return; }
-        if(origExportInventory) origExportInventory.apply(this, arguments);
-    };
-    var origExportClients = window.exportClientsCSV;
-    window.exportClientsCSV = function() {
-        if(window._isEmployeeSession && !p['client_export']) { window.showToast && window.showToast('🔒 Export permission required','error'); return; }
-        if(origExportClients) origExportClients.apply(this, arguments);
-    };
+    // Delete buttons in records table (rendered dynamically)
+    if(!p['inv_delete']) {
+        document.querySelectorAll('[onclick*="softDeleteInvoice"]').forEach(function(el){ el.style.display='none'; });
+    }
+    if(!p['inv_void']) {
+        document.querySelectorAll('[onclick*="voidInvoice"]').forEach(function(el){ el.style.display='none'; });
+    }
+    if(!p['prod_add']) {
+        document.querySelectorAll('[onclick*="openProductDrawer"]').forEach(function(el){
+            if(el.textContent.includes('Add') || el.getAttribute('onclick').includes('null')) el.style.display='none';
+        });
+    }
+    if(!p['client_add']) {
+        document.querySelectorAll('[onclick*="openClientDrawer"]').forEach(function(el){
+            if(el.getAttribute('onclick').includes('null')) el.style.display='none';
+        });
+    }
 };
 
-// Re-apply after every tab switch
+// Step 3: Hook into master switchTab — enforce after EVERY tab render
+// The master switchTab is already defined — we add enforcement via renderNavigation hook
 (function(){
-    var origSwitch = window.switchTab;
-    var empEnforceInterval = setInterval(function(){
-        if(window.switchTab && !window.switchTab._empUIEnforce) {
-            window.switchTab._empUIEnforce = true;
-            clearInterval(empEnforceInterval);
-            var orig = window.switchTab;
-            window.switchTab = function(tabId) {
-                orig(tabId);
-                if(window._isEmployeeSession) {
-                    setTimeout(window._enforceEmployeeUI, 150);
-                }
-            };
-        }
-    }, 300);
+    var checkInterval = setInterval(function(){
+        if(!window.renderNavigation || window.renderNavigation._empEnforceHooked) return;
+        clearInterval(checkInterval);
+        window.renderNavigation._empEnforceHooked = true;
+        var origRN = window.renderNavigation;
+        window.renderNavigation = function() {
+            origRN.apply(this, arguments);
+            if(window._isEmployeeSession) {
+                setTimeout(window._enforceEmployeeUI, 100);
+                setTimeout(window._enforceEmployeeUI, 500); // catch dynamic content
+            }
+        };
+    }, 200);
 })();
 
 
@@ -9347,29 +9431,41 @@ window.switchToAccount = function(email, type, bizUidOrUid) {
         var emps = []; try { emps = JSON.parse(localStorage.getItem('ayur_employees_'+bizUidOrUid)||'[]'); } catch(e){}
         var emp = emps.find(function(e){ return e.email===email && e.active!==false; });
         if(!emp) { window.showToast && window.showToast('Employee account not found','error'); return; }
-        // Sign out owner first if signed in
-        if(window._auth && window._auth.currentUser && !window._isEmployeeSession) {
-            if(window.clearFirestoreListeners) window.clearFirestoreListeners();
+        if(window.clearFirestoreListeners) window.clearFirestoreListeners();
+        if(window._auth && window._auth.currentUser) {
+            // Sign out Firebase first, then start employee session
+            var signOutFn = window._auth.signOut ? window._auth.signOut.bind(window._auth) : null;
+            var doStart = function() {
+                var session = {empId:emp.id, bizUid:bizUidOrUid, email:email, loginAt:new Date().toISOString()};
+                localStorage.setItem('ayur_emp_session', JSON.stringify(session));
+                window._startEmployeeSession(emp, bizUidOrUid);
+            };
+            if(signOutFn) signOutFn().then(doStart).catch(doStart);
+            else doStart();
+        } else {
+            var session = {empId:emp.id, bizUid:bizUidOrUid, email:email, loginAt:new Date().toISOString()};
+            localStorage.setItem('ayur_emp_session', JSON.stringify(session));
+            window._startEmployeeSession(emp, bizUidOrUid);
         }
-        var session = {empId:emp.id, bizUid:bizUidOrUid, email:email, loginAt:new Date().toISOString()};
-        localStorage.setItem('ayur_emp_session', JSON.stringify(session));
-        window._startEmployeeSession(emp, bizUidOrUid);
     } else {
-        // Owner account — need to sign into Firebase
-        var list = window.getSavedAccounts();
-        var acc = list.find(function(a){ return a.email===email && a.type==='owner'; });
-        if(!acc) { window.showToast && window.showToast('Account not found — re-add it','error'); return; }
-        // Prompt for password to re-authenticate
-        var pw = prompt('Enter password for '+email+':');
+        // Owner account — sign into Firebase
+        var pw = prompt('Enter password for ' + email + ':');
         if(!pw) return;
-        if(window._signInForPinReset) {
-            window._signInForPinReset(email, pw).then(function(cred) {
-                window.showToast && window.showToast('Switched to '+email+' ✅');
-                // onAuthStateChanged will handle the rest
-            }).catch(function(e) {
-                window.showToast && window.showToast('Login failed: '+e.message,'error');
-            });
-        }
+        if(!window._signInForPinReset) { window.showToast && window.showToast('Auth not ready, reload page','error'); return; }
+        window.showToast && window.showToast('Signing in...', 'info');
+        window._signInForPinReset(email, pw).then(function(cred) {
+            // Clear employee session if any
+            localStorage.removeItem('ayur_emp_session');
+            window._isEmployeeSession = false;
+            window._employeeData = null;
+            window._employeePermissions = {};
+            var banner = document.getElementById('employee-banner');
+            if(banner) banner.remove();
+            // onAuthStateChanged will fire and set up the app properly
+            window.showToast && window.showToast('Switched to ' + email + ' ✅');
+        }).catch(function(e) {
+            window.showToast && window.showToast('Wrong password: ' + e.message, 'error');
+        });
     }
 };
 
