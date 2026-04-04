@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>My Business ERP</title>
 <meta name="theme-color" content="#059669">
 <meta name="mobile-web-app-capable" content="yes">
@@ -357,9 +357,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
             </div>
           </form>
           <div class="border-t border-white/10 mt-4 pt-4 flex items-center justify-between">
-            <span class="text-slate-400 text-sm">New here?</span>
+        <span class="text-slate-400 text-sm">New here?</span>
             <button onclick="showSignup()" class="text-emerald-400 font-bold text-sm hover:text-emerald-300">Create account →</button>
-          </div>
+         
+
+</div>
           <div class="text-center mt-3">
             <button onclick="document.getElementById('privacy-modal').classList.add('open')" class="text-slate-500 text-xs hover:text-slate-400 underline">Privacy Policy</button>
           </div>
@@ -391,30 +393,148 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
           </form>
         </div>
 
-        <!-- Signup Form — shown separately, hides login -->
-        <form id="signup-form" onsubmit="handleSignup(event)" class="space-y-3 hidden">
-          <div><label class="lbl text-slate-300">Business Name</label>
-            <input type="text" id="signup-biz-name" class="inp bg-white/5 border-white/10 text-white" placeholder="My Business"></div>
-          <div><label class="lbl text-slate-300">Email</label>
-            <input type="email" id="signup-email" required class="inp bg-white/5 border-white/10 text-white" autocomplete="email"></div>
-          <div><label class="lbl text-slate-300">Password</label>
-            <input type="password" id="signup-password" required class="inp bg-white/5 border-white/10 text-white" autocomplete="new-password"></div>
-          <div>
-            <label class="lbl text-slate-300">Logo <span class="text-slate-500 font-normal normal-case">(optional)</span></label>
-            <div class="flex items-center gap-3">
-              <div class="w-11 h-11 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center overflow-hidden" id="signup-logo-preview"><i data-lucide="image" class="text-slate-400 w-4 h-4"></i></div>
-              <input type="file" accept="image/*" onchange="window.handleSignupUpload(event,'logo')" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500/20 file:text-emerald-400">
-            </div></div>
-          <div>
-            <label class="lbl text-slate-300">Signature <span class="text-slate-500 font-normal normal-case">(optional)</span></label>
-            <div class="flex items-center gap-3">
-              <div class="w-16 h-9 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center overflow-hidden" id="signup-sig-preview"><i data-lucide="pen-tool" class="text-slate-400 w-4 h-4"></i></div>
-              <input type="file" accept="image/*" onchange="window.handleSignupUpload(event,'signature')" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500/20 file:text-emerald-400">
-            </div></div>
-          <button type="submit" class="btn btn-primary w-full justify-center py-3 font-bold">Create Account</button>
-          <p class="text-center text-slate-400 text-xs mt-1">By creating an account you agree to our <button type="button" onclick="document.getElementById('privacy-modal').classList.add('open')" class="text-emerald-400 font-semibold underline">Privacy Policy</button></p>
-          <div class="border-t border-white/10 mt-3 pt-3 text-center">
-            <button type="button" onclick="showLogin()" class="text-emerald-400 font-bold text-sm">← Back to Sign In</button>
+        <!-- Advanced Multi-Step Signup Form -->
+        <form id="signup-form" onsubmit="return false;" class="hidden">
+          <!-- Step Indicator -->
+          <div class="flex items-center gap-1 mb-4" id="signup-step-indicator">
+            <div class="flex-1 h-1 rounded-full bg-emerald-500 transition-all" id="si-1"></div>
+            <div class="flex-1 h-1 rounded-full bg-white/15 transition-all" id="si-2"></div>
+            <div class="flex-1 h-1 rounded-full bg-white/15 transition-all" id="si-3"></div>
+          </div>
+          <div class="text-[10px] text-slate-400 uppercase tracking-wider mb-3 font-bold" id="signup-step-label">Step 1 of 3 — Account Setup</div>
+
+          <!-- ── STEP 1: Account Basics ── -->
+          <div id="signup-step-1" class="space-y-3">
+            <div><label class="lbl text-slate-300">Business Name *</label>
+              <input type="text" id="signup-biz-name" class="inp bg-white/5 border-white/10 text-white" placeholder="e.g. Dev Ayurveda"></div>
+            <div><label class="lbl text-slate-300">Email *</label>
+              <input type="email" id="signup-email" class="inp bg-white/5 border-white/10 text-white" autocomplete="email" placeholder="you@example.com"></div>
+            <div><label class="lbl text-slate-300">Password *</label>
+              <div class="relative">
+                <input type="password" id="signup-password" class="inp bg-white/5 border-white/10 text-white pr-11" autocomplete="new-password" placeholder="Min. 6 characters">
+                <button type="button" class="eye-btn absolute right-3 top-1/2 -translate-y-1/2" onclick="toggleEye('signup-password',this)"><i data-lucide="eye" class="w-4 h-4"></i></button>
+              </div></div>
+            <div>
+              <label class="lbl text-slate-300">GSTIN <span class="text-slate-500 font-normal normal-case">(optional)</span></label>
+              <input type="text" id="signup-gstin" class="inp bg-white/5 border-white/10 text-white" placeholder="22AAAAA0000A1Z5" maxlength="15">
+            </div>
+            <div>
+              <label class="lbl text-slate-300">Phone</label>
+              <input type="tel" id="signup-phone" class="inp bg-white/5 border-white/10 text-white" placeholder="+91 98765 43210">
+            </div>
+            <button type="button" onclick="signupNextStep(1)" class="btn btn-primary w-full justify-center py-3 font-bold">Next: Business Profile →</button>
+            <div class="border-t border-white/10 mt-2 pt-3 text-center">
+ <p class="text-center text-slate-400 text-sm mt-4">
+    Have account?&nbsp;<button type="button" onclick="window.showLogin()" class="text-emerald-400 font-semibold hover:text-emerald-300">Sign in</button>
+</p>
+
+ </div>
+          </div>
+
+          <!-- ── STEP 2: Business Profile ── -->
+          <div id="signup-step-2" class="space-y-3 hidden">
+            <div><label class="lbl text-slate-300">Business Type *</label>
+              <div class="grid grid-cols-2 gap-2" id="biz-type-grid">
+                <button type="button" onclick="selectBizType(this,'ayurveda')" data-btype="ayurveda" class="btype-btn p-2.5 rounded-xl border border-white/15 bg-white/5 text-left hover:border-emerald-400 transition-all">
+                  <div class="text-base">🌿</div><div class="text-xs font-bold text-white mt-0.5">Ayurveda / Wellness</div>
+                </button>
+                <button type="button" onclick="selectBizType(this,'clinic')" data-btype="clinic" class="btype-btn p-2.5 rounded-xl border border-white/15 bg-white/5 text-left hover:border-emerald-400 transition-all">
+                  <div class="text-base">🏥</div><div class="text-xs font-bold text-white mt-0.5">Clinic / Hospital</div>
+                </button>
+                <button type="button" onclick="selectBizType(this,'retail')" data-btype="retail" class="btype-btn p-2.5 rounded-xl border border-white/15 bg-white/5 text-left hover:border-emerald-400 transition-all">
+                  <div class="text-base">🛒</div><div class="text-xs font-bold text-white mt-0.5">Retail Shop</div>
+                </button>
+                <button type="button" onclick="selectBizType(this,'service')" data-btype="service" class="btype-btn p-2.5 rounded-xl border border-white/15 bg-white/5 text-left hover:border-emerald-400 transition-all">
+                  <div class="text-base">⚙️</div><div class="text-xs font-bold text-white mt-0.5">Service Business</div>
+                </button>
+                <button type="button" onclick="selectBizType(this,'salon')" data-btype="salon" class="btype-btn p-2.5 rounded-xl border border-white/15 bg-white/5 text-left hover:border-emerald-400 transition-all">
+                  <div class="text-base">💇</div><div class="text-xs font-bold text-white mt-0.5">Salon / Beauty</div>
+                </button>
+                <button type="button" onclick="selectBizType(this,'other')" data-btype="other" class="btype-btn p-2.5 rounded-xl border border-white/15 bg-white/5 text-left hover:border-emerald-400 transition-all">
+                  <div class="text-base">🏢</div><div class="text-xs font-bold text-white mt-0.5">Other Business</div>
+                </button>
+              </div>
+              <input type="hidden" id="signup-biz-type" value="">
+            </div>
+            <div><label class="lbl text-slate-300">Monthly Revenue Range</label>
+              <select id="signup-revenue" class="inp bg-white/10 border-white/15 text-white">
+                <option value="" class="bg-slate-800">Select range...</option>
+                <option value="under1L" class="bg-slate-800">Under ₹1 Lakh / month</option>
+                <option value="1-5L" class="bg-slate-800">₹1–5 Lakh / month</option>
+                <option value="5-20L" class="bg-slate-800">₹5–20 Lakh / month</option>
+                <option value="above20L" class="bg-slate-800">Above ₹20 Lakh / month</option>
+              </select>
+            </div>
+            <div><label class="lbl text-slate-300">Number of Employees</label>
+              <select id="signup-emp-count" class="inp bg-white/10 border-white/15 text-white">
+                <option value="solo" class="bg-slate-800">Solo / Just me</option>
+                <option value="2-5" class="bg-slate-800">2–5 employees</option>
+                <option value="6-15" class="bg-slate-800">6–15 employees</option>
+                <option value="15+" class="bg-slate-800">15+ employees</option>
+              </select>
+            </div>
+            <div><label class="lbl text-slate-300">City / Location</label>
+              <input type="text" id="signup-city" class="inp bg-white/5 border-white/10 text-white" placeholder="e.g. New Delhi">
+            </div>
+            <div class="flex gap-2">
+              <button type="button" onclick="signupPrevStep(2)" class="btn btn-ghost flex-1 justify-center py-2.5 text-slate-300">← Back</button>
+              <button type="button" onclick="signupNextStep(2)" class="btn btn-primary flex-1 justify-center py-2.5 font-bold">Next: Features →</button>
+            </div>
+          </div>
+
+          <!-- ── STEP 3: Features & Assets ── -->
+          <div id="signup-step-3" class="space-y-3 hidden">
+            <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+              <div class="text-xs font-bold text-emerald-300 mb-1">✨ Auto-configuring for your business type</div>
+              <div class="text-[11px] text-emerald-400/80" id="signup-config-hint">Select a business type in Step 2 to see personalized features.</div>
+            </div>
+            <div>
+              <label class="lbl text-slate-300">Which features do you need? (select all that apply)</label>
+              <div class="space-y-2 mt-1" id="signup-feature-list">
+                <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-white/5 border border-white/10 cursor-pointer hover:border-emerald-400 transition-all">
+                  <input type="checkbox" id="sf-gst" checked class="w-4 h-4 rounded accent-emerald-500">
+                  <div><div class="text-sm font-semibold text-white">📄 GST Invoicing</div><div class="text-[10px] text-slate-400">Generate tax invoices with GST breakdown</div></div>
+                </label>
+                <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-white/5 border border-white/10 cursor-pointer hover:border-emerald-400 transition-all">
+                  <input type="checkbox" id="sf-inventory" class="w-4 h-4 rounded accent-emerald-500">
+                  <div><div class="text-sm font-semibold text-white">📦 Inventory / Products</div><div class="text-[10px] text-slate-400">Track stock, batches, expiry, reorder alerts</div></div>
+                </label>
+                <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-white/5 border border-white/10 cursor-pointer hover:border-emerald-400 transition-all">
+                  <input type="checkbox" id="sf-services" class="w-4 h-4 rounded accent-emerald-500">
+                  <div><div class="text-sm font-semibold text-white">✨ Services Catalog</div><div class="text-[10px] text-slate-400">Manage service offerings with SAC codes</div></div>
+                </label>
+                <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-white/5 border border-white/10 cursor-pointer hover:border-emerald-400 transition-all">
+                  <input type="checkbox" id="sf-crm" checked class="w-4 h-4 rounded accent-emerald-500">
+                  <div><div class="text-sm font-semibold text-white">👥 Client CRM</div><div class="text-[10px] text-slate-400">Client ledger, journal, reminders</div></div>
+                </label>
+                <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-white/5 border border-white/10 cursor-pointer hover:border-emerald-400 transition-all">
+                  <input type="checkbox" id="sf-expenses" class="w-4 h-4 rounded accent-emerald-500">
+                  <div><div class="text-sm font-semibold text-white">💰 Expense Tracking</div><div class="text-[10px] text-slate-400">Track all business expenses & ITC</div></div>
+                </label>
+                <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-white/5 border border-white/10 cursor-pointer hover:border-emerald-400 transition-all">
+                  <input type="checkbox" id="sf-employees" class="w-4 h-4 rounded accent-emerald-500">
+                  <div><div class="text-sm font-semibold text-white">👤 Employee Management</div><div class="text-[10px] text-slate-400">Staff logins, permissions, activity log</div></div>
+                </label>
+                <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-white/5 border border-white/10 cursor-pointer hover:border-emerald-400 transition-all">
+                  <input type="checkbox" id="sf-aiReport" class="w-4 h-4 rounded accent-emerald-500">
+                  <div><div class="text-sm font-semibold text-white">🤖 AI Business Reports</div><div class="text-[10px] text-slate-400">Weekly/monthly intelligence reports</div></div>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label class="lbl text-slate-300">Business Logo <span class="text-slate-500 font-normal normal-case">(optional)</span></label>
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center overflow-hidden" id="signup-logo-preview"><i data-lucide="image" class="text-slate-400 w-4 h-4"></i></div>
+                <input type="file" accept="image/*" onchange="window.handleSignupUpload(event,'logo')" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500/20 file:text-emerald-400">
+              </div>
+            </div>
+            <p class="text-center text-slate-400 text-xs">By creating an account you agree to our <button type="button" onclick="document.getElementById('privacy-modal').classList.add('open')" class="text-emerald-400 font-semibold underline">Privacy Policy</button></p>
+            <div class="flex gap-2">
+              <button type="button" onclick="signupPrevStep(3)" class="btn btn-ghost flex-1 justify-center py-2.5 text-slate-300">← Back</button>
+              <button type="button" onclick="handleAdvancedSignup()" id="signup-submit-btn" class="btn btn-primary flex-1 justify-center py-3 font-bold">
+                <i data-lucide="rocket" class="w-4 h-4"></i> Launch My ERP!
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -499,7 +619,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
       <div><h4 class="font-bold text-slate-800 mb-1">7. Your Rights</h4>
       <p>You may delete your account and all associated data at any time by contacting support or deleting your Firebase project. You have full ownership of your business data.</p></div>
       <div><h4 class="font-bold text-slate-800 mb-1">8. Contact</h4>
-      <p>For privacy concerns, contact: <span class="font-semibold text-emerald-700">support@devayurveda.in</span></p></div>
+      <p>For privacy concerns, contact: <span class="font-semibold text-emerald-700"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1d6e686d6d726f695d79786b7c64686f6b78797c337473">[email&#160;protected]</a></span></p></div>
     </div>
     <div class="modal-foot">
       <button onclick="document.getElementById('privacy-modal').classList.remove('open')" class="btn btn-primary w-full justify-center">I Understand & Agree</button>
@@ -728,6 +848,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
           <span class="live-dot"></span>
           <span class="text-[11px] font-semibold text-emerald-700">Live</span>
         </div>
+<button onclick="window.exportGSTR1JSON()" class="btn btn-ghost btn-sm text-purple-700 bg-purple-50 border-purple-200">
+    <i data-lucide="file-json" class="w-3.5 h-3.5"></i> GSTR-1 JSON
+</button>
+
         <button onclick="window.openTrashModal&&openTrashModal()" class="btn btn-icon btn-ghost relative" title="Recycle Bin">
           <i data-lucide="trash-2" class="w-4 h-4 text-slate-400"></i>
         </button>
@@ -1420,23 +1544,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
         <p class="text-slate-500 text-sm mt-0.5">Prepare your GSTR-1, GSTR-3B returns and manage ITC</p>
       </div>
       <div class="flex gap-2 flex-wrap">
-        <select id="gst-period-select" class="inp py-2 text-sm bg-white border-slate-200" onchange="window.renderGSTModule()">
+        <select id="gst-period-select" class="inp py-2 text-sm bg-white border-slate-200 min-w-[130px]" onchange="window.renderGSTModule()">
         </select>
-        <button onclick="window.exportGSTJSON()" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-3.5 h-3.5"></i> Export JSON</button>
+        <button onclick="window.exportGSTJSON()" class="btn btn-ghost btn-sm"><i data-lucide="download" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Export JSON</span><span class="sm:hidden">JSON</span></button>
+        <button onclick="window.exportGSTReportPDF && window.exportGSTReportPDF()" class="btn btn-primary btn-sm"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">GST Report PDF</span><span class="sm:hidden">PDF</span></button>
       </div>
     </div>
 
     <!-- Tax Calendar Alert -->
     <div id="gst-calendar-alert" class="card p-4 bg-amber-50 border border-amber-200"></div>
 
-    <!-- Sub-tabs -->
-    <div class="flex gap-1 bg-slate-100 rounded-2xl p-1 overflow-x-auto" id="gst-tabs">
-      <button onclick="window.switchGSTTab('dashboard')" id="gsttab-dashboard" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold bg-white text-slate-800 shadow">📊 Tax Dashboard</button>
+    <!-- Sub-tabs — scrollable on mobile -->
+    <div class="flex gap-1 bg-slate-100 rounded-2xl p-1 overflow-x-auto no-scroll" id="gst-tabs" style="-webkit-overflow-scrolling:touch">
+      <button onclick="window.switchGSTTab('dashboard')" id="gsttab-dashboard" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold bg-white text-slate-800 shadow">📊 Dashboard</button>
       <button onclick="window.switchGSTTab('gstr1')" id="gsttab-gstr1" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-white/50">📤 GSTR-1</button>
       <button onclick="window.switchGSTTab('gstr3b')" id="gsttab-gstr3b" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-white/50">📋 GSTR-3B</button>
-      <button onclick="window.switchGSTTab('itc')" id="gsttab-itc" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-white/50">🧾 ITC Tracker</button>
-      <button onclick="window.switchGSTTab('calculator')" id="gsttab-calculator" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-white/50">🧮 Tax Calculator</button>
-      <button onclick="window.switchGSTTab('calendar')" id="gsttab-calendar" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-white/50">📅 Tax Calendar</button>
+      <button onclick="window.switchGSTTab('itc')" id="gsttab-itc" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-white/50">🧾 ITC</button>
+      <button onclick="window.switchGSTTab('calculator')" id="gsttab-calculator" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-white/50">🧮 Calculator</button>
+      <button onclick="window.switchGSTTab('calendar')" id="gsttab-calendar" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-white/50">📅 Calendar</button>
     </div>
 
     <!-- GST Content Area -->
@@ -1882,8 +2007,17 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
         <button onclick="closeInvModal()" class="btn btn-icon btn-ghost"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
     </div>
-    <div class="modal-body bg-slate-200 p-2 overflow-x-auto" id="inv-modal-body">
-      <div id="invoice-render-area" class="bg-white shadow-xl text-slate-800 leading-relaxed" style="width:210mm;min-height:297mm;padding:8mm 10mm;font-size:11px;margin:0 auto;"></div>
+    <!-- Zoom Toolbar -->
+    <div class="flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 border-b border-slate-200 flex-shrink-0">
+      <button id="inv-zoom-out" onclick="invZoomOut()" class="btn btn-ghost btn-sm btn-icon" title="Zoom Out"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
+      <span id="inv-zoom-label" class="text-xs font-bold text-slate-600 min-w-[42px] text-center">100%</span>
+      <button id="inv-zoom-in" onclick="invZoomIn()" class="btn btn-ghost btn-sm btn-icon" title="Zoom In"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
+      <button id="inv-zoom-reset" onclick="invZoomReset()" class="btn btn-ghost btn-sm text-xs ml-2">Reset</button>
+      <span class="text-slate-300 mx-1">|</span>
+      <span class="text-[10px] text-slate-400">Pinch to zoom on mobile</span>
+    </div>
+    <div class="modal-body bg-slate-200 p-2" id="inv-modal-body" style="overflow:auto;-webkit-overflow-scrolling:touch">
+      <div id="invoice-render-area" class="bg-white shadow-xl text-slate-800 leading-relaxed" style="width:794px;min-height:1123px;padding:30px 40px;font-size:11px;margin:0 auto;transform-origin:top center;"></div>
     </div>
   </div>
 </div>
@@ -2095,7 +2229,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
 <!-- ============================================================
   UI JAVASCRIPT — Clean, no conflicts
 ============================================================ -->
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── HELPERS ──
 function toggleEye(inputId, btn) {
     var inp = document.getElementById(inputId);
@@ -2108,13 +2242,19 @@ function toggleEye(inputId, btn) {
 
 function showLogin() {
     var ownerSec = document.getElementById('owner-login-section');
+    var empSec = document.getElementById('employee-login-section');
     var signupForm = document.getElementById('signup-form');
+    var signupSteps = document.getElementById('signup-steps-form');
     var toggle = document.getElementById('auth-mode-toggle');
     if(ownerSec) ownerSec.classList.remove('hidden');
+    if(empSec) empSec.classList.add('hidden');
     if(signupForm) signupForm.classList.add('hidden');
+    if(signupSteps) signupSteps.classList.add('hidden');
     if(toggle) toggle.classList.remove('hidden');
-    document.getElementById('auth-title').textContent = 'Welcome Back';
-    document.getElementById('auth-subtitle').textContent = 'Sign in to your ERP';
+    var titleEl = document.getElementById('auth-title');
+    var subEl = document.getElementById('auth-subtitle');
+    if(titleEl) titleEl.textContent = 'Welcome Back';
+    if(subEl) subEl.textContent = 'Sign in to your ERP';
     window.setAuthMode && window.setAuthMode('owner');
 }
 function showSignup() {
@@ -2253,77 +2393,121 @@ window.viewInvoice = function(id) {
     if(sub) sub.textContent = inv.id;
     document.getElementById('invoice-modal').classList.add('open');
     if(typeof lucide !== 'undefined') lucide.createIcons();
+    _invZoomLevel = 1; // Reset zoom on open
     setTimeout(scaleInv, 80);
 };
 window.closeInvoiceModal = closeInvModal;
 
-// Scale invoice PDF for mobile
+// Scale invoice PDF for mobile — stable, zoom-aware
+var _invZoomLevel = 1;
+var _invBaseScale = 1;
 function scaleInv() {
     var area = document.getElementById('invoice-render-area');
     var body = document.getElementById('inv-modal-body');
     if(!area || !body) return;
-    var w = body.clientWidth - 16;
+    var w = body.clientWidth - 24;
     var A4 = 794;
     if(w > 0 && w < A4) {
-        var scale = w / A4;
-        area.style.transform = 'scale(' + scale + ')';
-        area.style.marginBottom = '-' + Math.round(A4*(1-scale)) + 'px';
+        _invBaseScale = w / A4;
     } else {
-        area.style.transform = '';
-        area.style.marginBottom = '';
+        _invBaseScale = 1;
     }
+    applyInvZoom();
 }
+function applyInvZoom() {
+    var area = document.getElementById('invoice-render-area');
+    var body = document.getElementById('inv-modal-body');
+    if(!area) return;
+    var A4 = 794;
+    var finalScale = _invBaseScale * _invZoomLevel;
+    area.style.transformOrigin = 'top center';
+    area.style.transform = 'scale(' + finalScale + ')';
+    var scaledHeight = area.scrollHeight * finalScale;
+    var naturalHeight = area.scrollHeight;
+    var visibleHeight = naturalHeight * finalScale;
+    area.style.marginBottom = '-' + Math.max(0, Math.round(naturalHeight*(1-finalScale))) + 'px';
+    // Update zoom buttons
+    var zoomIn = document.getElementById('inv-zoom-in');
+    var zoomOut = document.getElementById('inv-zoom-out');
+    var zoomReset = document.getElementById('inv-zoom-reset');
+    var zoomLabel = document.getElementById('inv-zoom-label');
+    if(zoomOut) zoomOut.disabled = (_invZoomLevel <= 0.5);
+    if(zoomIn) zoomIn.disabled = (_invZoomLevel >= 3);
+    if(zoomLabel) zoomLabel.textContent = Math.round(_invZoomLevel * 100) + '%';
+}
+function invZoomIn() { _invZoomLevel = Math.min(3, _invZoomLevel + 0.25); applyInvZoom(); }
+function invZoomOut() { _invZoomLevel = Math.max(0.5, _invZoomLevel - 0.25); applyInvZoom(); }
+function invZoomReset() { _invZoomLevel = 1; applyInvZoom(); }
 window.addEventListener('resize', scaleInv);
 
-// ── WHATSAPP SHARE ──
+// ── WHATSAPP SHARE — Fixed: generates PDF from fresh full-size clone, not scaled view element
 async function shareInvoiceWA() {
     var id = window._curInvId || window._currentViewInvoiceId;
-    if(!id) return;
-    var inv = window.AppState && window.AppState.invoices.find(function(i){ return i.id===id; });
+    if(!id) { window.showToast && window.showToast('Open an invoice first', 'error'); return; }
+    var inv = window.AppState && window.AppState.invoices.find(function(i){ return i.id === id; });
     if(!inv) return;
-    var biz = (window.AppState.settings && window.AppState.settings.businessName) || 'My Business ';
-    var fmt = window.formatCurrency || function(a){ return '₹'+Number(a).toFixed(2); };
+
+    var biz = (window.AppState.settings && window.AppState.settings.businessName) || 'My Business';
+    var fmt = window.formatCurrency || function(a){ return '₹' + Number(a).toFixed(2); };
     var msg = '🌿 *' + biz + '*'
         + '\n\nHello ' + inv.client.name + ','
-        + '\n\nYour *' + (inv.docType||'Invoice') + '* is ready.'
-        + '\n\n📋 *' + inv.id + '*'
+        + '\n\n📋 Invoice: *' + inv.id + '*'
         + '\n📅 Date: ' + inv.date
         + '\n💰 Amount: *' + fmt(inv.grandTotal, inv.currency) + '*'
-        + '\n' + (inv.paymentStatus==='paid' ? '✅ Paid' : '⏳ Payment Pending')
-        + '\n\nThank you! 🙏';
+        + '\n' + (inv.paymentStatus === 'paid' ? '✅ Paid' : '⏳ Payment Pending')
+        + '\n\nThank you! 🙏'
+        + (window._waDigitalLinkOverride || '');
 
-    var mobile = inv.client && inv.client.mobile ? inv.client.mobile.replace(/\D/g,'') : '';
+    var mobile = inv.client && inv.client.mobile ? inv.client.mobile.replace(/\D/g, '') : '';
     var num = mobile.length === 10 ? '91' + mobile : mobile;
-    var waUrl = 'https://wa.me/' + (num||'') + '?text=' + encodeURIComponent(msg);
-    var area = document.getElementById('invoice-render-area');
 
-    // Try native share with PDF
-    if(area && typeof html2pdf !== 'undefined' && navigator.share && navigator.canShare) {
-        try {
-            window.showToast && window.showToast('Generating PDF...');
-            var blob = await html2pdf().set({
-                margin:0, filename:id+'.pdf',
-                image:{type:'jpeg',quality:0.9},
-                html2canvas:{scale:2,useCORS:true,logging:false},
-                jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-            }).from(area).output('blob');
-            var file = new File([blob], id+'.pdf', {type:'application/pdf'});
-            if(navigator.canShare({files:[file]})) {
-                await navigator.share({files:[file], text:msg});
-                window.showToast && window.showToast('Shared! ✅');
-                return;
-            }
-        } catch(e) {
-            if(e.name === 'AbortError') return;
+    // KEY FIX: Build a fresh full-size clone (not the scaled modal element)
+    // The modal element has CSS transform applied which makes html2canvas capture blank
+    var freshDiv = document.createElement('div');
+    freshDiv.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;min-height:1123px;padding:30px 40px;background:white;font-size:11px;box-sizing:border-box;z-index:-999;color:#1e293b;';
+    if(window.generateInvoiceHTML) freshDiv.innerHTML = window.generateInvoiceHTML(inv);
+    document.body.appendChild(freshDiv);
+
+    try {
+        window.showToast && window.showToast('PDF generate ho rahi hai...', 'info');
+        // Small delay so DOM renders
+        await new Promise(function(r){ setTimeout(r, 150); });
+
+        var pdfBlob = await html2pdf().set({
+            margin: 0,
+            filename: id + '.pdf',
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true, windowWidth: 794 },
+            jsPDF: { unit: 'px', format: [794, 1123], orientation: 'portrait' }
+        }).from(freshDiv).output('blob');
+
+        document.body.removeChild(freshDiv);
+
+        if(!pdfBlob) {
+            window.open('https://wa.me/' + (num||'') + '?text=' + encodeURIComponent(msg), '_blank');
+            return;
         }
-    }
-    // Fallback
-    window.open(waUrl, '_blank');
-    if(area && typeof html2pdf !== 'undefined') {
-        setTimeout(function(){
-            html2pdf().set({margin:0,filename:id+'.pdf',image:{type:'jpeg',quality:0.9},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(area).save();
-            window.showToast && window.showToast('PDF downloading — attach in WhatsApp 📎','info');
-        }, 500);
+
+        var pdfFile = new File([pdfBlob], id + '.pdf', { type: 'application/pdf' });
+
+        if(navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+            await navigator.share({ files: [pdfFile], text: msg });
+            window.showToast && window.showToast('Invoice shared via WhatsApp with PDF! ✅');
+            return;
+        }
+
+        // Fallback: open WA link + download PDF
+        window.open('https://wa.me/' + (num||'') + '?text=' + encodeURIComponent(msg), '_blank');
+        setTimeout(async function() {
+            await downloadPDFBlob(pdfBlob, id + '.pdf');
+            window.showToast && window.showToast('PDF download hua — WhatsApp mein attach karo 📎', 'info');
+        }, 800);
+
+    } catch(e) {
+        if(freshDiv.parentNode) document.body.removeChild(freshDiv);
+        if(e.name === 'AbortError') return;
+        window.open('https://wa.me/' + (num||'') + '?text=' + encodeURIComponent(msg), '_blank');
+        window.showToast && window.showToast('WA opened. PDF manually generate karo.', 'info');
     }
 }
 
@@ -2460,67 +2644,8 @@ window.downloadPDF = async function() {
 };
 
 // ── WHATSAPP SHARE ──
-async function shareInvoiceWA() {
-    var id = window._curInvId || window._currentViewInvoiceId;
-    if(!id) { window.showToast && window.showToast('Open an invoice first', 'error'); return; }
-    var inv = window.AppState && window.AppState.invoices.find(function(i){ return i.id === id; });
-    if(!inv) return;
-
-    var biz = (window.AppState.settings && window.AppState.settings.businessName) || 'My Business';
-    var fmt = window.formatCurrency || function(a){ return '₹' + Number(a).toFixed(2); };
-    var msg = '🌿 *' + biz + '*'
-        + '\n\nHello ' + inv.client.name + ','
-        + '\n\n📋 Invoice: *' + inv.id + '*'
-        + '\n📅 Date: ' + inv.date
-        + '\n💰 Amount: *' + fmt(inv.grandTotal, inv.currency) + '*'
-        + '\n' + (inv.paymentStatus === 'paid' ? '✅ Paid' : '⏳ Payment Pending')
-        + '\n\nThank you! 🙏'
-        + (window._waDigitalLinkOverride || '');
-
-    var mobile = inv.client && inv.client.mobile ? inv.client.mobile.replace(/\D/g, '') : '';
-    var num = mobile.length === 10 ? '91' + mobile : mobile;
-
-    // Generate PDF from clone (not visible area) — fixes blank PDF
-    var element = document.getElementById('invoice-render-area');
-    if(element && typeof html2pdf !== 'undefined') {
-        var clone = element.cloneNode(true);
-        clone.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm;background:white;font-size:11px;padding:8mm 10mm;box-sizing:border-box;z-index:-1;';
-        document.body.appendChild(clone);
-        try {
-            window.showToast && window.showToast('Preparing PDF...');
-            var pdfBlob = await html2pdf().set({
-                margin:0, filename:id+'.pdf',
-                image:{type:'jpeg',quality:0.92},
-                html2canvas:{scale:2,useCORS:true,logging:false,windowWidth:794},
-                jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-            }).from(clone).output('blob');
-            document.body.removeChild(clone);
-
-            if(pdfBlob && navigator.share && navigator.canShare) {
-                var pdfFile = new File([pdfBlob], id+'.pdf', {type:'application/pdf'});
-                if(navigator.canShare({files:[pdfFile]})) {
-                    await navigator.share({files:[pdfFile], text:msg});
-                    window.showToast && window.showToast('Shared! ✅');
-                    return;
-                }
-            }
-            // Fallback: open WA + download PDF
-            window.open('https://wa.me/'+(num||'')+'?text='+encodeURIComponent(msg), '_blank');
-            if(pdfBlob) {
-                setTimeout(async function(){
-                    await downloadPDFBlob(pdfBlob, id+'.pdf');
-                    window.showToast && window.showToast('WhatsApp opened + PDF downloaded 📎','info');
-                }, 800);
-            }
-        } catch(e) {
-            if(clone.parentNode) document.body.removeChild(clone);
-            if(e.name === 'AbortError') return;
-            window.open('https://wa.me/'+(num||'')+'?text='+encodeURIComponent(msg), '_blank');
-        }
-    } else {
-        window.open('https://wa.me/'+(num||'')+'?text='+encodeURIComponent(msg), '_blank');
-    }
-}
+// shareInvoiceWA — see implementation above (line ~2319). This duplicate removed to avoid conflict.
+// The correct fixed version uses generateInvoiceHTML fresh clone for blank-PDF fix.
 
 // ── CSV EXPORT using Blob (no data: URI)
 function downloadCSV(csvContent, filename) {
@@ -4000,7 +4125,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const salesMap = {}; finalized.forEach(inv => inv.items.forEach(item => salesMap[item.name] = (salesMap[item.name] || 0) + Number(item.qty)));
             const topSellers = Object.entries(salesMap).sort((a,b) => b[1] - a[1]).slice(0, 10);
             setHTML('dash-top-sellers', topSellers.map(ts => `<div class="flex justify-between items-center p-3 bg-emerald-50 rounded-xl mb-2"><div class="text-sm font-medium text-emerald-800">${ts[0]}</div><div class="text-xs font-bold text-emerald-700">${ts[1]} sold</div></div>`).join('') || '<div class="text-sm text-slate-400 p-4 text-center">No sales data yet.</div>');
-        }
+        
+// updateDashboard function ke end mein (line 1100 ke baad) ye dalein:
+            window.updateGSTSummary();
+}
 
         window.renderDaybook = function() {
             const dateEl = document.getElementById('daybook-date');
@@ -5929,8 +6057,29 @@ window.handleForgotPin = async function() {
     }
 };
 
-window.showLogin  = function() { if(window.toggleAuthMode) window.toggleAuthMode('login'); };
-window.showSignup = function() { if(window.toggleAuthMode) window.toggleAuthMode('signup'); };
+window.showLogin = function() {
+    const loginForm = document.getElementById('owner-login-section');
+    const signupForm = document.getElementById('signup-form');
+    const authTitle = document.getElementById('auth-title');
+    const authSubtitle = document.getElementById('auth-subtitle');
+
+    if(loginForm) loginForm.classList.remove('hidden');
+    if(signupForm) signupForm.classList.add('hidden');
+    if(authTitle) authTitle.textContent = 'Welcome Back';
+    if(authSubtitle) authSubtitle.textContent = 'Sign in to your ERP';
+};
+
+window.showSignup = function() {
+    const loginForm = document.getElementById('owner-login-section');
+    const signupForm = document.getElementById('signup-form');
+    const authTitle = document.getElementById('auth-title');
+    const authSubtitle = document.getElementById('auth-subtitle');
+
+    if(loginForm) loginForm.classList.add('hidden');
+    if(signupForm) signupForm.classList.remove('hidden');
+    if(authTitle) authTitle.textContent = 'Create Account';
+    if(authSubtitle) authSubtitle.textContent = 'Setup your Ayurvedic ERP';
+};
 </script>
 
 <script>
@@ -6534,29 +6683,45 @@ window.updateCashFlowForecast = function() {
 
 // ── FEATURE 10: GST Summary ───────────────────────────────────
 window.updateGSTSummary = function() {
-    var invs = (window.AppState.invoices||[]).filter(function(i){ return i.status==='final'; });
-    var exps = (window.AppState.expenses)||[];
-    var cgst = invs.reduce(function(s,i){ return s+Number(i.totalTax||0)/2; },0);
-    var sgst = cgst;
-    var igst = 0; // simplified
-    var itc = exps.reduce(function(s,e){ return s+Number(e.gstAmount||0); },0);
-    var net = Math.max(0, (cgst+sgst+igst) - itc);
-    var fmt = function(n){ return '₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:0}); };
-    var setText = function(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; };
-    setText('gst-cgst', fmt(cgst));
-    setText('gst-sgst', fmt(sgst));
-    setText('gst-igst', fmt(igst));
-    setText('gst-itc', fmt(itc));
-    setText('gst-net-payable', fmt(net));
-    // Filing reminder badge
-    var badge = document.getElementById('gst-filing-badge');
+    // Finalized invoices se GST nikalna
+    const invs = (window.AppState.invoices || []).filter(i => i.status === 'final' && i.docType !== 'Quotation');
+    const exps = (window.AppState.expenses || []);
+    
+    // CGST/SGST calculation (Total Tax ka aadha aadha)
+    const totalTax = invs.reduce((sum, i) => sum + (Number(i.totalTax) || 0), 0);
+    const cgst = totalTax / 2;
+    const sgst = totalTax / 2;
+    const igst = 0; // Simplified for domestic
+    const itc = exps.reduce((sum, e) => sum + (Number(e.gstAmount) || 0), 0);
+    const net = Math.max(0, totalTax - itc);
+
+    const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+    
+    // UI Update
+    const ids = {
+        'gst-cgst': cgst, 'gst-sgst': sgst, 
+        'gst-igst': igst, 'gst-itc': itc, 
+        'gst-net-payable': net
+    };
+    
+    Object.entries(ids).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if(el) el.textContent = fmt(val);
+    });
+
+    // Filing badge logic
+    const badge = document.getElementById('gst-filing-badge');
     if(badge) {
-        var d = new Date(); var day = d.getDate();
-        badge.textContent = day>=10&&day<=20 ? '⚠️ GSTR-1 Due!' : day>20 ? '🔴 GSTR-3B Due!' : '✅ Filing OK';
-        badge.className = 'badge text-[10px] ' + (day>=10 ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200');
+        const day = new Date().getDate();
+        if(day >= 10 && day <= 20) {
+            badge.textContent = '⚠️ GSTR-1 Due';
+            badge.className = 'badge bg-red-50 text-red-700 border border-red-200 text-[10px]';
+        } else {
+            badge.textContent = '✅ Filing OK';
+            badge.className = 'badge bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px]';
+        }
     }
 };
-
 // ── PATCH updateDashboard to call all new features ────────────
 (function() {
     var maxWait = 60, waited = 0;
@@ -8727,6 +8892,502 @@ window.openPermissionRequest=function(empEmail){
     var uid=window.AppState&&window.AppState.user&&window.AppState.user.uid;
     var reqs=JSON.parse(localStorage.getItem('ayur_perm_requests_'+uid)||'[]').map(function(r){return r.empEmail===empEmail?Object.assign(r,{status:'reviewed'}):r;});localStorage.setItem('ayur_perm_requests_'+uid,JSON.stringify(reqs));
     window.openRoleDrawer(emp.id);
+};
+</script>
+
+<!-- ================================================================
+  ADVANCED SIGNUP + BUSINESS PROFILING SYSTEM
+================================================================ -->
+<script>
+(function(){
+// ── Signup step navigation
+var _signupCurrentStep = 1;
+var _signupBizType = '';
+var _signupLogoB64 = '';
+
+window.signupNextStep = function(from) {
+    if(from === 1) {
+        var biz = document.getElementById('signup-biz-name').value.trim();
+        var email = document.getElementById('signup-email').value.trim();
+        var pw = document.getElementById('signup-password').value;
+        if(!biz) { window.showToast && window.showToast('Business name required','error'); return; }
+        if(!email || !email.includes('@')) { window.showToast && window.showToast('Valid email required','error'); return; }
+        if(!pw || pw.length < 6) { window.showToast && window.showToast('Password min 6 characters','error'); return; }
+    }
+    if(from === 2) {
+        // biz type optional, just proceed
+    }
+    var next = from + 1;
+    gotoSignupStep(next);
+};
+
+window.signupPrevStep = function(from) {
+    gotoSignupStep(from - 1);
+};
+
+function gotoSignupStep(step) {
+    [1,2,3].forEach(function(s){
+        var el = document.getElementById('signup-step-'+s);
+        if(el) el.classList.toggle('hidden', s !== step);
+        var si = document.getElementById('si-'+s);
+        if(si) si.style.background = s <= step ? '#10b981' : 'rgba(255,255,255,0.15)';
+    });
+    var labels = {1:'Step 1 of 3 — Account Setup', 2:'Step 2 of 3 — Business Profile', 3:'Step 3 of 3 — Features & Assets'};
+    var lbl = document.getElementById('signup-step-label');
+    if(lbl) lbl.textContent = labels[step] || '';
+    _signupCurrentStep = step;
+    if(step === 3) updateSignupFeatureHints();
+}
+
+window.selectBizType = function(btn, type) {
+    _signupBizType = type;
+    document.querySelectorAll('.btype-btn').forEach(function(b){
+        b.style.borderColor = '';
+        b.style.background = '';
+    });
+    btn.style.borderColor = '#10b981';
+    btn.style.background = 'rgba(16,185,129,0.15)';
+    document.getElementById('signup-biz-type').value = type;
+};
+
+// Auto-configure feature checkboxes based on biz type
+function updateSignupFeatureHints() {
+    var type = document.getElementById('signup-biz-type').value;
+    var hints = {
+        ayurveda: 'Ayurveda businesses need: GST invoicing, client journal, services & ITC tracking. Auto-enabled for you!',
+        clinic: 'Clinics need: client CRM, appointment tracking, services & GST invoices. Pre-configured!',
+        retail: 'Retail needs: inventory management, HSN codes, bulk invoicing & stock alerts. Pre-configured!',
+        service: 'Service businesses need: service catalog, GST invoicing, expense tracking. Pre-configured!',
+        salon: 'Salons need: service booking, client records, split payments. Pre-configured!',
+        other: 'Full ERP enabled. Customize as needed from Settings.'
+    };
+    var el = document.getElementById('signup-config-hint');
+    if(el) el.textContent = hints[type] || 'All features enabled by default. Toggle from Settings anytime.';
+
+    // Auto-check relevant features
+    var presets = {
+        ayurveda: {gst:1,services:1,crm:1,expenses:1,aiReport:1,inventory:0,employees:0},
+        clinic:   {gst:1,services:1,crm:1,expenses:1,aiReport:1,inventory:0,employees:1},
+        retail:   {gst:1,inventory:1,crm:1,expenses:1,aiReport:0,services:0,employees:1},
+        service:  {gst:1,services:1,crm:1,expenses:1,aiReport:1,inventory:0,employees:0},
+        salon:    {gst:1,services:1,crm:1,expenses:0,aiReport:0,inventory:0,employees:1},
+        other:    {gst:1,inventory:1,services:1,crm:1,expenses:1,aiReport:1,employees:1}
+    };
+    var p = presets[type] || presets.other;
+    Object.keys(p).forEach(function(k){
+        var cb = document.getElementById('sf-'+k);
+        if(cb) cb.checked = !!p[k];
+    });
+}
+
+// ── Main signup handler
+window.handleAdvancedSignup = async function() {
+    var btn = document.getElementById('signup-submit-btn');
+    if(btn) { btn.disabled = true; btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Creating...'; if(typeof lucide !== 'undefined') lucide.createIcons({node:btn}); }
+
+    var bizName = document.getElementById('signup-biz-name').value.trim() || 'My Business';
+    var email = document.getElementById('signup-email').value.trim();
+    var pw = document.getElementById('signup-password').value;
+    var gstin = (document.getElementById('signup-gstin') && document.getElementById('signup-gstin').value.trim()) || '';
+    var phone = (document.getElementById('signup-phone') && document.getElementById('signup-phone').value.trim()) || '';
+    var city = (document.getElementById('signup-city') && document.getElementById('signup-city').value.trim()) || '';
+    var bizType = document.getElementById('signup-biz-type').value || 'other';
+    var revenue = (document.getElementById('signup-revenue') && document.getElementById('signup-revenue').value) || '';
+    var empCount = (document.getElementById('signup-emp-count') && document.getElementById('signup-emp-count').value) || 'solo';
+
+    // Collect selected features
+    var selectedFeatures = {};
+    ['gst','inventory','services','crm','expenses','employees','aiReport'].forEach(function(f){
+        var cb = document.getElementById('sf-'+f);
+        selectedFeatures[f] = cb ? cb.checked : true;
+    });
+
+    // Build business profile
+    var bizProfile = { bizType: bizType, revenue: revenue, empCount: empCount, city: city, features: selectedFeatures };
+
+    try {
+        // Call original handleSignup logic via existing Firebase auth
+        // Store business profile in localStorage for auto-config on first load
+        localStorage.setItem('ayur_biz_profile_pending', JSON.stringify(bizProfile));
+        localStorage.setItem('ayur_biz_name_pending', bizName);
+        localStorage.setItem('ayur_gstin_pending', gstin);
+        localStorage.setItem('ayur_phone_pending', phone);
+        if(_signupLogoB64) localStorage.setItem('ayur_logo_pending', _signupLogoB64);
+
+        // Trigger the actual signup
+        if(window.handleSignup) {
+            // Patch signup-biz-name for existing handleSignup
+            var fakeEvent = { preventDefault: function(){} };
+            await window.handleSignup(fakeEvent);
+        }
+    } catch(e) {
+        if(btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="rocket" class="w-4 h-4"></i> Launch My ERP!'; if(typeof lucide !== 'undefined') lucide.createIcons({node:btn}); }
+        window.showToast && window.showToast('Signup error: ' + e.message, 'error');
+    }
+};
+
+// ── Apply biz profile after login
+window.applyBusinessProfileOnFirstLoad = function() {
+    var profileStr = localStorage.getItem('ayur_biz_profile_pending');
+    if(!profileStr) return;
+    try {
+        var profile = JSON.parse(profileStr);
+        localStorage.removeItem('ayur_biz_profile_pending');
+
+        // Apply feature settings
+        var featureMap = {gst:'expenses',inventory:'batch',services:'multiDoc',crm:'ledger',expenses:'expenses',employees:'deleteBtn'};
+        var features = profile.features || {};
+
+        // Store feature preferences for the settings page
+        localStorage.setItem('ayur_biz_type', profile.bizType || 'other');
+        localStorage.setItem('ayur_biz_profile', profileStr);
+
+        // Show welcome message
+        var msgs = {
+            ayurveda: 'ERP configured for Ayurveda & Wellness business! 🌿',
+            clinic: 'ERP configured for Clinic management! 🏥',
+            retail: 'ERP configured for Retail with inventory! 🛒',
+            service: 'ERP configured for Service business! ⚙️',
+            salon: 'ERP configured for Salon! 💇',
+            other: 'Full ERP ready for your business! 🚀'
+        };
+        setTimeout(function(){
+            window.showToast && window.showToast(msgs[profile.bizType] || 'ERP ready! 🚀');
+        }, 1500);
+    } catch(e) {}
+};
+
+// Hook into app load
+var _origBootstrap = window.onAppReady;
+document.addEventListener('DOMContentLoaded', function(){
+    // Monkey-patch: call applyBusinessProfileOnFirstLoad after user is logged in
+    var origShowApp = window.showApp;
+    if(typeof origShowApp === 'function') {
+        window.showApp = function() {
+            origShowApp.apply(this, arguments);
+            setTimeout(window.applyBusinessProfileOnFirstLoad, 800);
+        };
+    }
+});
+
+// Signup logo upload
+var _origSignupUpload = window.handleSignupUpload;
+window.handleSignupUpload = function(e, type) {
+    if(type === 'logo') {
+        var f = e.target.files[0]; if(!f) return;
+        var r = new FileReader();
+        r.onload = function(ev) {
+            _signupLogoB64 = ev.target.result;
+            var prev = document.getElementById('signup-logo-preview');
+            if(prev) prev.innerHTML = '<img src="'+ev.target.result+'" class="w-full h-full object-cover">';
+        };
+        r.readAsDataURL(f);
+    }
+    if(_origSignupUpload) _origSignupUpload(e, type);
+};
+
+})();
+</script>
+
+<!-- ================================================================
+  SMART FEATURE SETTINGS PANEL (auto-shown for new users)
+================================================================ -->
+<div id="feature-settings-modal" class="modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box max-w-lg w-full">
+    <div class="modal-head">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center"><i data-lucide="settings-2" class="w-4 h-4 text-emerald-600"></i></div>
+        <div><div class="font-bold text-slate-800">Smart Feature Settings</div><div class="text-xs text-slate-400">Toggle features on/off for your business</div></div>
+      </div>
+      <button onclick="document.getElementById('feature-settings-modal').classList.remove('open')" class="btn btn-icon btn-ghost"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+    <div class="modal-body space-y-3" id="smart-feature-list">
+      <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-medium">
+        ✨ These features are recommended based on your business type. Toggle anytime!
+      </div>
+      <!-- Dynamically populated -->
+    </div>
+    <div class="modal-foot">
+      <button onclick="window.saveSmartFeatures&&saveSmartFeatures()" class="btn btn-primary w-full justify-center">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+  GST COMPREHENSIVE PDF REPORT SYSTEM
+================================================================ -->
+<script>
+window.exportGSTReportPDF = async function() {
+    if(typeof html2pdf === 'undefined') { window.showToast && window.showToast('PDF library not loaded', 'error'); return; }
+    window.showToast && window.showToast('GST Report PDF generate ho rahi hai...', 'info');
+
+    var p = window.getGSTPeriod ? window.getGSTPeriod() : { month: new Date().getMonth(), year: new Date().getFullYear(), label: 'Current Period' };
+    var inv = window.getGSTInvoices ? window.getGSTInvoices() : [];
+    var bd = window.calcGSTBreakdown ? window.calcGSTBreakdown(inv) : { taxable:0, cgst:0, sgst:0, igst:0, total:0, b2b:[], b2cs:{}, hsn:{} };
+    var s = (window.AppState && window.AppState.settings) || {};
+    var expenses = window.getGSTExpenses ? window.getGSTExpenses() : [];
+    var itc = expenses.reduce(function(sum, e){ return sum + Number(e.gstAmount||0); }, 0);
+    var netTax = (bd.cgst + bd.sgst + bd.igst) - itc;
+    var mNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var fmt = function(n){ return '₹' + Number(n||0).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}); };
+    var fmtInt = function(n){ return '₹' + Number(n||0).toLocaleString('en-IN', {maximumFractionDigits:0}); };
+    var now = new Date().toLocaleDateString('en-IN', {day:'numeric',month:'long',year:'numeric'});
+    var bizName = s.businessName || 'My Business';
+    var gstin = s.gstin || 'N/A';
+
+    // Monthly data for chart
+    var year = p.year;
+    var monthlyData = [];
+    for(var m=0; m<12; m++) {
+        var prefix = year+'-'+String(m+1).padStart(2,'0');
+        var mInvs = (window.AppState&&window.AppState.invoices||[]).filter(function(i){ return i.date&&i.date.startsWith(prefix)&&i.status==='final'; });
+        var mBd = window.calcGSTBreakdown ? window.calcGSTBreakdown(mInvs) : {total:0, cgst:0, sgst:0, igst:0, taxable:0};
+        monthlyData.push({ label: mNames[m].substr(0,3), taxable: mBd.taxable, tax: mBd.cgst+mBd.sgst+mBd.igst, total: mBd.total });
+    }
+    var totalAnnualTax = monthlyData.reduce(function(s,m){ return s+m.tax; }, 0);
+    var totalAnnualSales = monthlyData.reduce(function(s,m){ return s+m.total; }, 0);
+
+    // Build HSN summary rows
+    var hsnRows = Object.keys(bd.hsn||{}).map(function(hsn){
+        var h = bd.hsn[hsn];
+        return '<tr><td>'+hsn+'</td><td>'+h.desc+'</td><td>'+Number(h.qty).toFixed(2)+'</td><td>'+fmt(h.taxable)+'</td><td>'+fmt(h.igst)+'</td><td>'+fmt(h.cgst)+'</td><td>'+fmt(h.sgst)+'</td><td>'+fmt(h.taxable+h.igst+h.cgst+h.sgst)+'</td></tr>';
+    }).join('') || '<tr><td colspan="8" style="text-align:center;color:#94a3b8">No HSN data for this period</td></tr>';
+
+    // B2B invoice rows
+    var b2bRows = (bd.b2b||[]).slice(0,15).map(function(inv){
+        var taxable = (inv.items||[]).reduce(function(s,it){ var r=Number(it.rate||0),q=Number(it.qty||1),g=Number(it.gst||0); return s+(g>0?r*q/(1+g/100):r*q); },0);
+        var tax = Number(inv.totalTax||0);
+        return '<tr><td>'+inv.id+'</td><td>'+inv.date+'</td><td>'+(inv.client&&inv.client.name||'')+'</td><td style="font-size:9px">'+(inv.client&&inv.client.gstin||'—')+'</td><td>'+fmt(taxable)+'</td><td>'+fmt(tax/2)+'</td><td>'+fmt(tax/2)+'</td><td style="font-weight:700">'+fmt(inv.grandTotal)+'</td></tr>';
+    }).join('') || '<tr><td colspan="8" style="text-align:center;color:#94a3b8">No B2B invoices</td></tr>';
+
+    // Expense/ITC rows
+    var itcRows = expenses.slice(0,10).map(function(e){
+        return '<tr><td>'+e.date+'</td><td>'+e.category+'</td><td>'+e.vendor+'</td><td>'+fmt(e.amount)+'</td><td style="color:#059669;font-weight:700">'+fmt(e.gstAmount)+'</td></tr>';
+    }).join('') || '<tr><td colspan="5" style="text-align:center;color:#94a3b8">No expense data</td></tr>';
+
+    // Bar chart data for monthly tax
+    var maxTax = Math.max(...monthlyData.map(function(m){ return m.tax; }), 1);
+    var barChartBars = monthlyData.map(function(m){
+        var h = Math.round((m.tax/maxTax)*80);
+        var isCurrent = (monthlyData.indexOf(m) === p.month);
+        return '<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:0">'
+            +'<div style="font-size:7px;color:'+(isCurrent?'#059669':'#64748b')+';margin-bottom:2px;font-weight:'+(isCurrent?'900':'400')+'">'+(m.tax>0?'₹'+Math.round(m.tax/1000)+'k':'')+'</div>'
+            +'<div style="width:100%;max-width:24px;height:'+h+'px;background:'+(isCurrent?'#059669':'#cbd5e1')+';border-radius:3px 3px 0 0;margin:0 auto;min-height:2px"></div>'
+            +'<div style="font-size:7px;color:#94a3b8;margin-top:3px">'+m.label+'</div>'
+            +'</div>';
+    }).join('');
+
+    // Donut chart via ASCII-style colored boxes
+    var totalTax = bd.cgst + bd.sgst + bd.igst;
+    var cgstPct = totalTax > 0 ? ((bd.cgst/totalTax)*100).toFixed(1) : '0';
+    var sgstPct = totalTax > 0 ? ((bd.sgst/totalTax)*100).toFixed(1) : '0';
+    var igstPct = totalTax > 0 ? ((bd.igst/totalTax)*100).toFixed(1) : '0';
+
+    var reportHTML = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>'
+        +'*{box-sizing:border-box;margin:0;padding:0}'
+        +'body{font-family:Arial,sans-serif;font-size:11px;color:#1e293b;background:white}'
+        +'.page{padding:12mm;max-width:210mm;margin:0 auto}'
+        +'.header{background:linear-gradient(135deg,#064e3b,#065f46);color:white;padding:16px 20px;border-radius:10px;margin-bottom:16px}'
+        +'.header h1{font-size:20px;font-weight:900;letter-spacing:-0.5px}'
+        +'.header p{font-size:10px;color:#a7f3d0;margin-top:3px}'
+        +'.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}'
+        +'.kpi{border-radius:8px;padding:12px;text-align:center}'
+        +'.kpi .val{font-size:16px;font-weight:900;margin-bottom:2px}'
+        +'.kpi .lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b}'
+        +'.section{background:white;border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:14px}'
+        +'.section h2{font-size:12px;font-weight:800;color:#0f172a;margin-bottom:10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #f1f5f9;padding-bottom:8px}'
+        +'.tbl{width:100%;border-collapse:collapse;font-size:9.5px}'
+        +'.tbl th{background:#0f172a;color:white;padding:6px 8px;text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:.05em}'
+        +'.tbl td{padding:6px 8px;border-bottom:1px solid #f1f5f9;vertical-align:middle}'
+        +'.tbl tr:nth-child(even) td{background:#f8fafc}'
+        +'.tbl tr:last-child td{border-bottom:none}'
+        +'.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}'
+        +'.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700}'
+        +'.footer{text-align:center;padding:16px;color:#94a3b8;font-size:9px;border-top:1px solid #f1f5f9;margin-top:16px}'
+        +'.bar-chart{display:flex;align-items:flex-end;gap:4px;height:90px;padding:4px 0}'
+        +'.insight{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;margin-bottom:8px}'
+        +'.insight .t{font-weight:800;color:#1d4ed8;font-size:10px;margin-bottom:3px}'
+        +'.insight p{color:#3730a3;font-size:9.5px;line-height:1.5}'
+        +'@media print{.page{padding:8mm}}'
+        +'</style></head><body><div class="page">'
+
+        // HEADER
+        +'<div class="header">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center">'
+        +'<div><div style="font-size:9px;color:#6ee7b7;text-transform:uppercase;letter-spacing:.15em;font-weight:700">GST Compliance Report</div>'
+        +'<h1>'+bizName+'</h1>'
+        +'<p>GSTIN: '+gstin+' &nbsp;|&nbsp; Period: '+mNames[p.month]+' '+p.year+' &nbsp;|&nbsp; Generated: '+now+'</p></div>'
+        +'<div style="text-align:right;font-size:10px;color:#a7f3d0"><div style="font-size:20px;font-weight:900">₹'+Math.round(totalTax/1000)+'K</div><div>Total Tax This Month</div></div>'
+        +'</div></div>'
+
+        // KPI CARDS
+        +'<div class="kpi-grid">'
+        +'<div class="kpi" style="background:#f0fdf4;border:1px solid #a7f3d0"><div class="val" style="color:#065f46">'+fmt(bd.taxable)+'</div><div class="lbl">Taxable Amount</div></div>'
+        +'<div class="kpi" style="background:#eff6ff;border:1px solid #bfdbfe"><div class="val" style="color:#1d4ed8">'+fmt(bd.cgst)+'</div><div class="lbl">CGST Collected</div></div>'
+        +'<div class="kpi" style="background:#fdf4ff;border:1px solid #e9d5ff"><div class="val" style="color:#7c3aed">'+fmt(bd.sgst)+'</div><div class="lbl">SGST Collected</div></div>'
+        +'<div class="kpi" style="background:#fff7ed;border:1px solid #fed7aa"><div class="val" style="color:#c2410c">'+fmt(bd.igst)+'</div><div class="lbl">IGST Collected</div></div>'
+        +'</div>'
+
+        // NET PAYABLE BANNER
+        +'<div style="background:linear-gradient(90deg,#dc2626,#b91c1c);color:white;border-radius:8px;padding:12px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">'
+        +'<div><div style="font-weight:700;font-size:12px">Net GST Payable to Government</div><div style="font-size:9px;opacity:.8">Total Tax Collected - ITC Credit</div></div>'
+        +'<div style="font-size:22px;font-weight:900">'+fmt(Math.max(0,netTax))+'</div>'
+        +'</div>'
+
+        // CHARTS ROW
+        +'<div class="grid2">'
+
+        // Monthly Bar Chart
+        +'<div class="section"><h2>📈 Annual Tax Trend ('+year+')</h2>'
+        +'<div class="bar-chart" style="align-items:flex-end">'+barChartBars+'</div>'
+        +'<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:9px;color:#64748b">'
+        +'<span>Annual Tax: <strong style="color:#059669">'+fmtInt(totalAnnualTax)+'</strong></span>'
+        +'<span>Annual Sales: <strong>'+fmtInt(totalAnnualSales)+'</strong></span>'
+        +'</div></div>'
+
+        // Tax Breakdown Donut (visual)
+        +'<div class="section"><h2>🍩 Tax Type Split</h2>'
+        +'<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#eff6ff;border-radius:6px"><div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;background:#3b82f6;border-radius:2px"></div><span style="font-weight:700;font-size:10px">CGST</span></div><div style="text-align:right"><div style="font-weight:900;color:#1d4ed8">'+fmt(bd.cgst)+'</div><div style="font-size:9px;color:#64748b">'+cgstPct+'% of tax</div></div></div>'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#fdf4ff;border-radius:6px"><div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;background:#a855f7;border-radius:2px"></div><span style="font-weight:700;font-size:10px">SGST</span></div><div style="text-align:right"><div style="font-weight:900;color:#7c3aed">'+fmt(bd.sgst)+'</div><div style="font-size:9px;color:#64748b">'+sgstPct+'% of tax</div></div></div>'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#fff7ed;border-radius:6px"><div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;background:#f97316;border-radius:2px"></div><span style="font-weight:700;font-size:10px">IGST</span></div><div style="text-align:right"><div style="font-weight:900;color:#c2410c">'+fmt(bd.igst)+'</div><div style="font-size:9px;color:#64748b">'+igstPct+'% of tax</div></div></div>'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#f0fdf4;border-radius:6px;border:1px solid #a7f3d0"><div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;background:#059669;border-radius:2px"></div><span style="font-weight:700;font-size:10px;color:#065f46">ITC Credit</span></div><div style="text-align:right"><div style="font-weight:900;color:#059669">- '+fmt(itc)+'</div><div style="font-size:9px;color:#64748b">Input Tax Credit</div></div></div>'
+        +'</div></div>'
+        +'</div>'
+
+        // B2B INVOICE TABLE
+        +'<div class="section"><h2>📋 B2B Invoice Register</h2>'
+        +'<div style="overflow:auto"><table class="tbl">'
+        +'<thead><tr><th>Invoice No</th><th>Date</th><th>Party Name</th><th>GSTIN</th><th>Taxable</th><th>CGST</th><th>SGST</th><th>Total</th></tr></thead>'
+        +'<tbody>'+b2bRows+'</tbody>'
+        +'</table></div></div>'
+
+        // HSN SUMMARY
+        +'<div class="section"><h2>📦 HSN/SAC Summary</h2>'
+        +'<div style="overflow:auto"><table class="tbl">'
+        +'<thead><tr><th>HSN/SAC</th><th>Description</th><th>Qty</th><th>Taxable</th><th>IGST</th><th>CGST</th><th>SGST</th><th>Total</th></tr></thead>'
+        +'<tbody>'+hsnRows+'</tbody>'
+        +'</table></div></div>'
+
+        // ITC / EXPENSES
+        +'<div class="section"><h2>🧾 ITC Credit Register (Expenses)</h2>'
+        +'<div style="overflow:auto"><table class="tbl">'
+        +'<thead><tr><th>Date</th><th>Category</th><th>Vendor</th><th>Amount</th><th>GST (ITC)</th></tr></thead>'
+        +'<tbody>'+itcRows+'</tbody>'
+        +'<tfoot><tr style="background:#f0fdf4"><td colspan="4" style="text-align:right;font-weight:700;padding:8px">Total ITC Available:</td><td style="font-weight:900;color:#059669;padding:8px">'+fmt(itc)+'</td></tr></tfoot>'
+        +'</table></div></div>'
+
+        // KEY INSIGHTS
+        +'<div class="section"><h2>💡 Compliance Insights</h2>'
+        +'<div class="insight"><div class="t">📊 Effective Tax Rate</div><p>Your effective GST rate this period is '+(bd.total>0?((totalTax/bd.total)*100).toFixed(2):0)+'% on total sales of '+fmt(bd.total)+'. Net payable after ITC: '+fmt(Math.max(0,netTax))+'</p></div>'
+        +(netTax < 0 ? '<div class="insight" style="background:#f0fdf4;border-color:#a7f3d0"><div class="t" style="color:#065f46">✅ ITC Excess — Carry Forward</div><p style="color:#065f46">ITC ('+fmt(itc)+') exceeds tax liability ('+fmt(totalTax)+'). Excess of '+fmt(Math.abs(netTax))+' can be carried forward to next period.</p></div>' : '')
+        +'<div class="insight"><div class="t">📅 Filing Deadlines</div><p>GSTR-1 is due by 11th of next month. GSTR-3B is due by 20th. Pay net liability of '+fmt(Math.max(0,netTax))+' before GSTR-3B deadline to avoid interest @18% p.a.</p></div>'
+        +'<div class="insight"><div class="t">📈 Annual Projection</div><p>Based on current month, projected annual GST liability: '+fmtInt(totalTax*12)+'. Annual turnover projection: '+fmtInt(bd.total*12)+'</p></div>'
+        +'</div>'
+
+        // FOOTER
+        +'<div class="footer">Generated by My Business ERP &nbsp;|&nbsp; '+bizName+' &nbsp;|&nbsp; GSTIN: '+gstin+' &nbsp;|&nbsp; '+now+'<br>This report is for internal reference. File your actual returns on the GST Portal.</div>'
+        +'</div></body></html>';
+
+    // Render in hidden div and generate PDF
+    var container = document.createElement('div');
+    container.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm;background:white;z-index:-999;';
+    container.innerHTML = reportHTML;
+    document.body.appendChild(container);
+
+    try {
+        await new Promise(function(r){ setTimeout(r, 200); });
+        var blob = await html2pdf().set({
+            margin: 0,
+            filename: 'GST_Report_'+bizName+'_'+mNames[p.month]+'_'+p.year+'.pdf',
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true, windowWidth: 794 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(container).output('blob');
+        document.body.removeChild(container);
+        if(blob) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'GST_Report_'+mNames[p.month]+'_'+p.year+'.pdf';
+            a.click();
+            setTimeout(function(){ URL.revokeObjectURL(url); }, 3000);
+            window.showToast && window.showToast('GST Report PDF downloaded! ✅');
+        }
+    } catch(e) {
+        if(container.parentNode) document.body.removeChild(container);
+        window.showToast && window.showToast('PDF error: ' + e.message, 'error');
+    }
+};
+</script>
+
+<!-- ================================================================
+  OTHER VIEW MODALS ZOOM FIX (Ledger, Financial Reports)
+================================================================ -->
+<script>
+// Apply stable overflow scrolling to all view modals on mobile
+(function(){
+    document.addEventListener('DOMContentLoaded', function(){
+        // Fix ledger modal body
+        var ledgerBody = document.querySelector('#ledger-modal .modal-body');
+        if(ledgerBody) {
+            ledgerBody.style.overflow = 'auto';
+            ledgerBody.style.webkitOverflowScrolling = 'touch';
+        }
+        // Fix reports modal body
+        var reportsBody = document.querySelector('#reports-modal .modal-body');
+        if(reportsBody) {
+            reportsBody.style.overflow = 'auto';
+            reportsBody.style.webkitOverflowScrolling = 'touch';
+        }
+        // Add touch-action: pan-y to all modal-body elements
+        document.querySelectorAll('.modal-body').forEach(function(el){
+            el.style.webkitOverflowScrolling = 'touch';
+            el.style.touchAction = 'pan-y';
+        });
+    });
+})();
+
+// Smart Feature Settings Modal
+window.openSmartFeatureSettings = function() {
+    var profile = {};
+    try { profile = JSON.parse(localStorage.getItem('ayur_biz_profile') || '{}'); } catch(e) {}
+    var features = profile.features || {};
+    var list = document.getElementById('smart-feature-list');
+    if(!list) return;
+
+    var featuresDef = [
+        {id:'gst', label:'📄 GST Invoicing', desc:'Generate GST-compliant tax invoices'},
+        {id:'inventory', label:'📦 Inventory / Products', desc:'Stock tracking, low stock alerts, batches'},
+        {id:'services', label:'✨ Services Catalog', desc:'Service offerings with SAC codes'},
+        {id:'crm', label:'👥 Client CRM', desc:'Client ledger, journal & reminders'},
+        {id:'expenses', label:'💰 Expense Tracking', desc:'Business expense & ITC management'},
+        {id:'employees', label:'👤 Employee Management', desc:'Staff roles, logins & permissions'},
+        {id:'aiReport', label:'🤖 AI Business Reports', desc:'Weekly/monthly intelligence reports'}
+    ];
+
+    list.innerHTML = '<div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-medium">✨ Features based on your business profile. Toggle anytime!</div>'
+        + featuresDef.map(function(f){
+            var checked = features[f.id] !== false;
+            return '<label class="toggle-row"><label class="toggle"><input type="checkbox" id="sff-'+f.id+'" '+(checked?'checked':'')+' onchange=""><span class="toggle-track"></span></label>'
+                +'<div class="flex-1"><div class="text-sm font-semibold text-slate-800">'+f.label+'</div><div class="text-xs text-slate-400">'+f.desc+'</div></div></label>';
+        }).join('');
+
+    document.getElementById('feature-settings-modal').classList.add('open');
+    if(typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+window.saveSmartFeatures = function() {
+    var profile = {};
+    try { profile = JSON.parse(localStorage.getItem('ayur_biz_profile') || '{}'); } catch(e) {}
+    profile.features = profile.features || {};
+    ['gst','inventory','services','crm','expenses','employees','aiReport'].forEach(function(f){
+        var cb = document.getElementById('sff-'+f);
+        if(cb) profile.features[f] = cb.checked;
+    });
+    localStorage.setItem('ayur_biz_profile', JSON.stringify(profile));
+    document.getElementById('feature-settings-modal').classList.remove('open');
+    window.showToast && window.showToast('Feature settings saved! ✅');
 };
 </script>
 </body>
@@ -11091,71 +11752,75 @@ window.renderGSTCalendarFull = function() {
 };
 
 // ── JSON EXPORT FOR GST PORTAL ────────────────────────────────
-window.exportGSTJSON = function(type) {
-    var p = window.getGSTPeriod();
-    var inv = window.getGSTInvoices();
-    var bd = window.calcGSTBreakdown(inv);
-    var s = window.AppState.settings||{};
-    type = type || 'gstr1';
-
-    var json = {};
-    if(type === 'gstr1') {
-        json = {
-            gstin: s.gstin||'', fp: String(p.month+1).padStart(2,'0')+String(p.year),
-            b2b: bd.b2b.map(function(inv){
-                return { ctin: (inv.client&&inv.client.gstin)||'', inv: [{
-                    inum: inv.id, idt: inv.date, val: Number(inv.grandTotal||0),
-                    itms: (inv.items||[]).map(function(it){
-                        var rate=Number(it.rate||0), qty=Number(it.qty||1), gst=Number(it.gst||0);
-                        var txval = rate*qty/(1+gst/100);
-                        return { num:1, itm_det:{ rt:gst, txval:+txval.toFixed(2), iamt:+(txval*gst/100).toFixed(2) } };
-                    })
-                }]};
-            }),
-            b2cs: Object.keys(bd.b2cSmall).map(function(state){
-                var d = bd.b2cSmall[state];
-                return { typ:'OE', pos:'96', rt:18, txval:+(d.total*0.85).toFixed(2), iamt:+(d.total*0.15).toFixed(2) };
-            }),
-            hsn: { data: Object.keys(bd.hsn).map(function(hsn){ var h=bd.hsn[hsn]; return { num:1, hsn_sc:hsn, desc:h.desc, uqc:'OTH', qty:+h.qty.toFixed(2), val:+(h.taxable+h.igst+h.cgst+h.sgst).toFixed(2), txval:+h.taxable.toFixed(2), iamt:+h.igst.toFixed(2), camt:+h.cgst.toFixed(2), samt:+h.sgst.toFixed(2) }; }) }
-        };
-    } else if(type === 'gstr3b') {
-        var totalTax = bd.cgst+bd.sgst+bd.igst;
-        var exp = window.getGSTExpenses();
-        var itc = exp.reduce(function(s,e){ return s+Number(e.gstAmount||0); }, 0);
-        json = {
-            gstin: s.gstin||'', ret_period: String(p.month+1).padStart(2,'0')+String(p.year),
-            sup_details: { osup_det: { txval:+bd.taxable.toFixed(2), iamt:+bd.igst.toFixed(2), camt:+bd.cgst.toFixed(2), samt:+bd.sgst.toFixed(2) } },
-            itc_elg: { itc_avl: [{ ty:'IMPG', iamt:0, camt:+(itc/2).toFixed(2), samt:+(itc/2).toFixed(2) }] },
-            intr_ltfee: { intr_details: { camt:0, samt:0 }, ltfee: { camt:0, samt:0 } }
-        };
+window.exportGSTR1JSON = function() {
+    const invs = (window.AppState.invoices || []).filter(i => i.status === 'final' && i.docType === 'Tax Invoice');
+    if (invs.length === 0) {
+        window.showToast("Export ke liye koi finalized tax invoices nahi hain.", "warning");
+        return;
     }
 
-    var blob = new Blob([JSON.stringify(json, null, 2)], {type:'application/json'});
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href=url; a.download=type.toUpperCase()+'_'+s.gstin+'_'+String(p.month+1).padStart(2,'0')+p.year+'.json';
-    a.click(); URL.revokeObjectURL(url);
-    window.showToast && window.showToast('GST JSON exported! Upload to GST Offline Tool ✅');
-};
+    const s = window.AppState.settings || {};
+    const period = new Date().getMonth() + 1; // Current month
+    const year = new Date().getFullYear();
 
-window.exportGSTExcel = function(type) {
-    var p = window.getGSTPeriod();
-    var inv = window.getGSTInvoices();
-    var bd = window.calcGSTBreakdown(inv);
-    var rows = [['Invoice No','Date','Client','GSTIN','Taxable','CGST','SGST','IGST','Total']];
-    inv.forEach(function(i){
-        var taxable = (i.items||[]).reduce(function(s,it){ return s+Number(it.qty||1)*Number(it.rate||0)/(1+Number(it.gst||0)/100); }, 0);
-        rows.push([i.id, i.date, (i.client&&i.client.name)||'', (i.client&&i.client.gstin)||'',
-            taxable.toFixed(2), (i.totalTax/2||0).toFixed(2), (i.totalTax/2||0).toFixed(2), '0.00', Number(i.grandTotal||0).toFixed(2)]);
+    // GSTR-1 Schema Structure
+    const gstr1Data = {
+        gstin: s.gstin || "YOUR_GSTIN",
+        fp: (period < 10 ? "0" + period : period) + year,
+        gt: 0.00,
+        cur_gt: 0.00,
+        b2b: []
+    };
+
+    // Grouping invoices by Client GSTIN for B2B section
+    const b2bMap = {};
+
+    invs.forEach(inv => {
+        if (inv.client && inv.client.gstin) {
+            const cGstin = inv.client.gstin;
+            if (!b2bMap[cGstin]) {
+                b2bMap[cGstin] = {
+                    ctin: cGstin,
+                    inv: []
+                };
+            }
+
+            // Individual Invoice Data
+            b2bMap[cGstin].inv.push({
+                inum: inv.id,
+                idt: inv.date.split('-').reverse().join('-'), // Format: DD-MM-YYYY
+                val: Number(inv.grandTotal),
+                pos: s.address ? s.address.slice(-2) : "00", // State code extraction logic
+                rchrg: inv.isRcm ? "Y" : "N",
+                inv_typ: "R",
+                itms: [{
+                    num: 1,
+                    itm_det: {
+                        rt: inv.items && inv.items[0] ? Number(inv.items[0].gst) : 0,
+                        txval: Number(inv.subtotal),
+                        iamt: 0, // Simplified: Assuming Intra-state
+                        camt: Number(inv.totalTax) / 2,
+                        samt: Number(inv.totalTax) / 2,
+                        csamt: 0
+                    }
+                }]
+            });
+        }
     });
-    var csv = rows.map(function(r){ return r.join(','); }).join('\n');
-    var blob = new Blob([csv], {type:'text/csv'});
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a'); a.href=url; a.download=type+'_'+p.label+'.csv';
-    a.click(); URL.revokeObjectURL(url);
-    window.showToast && window.showToast('Excel CSV exported ✅');
-};
 
-// Auto-render when GST tab opens
-window.EMP_TAB_PERMS.gst = 'settings_view';
+    gstr1Data.b2b = Object.values(b2bMap);
+
+    // Download Logic
+    const jsonStr = JSON.stringify(gstr1Data, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `GSTR1_${s.businessName.replace(/\s+/g, '_')}_${gstr1Data.fp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 2000);
+    
+    window.showToast("GSTR-1 JSON Exported! Ise GST Offline Tool mein upload karein. ✅");
+};
 </script>
