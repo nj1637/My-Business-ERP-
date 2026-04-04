@@ -403,13 +403,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
             <label class="lbl text-slate-300">Logo <span class="text-slate-500 font-normal normal-case">(optional)</span></label>
             <div class="flex items-center gap-3">
               <div class="w-11 h-11 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center overflow-hidden" id="signup-logo-preview"><i data-lucide="image" class="text-slate-400 w-4 h-4"></i></div>
-              <input type="file" accept="image/*" onchange="handleSignupAsset(event,'logo')" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500/20 file:text-emerald-400">
+              <input type="file" accept="image/*" onchange="window.handleSignupUpload(event,'logo')" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500/20 file:text-emerald-400">
             </div></div>
           <div>
             <label class="lbl text-slate-300">Signature <span class="text-slate-500 font-normal normal-case">(optional)</span></label>
             <div class="flex items-center gap-3">
               <div class="w-16 h-9 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center overflow-hidden" id="signup-sig-preview"><i data-lucide="pen-tool" class="text-slate-400 w-4 h-4"></i></div>
-              <input type="file" accept="image/*" onchange="handleSignupAsset(event,'signature')" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500/20 file:text-emerald-400">
+              <input type="file" accept="image/*" window.handleSignupUpload(event,'signature')"> class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500/20 file:text-emerald-400">
             </div></div>
           <button type="submit" class="btn btn-primary w-full justify-center py-3 font-bold">Create Account</button>
           <p class="text-center text-slate-400 text-xs mt-1">By creating an account you agree to our <button type="button" onclick="document.getElementById('privacy-modal').classList.add('open')" class="text-emerald-400 font-semibold underline">Privacy Policy</button></p>
@@ -2117,10 +2117,10 @@ function closeSidebar() {
     if(sb) sb.classList.remove('open');
     if(ov) ov.classList.remove('visible');
 }
-// Close sidebar on mobile nav click
+// Close sidebar when any nav item clicked (mobile)
 document.addEventListener('click', function(e) {
     if(window.innerWidth >= 768) return;
-    if(e.target.closest('#desk-nav button') || e.target.closest('#bottom-nav button')) closeSidebar();
+    if(e.target.closest('#desk-nav button') || e.target.closest('#bottom-nav button') || e.target.closest('.nav-item')) closeSidebar();
 });
 
 // ── SETTINGS ACCORDION ──
@@ -3552,10 +3552,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Explicitly define all fields so old state cannot leak
                 await setDoc(doc(db, 'artifacts', appId, 'users', cred.user.uid, 'config', 'settings'), {
                     businessName: document.getElementById('signup-biz-name').value || '', 
-                    owner: document.getElementById('signup-owner').value || '', 
-                    phone: document.getElementById('signup-phone').value || '', 
-                    gstin: document.getElementById('signup-gstin').value || '', 
-                    address: document.getElementById('signup-address').value || '',
+                    owner: '', phone: '', gstin: '', address: '',
                     logo: window.AppState.signupLogoBase64 || '', 
                     signature: window.AppState.signupSigBase64 || '', 
                     seal: '', bankName: '', bankAcc: '', bankIfsc: '',
@@ -3842,6 +3839,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if(window.updateFabPos) window.updateFabPos();
 
             window.scrollTo(0,0);
+            // Auto-close sidebar on mobile after tab switch
+            if(window.innerWidth < 768) { typeof closeSidebar === 'function' && closeSidebar(); }
         }
 
         window.updateDashboard = function() {
@@ -4732,12 +4731,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if(type === 'Product') collectionName = 'products';
             if(type === 'Client') collectionName = 'clients';
             if(type === 'Expense') collectionName = 'expenses';
-            
             try {
-                await updateDoc(doc(db, 'artifacts', appId, 'users', window.AppState.user.uid, collectionName, id), { isDeleted: false });
-                window.showToast(`${type} restored successfully!`);
-                window.openTrashModal(); 
-            } catch(e) { window.showToast(`Failed to restore ${type}`, "error"); }
+                var updateData = { isDeleted: false };
+                // Invoice restore: check toggle — restore as void or original status
+                if(type === 'Invoice') {
+                    var restoreAsVoid = window.AppState && window.AppState.settings && window.AppState.settings.features && window.AppState.settings.features.restoreInvoiceAsVoid;
+                    if(restoreAsVoid) { updateData.status = 'void'; }
+                    else { updateData.status = 'final'; }
+                }
+                await updateDoc(doc(db, 'artifacts', appId, 'users', window.AppState.user.uid, collectionName, id), updateData);
+                window.showToast(type + ' restored' + (type==='Invoice'&&updateData.status==='void'?' as VOID':' successfully') + '!');
+                window.openTrashModal();
+            } catch(e) { window.showToast('Failed to restore ' + type, "error"); }
         }
 
         // NEW PERMANENT DELETE FUNCTION
@@ -7857,31 +7862,8 @@ window.openStaffModal = function() {
 
 // ── ADD FEATURE BUTTONS TO SIDEBAR — PERSISTENT ──────────────
 // These are added once and survive renderNavigation calls
-window.ensureSidebarTools = function() {
-    var nav = document.getElementById('desk-nav');
-    if(!nav || document.getElementById('wa-autosend-toggle')) return;
-    var waEnabled = localStorage.getItem('ayur_wa_autosend') === 'true';
-    var section = document.createElement('div');
-    section.id = 'sidebar-tools-section';
-    section.innerHTML = '<div class="nav-section mt-2">Tools</div>';
-    var waBtn = document.createElement('button');
-    waBtn.className = 'nav-item'; waBtn.id = 'wa-autosend-toggle';
-    waBtn.onclick = function(){
-        var cur = localStorage.getItem('ayur_wa_autosend')==='true';
-        localStorage.setItem('ayur_wa_autosend', String(!cur));
-        waBtn.querySelector('span').textContent=(!cur?'✅ ':'📲 ')+'WA Auto-Send';
-        window.showToast&&window.showToast('WhatsApp auto-send '+(!cur?'ON':'OFF'));
-    };
-    waBtn.innerHTML='<i data-lucide="message-circle" class="w-4 h-4"></i><span>'+(waEnabled?'✅ ':'📲 ')+'WA Auto-Send</span>';
-    var staffBtn = document.createElement('button');
-    staffBtn.className='nav-item'; staffBtn.id='staff-nav-btn';
-    staffBtn.onclick = function(){ window.switchTab&&window.switchTab('employees'); };
-    staffBtn.innerHTML='<i data-lucide="users" class="w-4 h-4"></i><span>Employees</span>';
-    section.appendChild(waBtn); section.appendChild(staffBtn);
-    nav.parentElement.appendChild(section);
-    if(typeof lucide!=='undefined') lucide.createIcons({node:section});
-};
-setTimeout(window.ensureSidebarTools, 1200);
+// Tools section removed from sidebar — WA and Employees accessible via Settings/nav
+window.ensureSidebarTools = function() {};
 
 // ── SETTINGS: WA SETTINGS MODAL PATCH ────────────────────────
 // Patch openSettingsModal for wa settings
@@ -10077,4 +10059,395 @@ window.showAppGuide = function() {
     rippleStyle.textContent = '@keyframes ripple{from{opacity:1;transform:scale(0)}to{opacity:0;transform:scale(2)}}';
     document.head.appendChild(rippleStyle);
 })();
+</script>
+
+<script>
+// ================================================================
+// COMPREHENSIVE BUG FIXES & NEW FEATURES
+// ================================================================
+
+// ── 1. SWIPE TO OPEN/CLOSE SIDEBAR ───────────────────────────
+(function(){
+    var touchStartX = 0, touchStartY = 0;
+    document.addEventListener('touchstart', function(e){
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    }, {passive:true});
+    document.addEventListener('touchend', function(e){
+        var dx = e.changedTouches[0].clientX - touchStartX;
+        var dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+        if(dy > 60) return; // vertical swipe — ignore
+        var sb = document.getElementById('sidebar');
+        if(!sb) return;
+        if(dx > 60 && touchStartX < 40) { // swipe right from left edge
+            typeof toggleSidebar === 'function' && toggleSidebar();
+        } else if(dx < -60 && sb.classList.contains('open')) { // swipe left to close
+            typeof closeSidebar === 'function' && closeSidebar();
+        }
+    }, {passive:true});
+})();
+
+// ── 2. ACTIVE NAV ITEM GREEN HIGHLIGHT (sidebar) ─────────────
+// Already handled via .active class — ensure CSS is correct
+(function(){
+    var style = document.createElement('style');
+    style.textContent = [
+        // Strong active highlight
+        '.nav-item.active{background:linear-gradient(90deg,rgba(16,185,129,.18),rgba(16,185,129,.06))!important;color:#10b981!important;border-left:3px solid #10b981;padding-left:13px;}',
+        '.nav-item.active i{color:#10b981!important;}',
+        // Mobile scroll fix — all tab views should be scrollable
+        '.tab.active{overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;}',
+        '#app{overflow:hidden}',
+        'main{overflow:hidden!important;}',
+        '.tab{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;}',
+        // Invoice modal zoom fix
+        '#invoice-modal .modal-body{overflow:auto;-webkit-overflow-scrolling:touch;}',
+        '#invoice-render-area{touch-action:pan-x pan-y pinch-zoom;transform-origin:top center;}',
+        '#inv-modal-body{overflow:auto;-webkit-overflow-scrolling:touch;cursor:grab;}',
+        // Mobile responsive bottom scroll
+        '@media(max-width:768px){',
+        '  .tab.active{padding-bottom:80px!important;}',
+        '  main{display:flex;flex-direction:column;height:100vh;}',
+        '  #topbar{flex-shrink:0;}',
+        '  .tab-container,.tab-wrap,#tab-content-area{flex:1;overflow:hidden;position:relative;}',
+        '  .tab{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}',
+        '}',
+        // Records table action column compact
+        '.records-action-wrap{display:flex;align-items:center;gap:4px;justify-content:center;}',
+    ].join('\n');
+    document.head.appendChild(style);
+})();
+
+// ── 3. INVOICE QTY REAL-TIME CALCULATION ─────────────────────
+// Patch qty inputs to update on 'input' event (not just 'change')
+(function(){
+    var patchQty = setInterval(function(){
+        if(!window.updateDraftItem) return;
+        clearInterval(patchQty);
+        // Override renderInvoiceItems to use oninput instead of onchange
+        var origRender = window.renderInvoiceItems;
+        if(origRender) {
+            window.renderInvoiceItems = function() {
+                origRender.apply(this, arguments);
+                // After render, switch onchange to oninput for qty/rate
+                setTimeout(function(){
+                    document.querySelectorAll('#inv-items-table input[type="number"]').forEach(function(inp){
+                        inp.setAttribute('oninput', inp.getAttribute('onchange') || '');
+                        inp.addEventListener('input', function(){
+                            var onch = this.getAttribute('onchange');
+                            if(onch) { try { eval(onch); } catch(e){} }
+                        });
+                    });
+                }, 50);
+            };
+        }
+    }, 500);
+
+    // Also patch updateDraftItem to be faster
+    var patchUI = setInterval(function(){
+        if(!window.updateInvoiceUI) return;
+        clearInterval(patchUI);
+        // Add oninput listener to any qty/rate fields via delegation
+        document.addEventListener('input', function(e){
+            var inp = e.target;
+            if(!inp || inp.type !== 'number') return;
+            var onch = inp.getAttribute('onchange');
+            if(!onch || !onch.includes('updateDraftItem')) return;
+            // Already handled by onchange, but trigger immediately
+            try { eval(onch.replace(/this\.value/g, JSON.stringify(inp.value))); } catch(ex){}
+        });
+    }, 300);
+})();
+
+// ── 4. RECORDS TABLE — Compact action button with dropdown ────
+// Replace the wide action buttons with View + Action menu + Delete
+window._buildRecordActions = function(inv) {
+    var id = inv.id;
+    if(inv.status === 'draft') {
+        return '<div class="records-action-wrap">'
+            + '<button onclick="window.resumeDraft(\''+id+'\')" class="px-2.5 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 rounded-lg text-xs font-bold">Resume</button>'
+            + (window.isFeatureEnabled('deleteBtn') ? '<button onclick="window.softDeleteInvoice(\''+id+'\')" class="p-1.5 text-slate-400 hover:text-red-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>' : '')
+            + '</div>';
+    }
+    // Build action menu items
+    var menuItems = [
+        { label:'📋 Duplicate', fn:'window.duplicateInvoice(\''+id+'\')' },
+        { label:'📲 WhatsApp', fn:'window.shareWhatsApp(\''+id+'\')' },
+        { label:'🚫 Void', fn:'window.voidInvoice(\''+id+'\')' },
+    ];
+    if(window.isFeatureEnabled('creditNote')) menuItems.push({ label:'📝 Credit Note', fn:'window.issueCreditNote(\''+id+'\')' });
+
+    var menuHTML = menuItems.map(function(m){
+        return '<button onclick="document.getElementById(\'act-menu-'+id+'\').style.display=\'none\';'+m.fn+'" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50 text-slate-700 font-medium whitespace-nowrap">'+m.label+'</button>';
+    }).join('');
+
+    return '<div class="records-action-wrap relative">'
+        + '<button onclick="window.viewInvoice(\''+id+'\')" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-lg text-xs font-bold">View</button>'
+        + '<div class="relative">'
+        + '<button onclick="var m=document.getElementById(\'act-menu-'+id+'\');m.style.display=m.style.display===\'block\'?\'none\':\'block\'" class="p-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-600 transition-colors" title="More actions"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>'
+        + '<div id="act-menu-'+id+'" style="display:none;position:absolute;right:0;top:100%;z-index:999;background:white;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:140px;overflow:hidden;margin-top:4px;">'+menuHTML+'</div>'
+        + '</div>'
+        + (window.isFeatureEnabled('deleteBtn') ? '<button onclick="window.softDeleteInvoice(\''+id+'\')" class="p-1.5 text-slate-400 hover:text-red-500 transition-colors" title="Delete"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>' : '')
+        + '</div>';
+};
+
+// Close action menus when clicking outside
+document.addEventListener('click', function(e){
+    if(!e.target.closest('[id^="act-menu-"]') && !e.target.closest('button[onclick*="act-menu-"]')) {
+        document.querySelectorAll('[id^="act-menu-"]').forEach(function(m){ m.style.display='none'; });
+    }
+});
+
+// Patch renderRecords to use new action builder
+(function(){
+    var patchRec = setInterval(function(){
+        if(!window.renderRecords || window.renderRecords._actionPatched) return;
+        window.renderRecords._actionPatched = true;
+        clearInterval(patchRec);
+        var orig = window.renderRecords;
+        window.renderRecords = function() {
+            orig.apply(this, arguments);
+            // After render, replace last td in each row with compact actions
+            setTimeout(function(){
+                var rows = document.querySelectorAll('#records-list tr');
+                rows.forEach(function(row){
+                    var lastTd = row.querySelector('td:last-child');
+                    if(!lastTd) return;
+                    var invId = row.querySelector('td:first-child');
+                    if(!invId) return;
+                    var id = invId.textContent.trim();
+                    var inv = (window.AppState&&window.AppState.invoices||[]).find(function(i){ return i.id===id; });
+                    if(!inv) inv = (window.AppState&&window.AppState.invoices||[]).find(function(i){ return i.id.includes(id) || id.includes(i.id); });
+                    if(inv) lastTd.innerHTML = window._buildRecordActions(inv);
+                });
+                if(typeof lucide !== 'undefined') lucide.createIcons();
+            }, 100);
+        };
+    }, 500);
+})();
+
+// ── 5. DASHBOARD — Fix client count (unique from invoices) ────
+(function(){
+    var origDash = window.updateDashboard;
+    var patchDash = setInterval(function(){
+        if(!window.updateDashboard || window.updateDashboard._clientFixed) return;
+        window.updateDashboard._clientFixed = true;
+        clearInterval(patchDash);
+        var origUD = window.updateDashboard;
+        window.updateDashboard = function() {
+            origUD.apply(this, arguments);
+            // Fix client count — use unique clients from invoices + client list
+            var invoiceClients = new Set((window.AppState.invoices||[]).map(function(i){ return i.client&&i.client.name; }).filter(Boolean));
+            var totalUnique = Math.max(invoiceClients.size, (window.AppState.clients||[]).length);
+            var el = document.getElementById('dash-clients');
+            if(el) el.textContent = totalUnique;
+        };
+    }, 600);
+})();
+
+// ── 6. HEALTH SCORE DETAILS — Proper modal ────────────────────
+window.showHealthDetail = function() {
+    var invs = (window.AppState.invoices||[]).filter(function(i){ return i.status==='final' && i.docType!=='Quotation'; });
+    var paid = invs.filter(function(i){ return i.paymentStatus==='paid'; });
+    var collRate = invs.length ? Math.round((paid.length/invs.length)*100) : 0;
+    var total = invs.reduce(function(s,i){ return s+Number(i.grandTotal||0); },0);
+    var lowStock = (window.AppState.products||[]).filter(function(p){ return Number(p.stock||0)<=10 && !p.isHidden; }).length;
+    var clients = (window.AppState.clients||[]).length;
+    var fmt = function(n){ return '₹'+Number(n).toLocaleString('en-IN',{maximumFractionDigits:0}); };
+
+    var scoreNum = document.getElementById('health-score-num');
+    var score = scoreNum ? parseInt(scoreNum.textContent)||0 : 0;
+    var grade = score>=80?'Excellent 🌟':score>=60?'Good 👍':score>=40?'Fair ⚠️':'Needs Attention ❌';
+
+    window.showToast && window.showToast('Health: '+score+'/100 — '+grade, score>=60?'info':'warning');
+
+    // Show detail modal
+    var modal = document.createElement('div');
+    modal.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.7);display:flex;align-items:center;justify-content:center;padding:16px;';
+    modal.innerHTML='<div style="background:white;border-radius:20px;padding:24px;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">'
+        +'<div style="font-size:16px;font-weight:800;color:#1e293b">Business Health Score</div>'
+        +'<button onclick="this.closest(\'[style*=fixed]\').remove()" style="background:#f1f5f9;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:16px">✕</button>'
+        +'</div>'
+        +'<div style="text-align:center;margin-bottom:20px">'
+        +'<div style="font-size:48px;font-weight:900;color:'+(score>=60?'#059669':'#dc2626')+'">'+(score||0)+'</div>'
+        +'<div style="font-size:13px;color:#64748b">out of 100</div>'
+        +'<div style="font-size:14px;font-weight:700;color:#1e293b;margin-top:4px">'+grade+'</div>'
+        +'</div>'
+        +'<div style="space-y:8px;display:flex;flex-direction:column;gap:10px">'
+        +'<div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f0fdf4;border-radius:10px"><span style="color:#065f46;font-size:13px">💰 Collection Rate</span><span style="font-weight:700;color:#059669">'+collRate+'%</span></div>'
+        +'<div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f0f9ff;border-radius:10px"><span style="color:#0369a1;font-size:13px">📋 Total Revenue</span><span style="font-weight:700;color:#0284c7">'+fmt(total)+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between;padding:10px 14px;background:'+(lowStock>0?'#fff7ed':'#f0fdf4')+';border-radius:10px"><span style="color:#92400e;font-size:13px">📦 Low Stock Items</span><span style="font-weight:700;color:'+(lowStock>0?'#ea580c':'#059669')+'">'+lowStock+'</span></div>'
+        +'<div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f5f3ff;border-radius:10px"><span style="color:#5b21b6;font-size:13px">👥 Total Clients</span><span style="font-weight:700;color:#7c3aed">'+clients+'</span></div>'
+        +'</div>'
+        +'<button onclick="this.closest(\'[style*=fixed]\').remove()" style="width:100%;margin-top:16px;padding:12px;background:#059669;color:white;border:none;border-radius:12px;font-weight:700;cursor:pointer;">Close</button>'
+        +'</div>';
+    document.body.appendChild(modal);
+};
+
+// ── 7. ACTIVE MODULES — Add restoreInvoiceAsVoid toggle ──────
+// Patch the modules list render to add the new toggle
+(function(){
+    var patchMod = setInterval(function(){
+        if(!window.SETTINGS_MODALS || !window.SETTINGS_MODALS.modules) return;
+        clearInterval(patchMod);
+        var origRender = window.SETTINGS_MODALS.modules.render;
+        if(origRender && !origRender._patched) {
+            origRender._patched = true;
+            window.SETTINGS_MODALS.modules.render = function() {
+                var html = origRender.apply(this, arguments);
+                // Add new toggle before closing </div>
+                var feats = (window.AppState&&window.AppState.settings&&window.AppState.settings.features)||{};
+                var checked = feats.restoreInvoiceAsVoid ? 'checked' : '';
+                var newToggle = '<label class="toggle-row flex-col items-start gap-0.5">'
+                    +'<div class="flex items-center gap-2 w-full">'
+                    +'<label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" id="smod-feat-restoreInvoiceAsVoid" '+checked+'><span class="toggle-track"></span></label>'
+                    +'<span class="text-sm font-medium text-slate-700">Restore Invoice as Void <span class="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold ml-1">CONTROL</span></span>'
+                    +'</div>'
+                    +'<div class="text-xs text-amber-600">When ON: restored deleted invoices are marked VOID. When OFF: restored as FINAL.</div>'
+                    +'</label>';
+                return html.replace('</div>', newToggle + '</div>');
+            };
+        }
+        // Also patch save to include new toggle
+        var origSave = window.SETTINGS_MODALS.modules.save;
+        if(origSave && !origSave._patched) {
+            origSave._patched = true;
+            window.SETTINGS_MODALS.modules.save = function() {
+                origSave.apply(this, arguments);
+                var el = document.getElementById('smod-feat-restoreInvoiceAsVoid');
+                if(el && window.AppState && window.AppState.settings) {
+                    window.AppState.settings.features = window.AppState.settings.features || {};
+                    window.AppState.settings.features.restoreInvoiceAsVoid = el.checked;
+                }
+            };
+        }
+    }, 600);
+})();
+
+// ── 8. RECURRING INVOICES — Add to sidebar nav ────────────────
+(function(){
+    var addRecNav = setInterval(function(){
+        var nav = document.getElementById('desk-nav');
+        if(!nav || document.getElementById('recurring-nav-btn2')) return;
+        if(!(window.AppState&&window.AppState.user)) return;
+        clearInterval(addRecNav);
+        var divider = document.createElement('div');
+        divider.className = 'nav-section mt-2';
+        divider.textContent = 'Recurring';
+        var btn = document.createElement('button');
+        btn.id = 'recurring-nav-btn2';
+        btn.className = 'nav-item';
+        btn.setAttribute('data-tab','recurring');
+        btn.innerHTML = '<i data-lucide="repeat" class="w-4 h-4"></i><span>Recurring Invoices</span>';
+        btn.onclick = function(){ window.openRecurringModal&&window.openRecurringModal(); };
+        nav.appendChild(divider);
+        nav.appendChild(btn);
+        if(typeof lucide!=='undefined') lucide.createIcons({node:btn});
+    }, 1000);
+})();
+
+// ── 9. INVOICE PINCH-TO-ZOOM FIX ─────────────────────────────
+(function(){
+    // Enable pinch-zoom on invoice modal
+    var addZoom = setInterval(function(){
+        var area = document.getElementById('inv-modal-body');
+        if(!area) return;
+        clearInterval(addZoom);
+
+        var scale = 1, startDist = 0, startScale = 1;
+        var renderArea = document.getElementById('invoice-render-area');
+
+        area.addEventListener('touchstart', function(e){
+            if(e.touches.length === 2) {
+                startDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                startScale = scale;
+                e.preventDefault();
+            }
+        }, {passive:false});
+
+        area.addEventListener('touchmove', function(e){
+            if(e.touches.length === 2 && renderArea) {
+                var dist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                scale = Math.min(3, Math.max(0.5, startScale * (dist/startDist)));
+                renderArea.style.transform = 'scale('+scale+')';
+                renderArea.style.transformOrigin = 'top center';
+                e.preventDefault();
+            }
+        }, {passive:false});
+
+        // Double-tap to reset zoom
+        var lastTap = 0;
+        area.addEventListener('touchend', function(e){
+            var now = Date.now();
+            if(now - lastTap < 300) {
+                scale = 1;
+                if(renderArea) renderArea.style.transform = 'scale(1)';
+            }
+            lastTap = now;
+        });
+    }, 1000);
+})();
+
+// ── 10. SIGNUP FIX — handleSignupAsset alias ─────────────────
+window.handleSignupAsset = window.handleSignupUpload || function(e, type) {
+    var file = e.target.files[0]; if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+        if(type==='logo') { window.AppState.signupLogoBase64=ev.target.result; var el=document.getElementById('signup-logo-preview'); if(el) el.innerHTML='<img src="'+ev.target.result+'" class="w-full h-full object-cover">'; }
+        if(type==='signature') { window.AppState.signupSigBase64=ev.target.result; var el2=document.getElementById('signup-sig-preview'); if(el2) el2.innerHTML='<img src="'+ev.target.result+'" class="w-full h-full object-cover">'; }
+    };
+    reader.readAsDataURL(file);
+};
+
+// ── 11. SHOW CREATE ACCOUNT PROPERLY ─────────────────────────
+// Ensure showSignup works even before Firebase module loads
+var _origShowSignup = window.showSignup;
+window.showSignup = function() {
+    var ownerSec = document.getElementById('owner-login-section');
+    var empSec = document.getElementById('employee-login-section');
+    var signupForm = document.getElementById('signup-form');
+    var toggle = document.getElementById('auth-mode-toggle');
+    if(ownerSec) ownerSec.classList.add('hidden');
+    if(empSec) empSec.classList.add('hidden');
+    if(signupForm) signupForm.classList.remove('hidden');
+    if(toggle) toggle.classList.add('hidden');
+    var t=document.getElementById('auth-title'); if(t) t.textContent='Create Account';
+    var s=document.getElementById('auth-subtitle'); if(s) s.textContent='Setup your professional ERP';
+};
+
+// ── 12. MOBILE SCROLL FIX — all tab sections scrollable ──────
+(function(){
+    var fixScroll = function(){
+        document.querySelectorAll('.tab.active, .tab-content.active').forEach(function(el){
+            el.style.overflowY = 'auto';
+            el.style.webkitOverflowScrolling = 'touch';
+            el.style.height = '100%';
+        });
+    };
+    setInterval(fixScroll, 1000);
+    document.addEventListener('click', function(){ setTimeout(fixScroll, 200); });
+})();
+
+// ── 13. QTY REAL-TIME INPUT PATCH ────────────────────────────
+// Add 'input' event alongside 'change' for immediate calculation
+document.addEventListener('DOMContentLoaded', function(){
+    document.addEventListener('input', function(e){
+        var inp = e.target;
+        if(!inp || !inp.closest('#inv-items-table, #invoice-items-wrap')) return;
+        var oc = inp.getAttribute('onchange');
+        if(oc && oc.includes('updateDraftItem') && inp.type === 'number') {
+            // Already handled by event, force immediate update
+            if(window.updateInvoiceUI) window.updateInvoiceUI();
+        }
+    });
+});
+
+console.log('All fixes loaded ✅');
 </script>
