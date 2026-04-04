@@ -1409,6 +1409,42 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
 </div>
 
 <!-- ===== AI REPORT ===== -->
+<!-- ==================== GST FILING CENTER ==================== -->
+<div id="view-gst" class="tab">
+  <div class="p-4 md:p-6 max-w-5xl mx-auto space-y-4">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h2 class="text-xl font-black text-slate-800">🏛️ GST Filing Center</h2>
+        <p class="text-slate-500 text-sm mt-0.5">Prepare your GSTR-1, GSTR-3B returns and manage ITC</p>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <select id="gst-period-select" class="inp py-2 text-sm bg-white border-slate-200" onchange="window.renderGSTModule()">
+        </select>
+        <button onclick="window.exportGSTJSON()" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-3.5 h-3.5"></i> Export JSON</button>
+      </div>
+    </div>
+
+    <!-- Tax Calendar Alert -->
+    <div id="gst-calendar-alert" class="card p-4 bg-amber-50 border border-amber-200"></div>
+
+    <!-- Sub-tabs -->
+    <div class="flex gap-1 bg-slate-100 rounded-2xl p-1 overflow-x-auto" id="gst-tabs">
+      <button onclick="window.switchGSTTab('dashboard')" id="gsttab-dashboard" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold bg-white text-slate-800 shadow">📊 Tax Dashboard</button>
+      <button onclick="window.switchGSTTab('gstr1')" id="gsttab-gstr1" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-white/50">📤 GSTR-1</button>
+      <button onclick="window.switchGSTTab('gstr3b')" id="gsttab-gstr3b" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-white/50">📋 GSTR-3B</button>
+      <button onclick="window.switchGSTTab('itc')" id="gsttab-itc" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-white/50">🧾 ITC Tracker</button>
+      <button onclick="window.switchGSTTab('calculator')" id="gsttab-calculator" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-white/50">🧮 Tax Calculator</button>
+      <button onclick="window.switchGSTTab('calendar')" id="gsttab-calendar" class="gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-white/50">📅 Tax Calendar</button>
+    </div>
+
+    <!-- GST Content Area -->
+    <div id="gst-content-area"></div>
+
+  </div>
+</div>
+
 <div id="view-ai-report" class="tab">
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
     <div>
@@ -2861,7 +2897,7 @@ window.setTemplate = function(tpl) {
 };
 
 // ── SWITCHAB TITLE PATCH ── (integrated into master switchTab below)
-var _tabTitles = {dashboard:'Dashboard',daybook:'Daybook',invoice:'New Invoice',records:'Sales Records',inventory:'Inventory',services:'Services',expenses:'Expenses',clients:'Clients CRM',employees:'Employees',settings:'Settings','ai-report':'AI Report'};
+var _tabTitles = {dashboard:'Dashboard',daybook:'Daybook',invoice:'New Invoice',records:'Sales Records',inventory:'Inventory',services:'Services',expenses:'Expenses',clients:'Clients CRM',employees:'Employees',gst:'GST Filing Center',settings:'Settings','ai-report':'AI Report'};
 // Title update called from master switchTab
 
 // Fix: renderNavigation uses mobile-nav id, map to bottom-nav
@@ -3394,6 +3430,7 @@ document.addEventListener('DOMContentLoaded', function() {
             { id: 'expenses', icon: 'receipt', label: 'Expenses', class: 'feat-expenses' },
             { id: 'clients', icon: 'users', label: 'Clients' }, 
             { id: 'employees', icon: 'user-check', label: 'Employees' },
+            { id: 'gst', icon: 'landmark', label: 'GST Filing' },
             { id: 'ai-report', icon: 'bar-chart-2', label: 'AI Report' },
             { id: 'settings', icon: 'settings', label: 'Settings' }
         ];
@@ -3818,6 +3855,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if(tabId === 'employees') window.renderEmployees && window.renderEmployees();
             if(tabId === 'settings') window.populateSettingsUI && window.populateSettingsUI();
             if(tabId === 'ai-report') { window.updateAIReportPreview && window.updateAIReportPreview(); if(typeof lucide!=='undefined') lucide.createIcons(); }
+            if(tabId === 'gst') { window.renderGSTModule && window.renderGSTModule(); }
             if(tabId === 'invoice') { setTimeout(function(){ window.setInvoiceMode && window.setInvoiceMode(window._svcInvoiceMode||'goods'); }, 80); }
             if(tabId === 'services') { window.loadServices && window.loadServices(); }
             if(tabId === 'employees') {
@@ -10494,4 +10532,630 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 console.log('All fixes loaded ✅');
+</script>
+
+<script>
+// ================================================================
+// GST FILING CENTER — Complete Module
+// ================================================================
+
+window._gstActiveTab = 'dashboard';
+window._gstPeriod = null; // {month: 0-11, year: 2026}
+
+// ── INIT: Populate period selector ───────────────────────────
+window.initGSTPeriodSelector = function() {
+    var sel = document.getElementById('gst-period-select');
+    if(!sel || sel.options.length > 0) return;
+    var now = new Date();
+    for(var i = 0; i < 12; i++) {
+        var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        var val = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+        var label = d.toLocaleDateString('en-IN', {month:'long', year:'numeric'});
+        var opt = document.createElement('option');
+        opt.value = val; opt.textContent = label;
+        if(i===1) opt.selected = true; // previous month default
+        sel.appendChild(opt);
+    }
+};
+
+window.getGSTPeriod = function() {
+    var sel = document.getElementById('gst-period-select');
+    var val = sel ? sel.value : '';
+    if(!val) {
+        var now = new Date();
+        return { year: now.getFullYear(), month: now.getMonth() === 0 ? 11 : now.getMonth() - 1,
+            label: new Date(now.getFullYear(), now.getMonth()-1, 1).toLocaleDateString('en-IN',{month:'long',year:'numeric'}) };
+    }
+    var parts = val.split('-');
+    var d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, 1);
+    return { year: parseInt(parts[0]), month: parseInt(parts[1])-1, label: d.toLocaleDateString('en-IN',{month:'long',year:'numeric'}) };
+};
+
+// ── FILTER INVOICES BY PERIOD ─────────────────────────────────
+window.getGSTInvoices = function() {
+    var p = window.getGSTPeriod();
+    var prefix = p.year + '-' + String(p.month+1).padStart(2,'0');
+    return (window.AppState.invoices||[]).filter(function(inv){
+        return inv.date && inv.date.startsWith(prefix) && inv.status === 'final'
+            && inv.docType !== 'Quotation' && inv.docType !== 'Proforma Invoice';
+    });
+};
+
+window.getGSTExpenses = function() {
+    var p = window.getGSTPeriod();
+    var prefix = p.year + '-' + String(p.month+1).padStart(2,'0');
+    return (window.AppState.expenses||[]).filter(function(e){
+        return e.date && e.date.startsWith(prefix) && !e.isDeleted && e.gstAmount > 0;
+    });
+};
+
+// ── GST CALCULATION ENGINE ─────────────────────────────────────
+window.calcGSTBreakdown = function(invoices) {
+    var result = { taxable:0, cgst:0, sgst:0, igst:0, total:0, exempt:0, b2b:[], b2cLarge:[], b2cSmall:{}, hsn:{}, nilRated:0 };
+    (invoices||[]).forEach(function(inv) {
+        var isB2B = !!(inv.client && inv.client.gstin && inv.client.gstin.length > 5);
+        var isInterState = !!(inv.client && inv.client.gstin && inv.client.gstin.substring(0,2) !== ((window.AppState.settings&&window.AppState.settings.gstin)||'07').substring(0,2));
+        (inv.items||[]).forEach(function(item) {
+            var qty = Number(item.qty||1), rate = Number(item.rate||0), gst = Number(item.gst||0);
+            var lineAmt = qty * rate;
+            var taxableAmt = gst > 0 ? lineAmt / (1 + gst/100) : lineAmt;
+            var taxAmt = lineAmt - taxableAmt;
+            if(gst === 0) { result.nilRated += lineAmt; result.exempt += lineAmt; }
+            else {
+                result.taxable += taxableAmt;
+                if(isInterState) { result.igst += taxAmt; }
+                else { result.cgst += taxAmt/2; result.sgst += taxAmt/2; }
+            }
+            // HSN summary
+            var hsn = item.hsn || 'N/A';
+            if(!result.hsn[hsn]) result.hsn[hsn] = { desc: item.name, qty:0, taxable:0, igst:0, cgst:0, sgst:0, rate: gst };
+            result.hsn[hsn].qty += qty; result.hsn[hsn].taxable += taxableAmt;
+            if(isInterState) result.hsn[hsn].igst += taxAmt;
+            else { result.hsn[hsn].cgst += taxAmt/2; result.hsn[hsn].sgst += taxAmt/2; }
+        });
+        result.total += Number(inv.grandTotal||0);
+        // B2B vs B2C categorization
+        if(isB2B) { result.b2b.push(inv); }
+        else if(Number(inv.grandTotal||0) >= 250000 && isInterState) { result.b2cLarge.push(inv); }
+        else {
+            var state = (inv.client&&inv.client.address)||'Other';
+            if(!result.b2cSmall[state]) result.b2cSmall[state] = { taxable:0, igst:0, cgst:0, sgst:0, total:0 };
+            result.b2cSmall[state].total += Number(inv.grandTotal||0);
+        }
+    });
+    return result;
+};
+
+// ── TAX CALENDAR ─────────────────────────────────────────────
+window.getGSTCalendar = function() {
+    var now = new Date();
+    var m = now.getMonth(), y = now.getFullYear();
+    var due = [];
+    // GSTR-1 — 11th of next month
+    var r1Date = new Date(y, m+1, 11);
+    // GSTR-3B — 20th/22nd/24th based on turnover (default 20th)
+    var r3bDate = new Date(y, m+1, 20);
+    // IFF — 13th of next month (2nd and 3rd month of quarter)
+    var iffDate = new Date(y, m+1, 13);
+
+    var fmt = function(d){ return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); };
+    var daysLeft = function(d){ return Math.ceil((d-now)/86400000); };
+
+    due.push({ name:'GSTR-1', desc:'Sales Invoice Filing', date:r1Date, days:daysLeft(r1Date), color: daysLeft(r1Date) <= 3 ? '#dc2626' : daysLeft(r1Date) <= 7 ? '#f59e0b' : '#059669' });
+    due.push({ name:'GSTR-3B', desc:'Monthly Tax Payment', date:r3bDate, days:daysLeft(r3bDate), color: daysLeft(r3bDate) <= 3 ? '#dc2626' : daysLeft(r3bDate) <= 7 ? '#f59e0b' : '#059669' });
+    due.push({ name:'IFF', desc:'Invoice Furnishing (QRMP)', date:iffDate, days:daysLeft(iffDate), color: daysLeft(iffDate) <= 3 ? '#dc2626' : daysLeft(iffDate) <= 7 ? '#f59e0b' : '#059669' });
+    due.push({ name:'GSTR-9', desc:'Annual Return (Dec 31)', date:new Date(y, 11, 31), days:daysLeft(new Date(y,11,31)), color:'#3b82f6' });
+    return due;
+};
+
+// ── RENDER GST MODULE ─────────────────────────────────────────
+window.renderGSTModule = function() {
+    window.initGSTPeriodSelector();
+    window.renderGSTCalendarAlert();
+    window.switchGSTTab(window._gstActiveTab || 'dashboard');
+    if(typeof lucide !== 'undefined') lucide.createIcons({node: document.getElementById('view-gst')});
+};
+
+window.switchGSTTab = function(tab) {
+    window._gstActiveTab = tab;
+    document.querySelectorAll('.gst-tab-btn').forEach(function(b){
+        b.className = 'gst-tab-btn flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold ' +
+            (b.id === 'gsttab-'+tab ? 'bg-white text-slate-800 shadow' : 'text-slate-500 hover:bg-white/50');
+    });
+    var area = document.getElementById('gst-content-area');
+    if(!area) return;
+    var inv = window.getGSTInvoices();
+    var bd = window.calcGSTBreakdown(inv);
+    var p = window.getGSTPeriod();
+    var fmt = function(n){ return '₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+
+    if(tab === 'dashboard') area.innerHTML = window.renderGSTDashboard(inv, bd, p, fmt);
+    else if(tab === 'gstr1') area.innerHTML = window.renderGSTR1(inv, bd, p, fmt);
+    else if(tab === 'gstr3b') area.innerHTML = window.renderGSTR3B(inv, bd, p, fmt);
+    else if(tab === 'itc') area.innerHTML = window.renderGSTITC(p, fmt);
+    else if(tab === 'calculator') area.innerHTML = window.renderGSTCalculator();
+    else if(tab === 'calendar') area.innerHTML = window.renderGSTCalendarFull();
+
+    if(typeof lucide !== 'undefined') setTimeout(function(){ lucide.createIcons({node:area}); }, 100);
+};
+
+window.renderGSTCalendarAlert = function() {
+    var el = document.getElementById('gst-calendar-alert');
+    if(!el) return;
+    var due = window.getGSTCalendar();
+    var urgent = due.filter(function(d){ return d.days >= 0 && d.days <= 7; });
+    if(!urgent.length) { el.style.display='none'; return; }
+    el.style.display = '';
+    el.innerHTML = '<div class="flex items-start gap-3"><i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i><div><div class="font-bold text-amber-800 text-sm">⚠️ Upcoming GST Due Dates</div><div class="flex flex-wrap gap-2 mt-2">'
+        + urgent.map(function(d){ return '<span class="px-2 py-1 rounded-lg text-xs font-bold" style="background:'+d.color+'20;color:'+d.color+'">'+d.name+': '+d.days+' days left</span>'; }).join('')
+        + '</div></div></div>';
+    if(typeof lucide !== 'undefined') lucide.createIcons({node:el});
+};
+
+// ── TAX DASHBOARD ─────────────────────────────────────────────
+window.renderGSTDashboard = function(inv, bd, p, fmt) {
+    var totalTax = bd.cgst + bd.sgst + bd.igst;
+    var expenses = window.getGSTExpenses();
+    var itcTotal = expenses.reduce(function(s,e){ return s + Number(e.gstAmount||0); }, 0);
+    var netPayable = Math.max(0, totalTax - itcTotal);
+    var prevM = new Date(p.year, p.month-1, 1);
+    var prevPrefix = prevM.getFullYear()+'-'+String(prevM.getMonth()+1).padStart(2,'0');
+    var prevInv = (window.AppState.invoices||[]).filter(function(i){ return i.date&&i.date.startsWith(prevPrefix)&&i.status==='final'; });
+    var prevBD = window.calcGSTBreakdown(prevInv);
+    var prevTax = prevBD.cgst+prevBD.sgst+prevBD.igst;
+    var growth = prevTax > 0 ? ((totalTax-prevTax)/prevTax*100).toFixed(1) : '—';
+
+    return '<div class="space-y-4">'
+        // Stats row
+        + '<div class="grid grid-cols-2 md:grid-cols-4 gap-3">'
+        + _gstStatCard('Total Sales', fmt(bd.total), 'bg-blue-50 text-blue-700', 'trending-up')
+        + _gstStatCard('Taxable Value', fmt(bd.taxable), 'bg-emerald-50 text-emerald-700', 'check-circle')
+        + _gstStatCard('Output Tax', fmt(totalTax), 'bg-orange-50 text-orange-700', 'landmark')
+        + _gstStatCard('ITC Available', fmt(itcTotal), 'bg-purple-50 text-purple-700', 'shield-check')
+        + '</div>'
+        // Tax payable
+        + '<div class="card p-5" style="background:linear-gradient(135deg,#064e3b,#065f46);color:white">'
+        + '<div class="text-sm opacity-75 font-medium mb-1">Net GST Payable for '+p.label+'</div>'
+        + '<div class="text-3xl font-black">'+fmt(netPayable)+'</div>'
+        + '<div class="flex gap-6 mt-3 text-sm opacity-80">'
+        + '<span>Output Tax: '+fmt(totalTax)+'</span><span>ITC Claimed: '+fmt(itcTotal)+'</span>'
+        + (growth !== '—' ? '<span>vs Last Month: '+(growth > 0 ? '+':'')+growth+'%</span>' : '')
+        + '</div></div>'
+        // Breakup table
+        + '<div class="card overflow-hidden"><div class="p-4 font-bold text-slate-800 border-b border-slate-100">Tax Breakup ('+p.label+')</div>'
+        + '<table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-3 text-left">Tax Type</th><th class="p-3 text-right">Taxable Amount</th><th class="p-3 text-right">Tax Amount</th><th class="p-3 text-right">Effective Rate</th></tr></thead>'
+        + '<tbody>'
+        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium">CGST (Central)</td><td class="p-3 text-right">'+fmt(bd.taxable/2)+'</td><td class="p-3 text-right font-bold text-emerald-700">'+fmt(bd.cgst)+'</td><td class="p-3 text-right text-slate-500">'+(bd.taxable>0?(bd.cgst/bd.taxable*100).toFixed(1)+'%':'—')+'</td></tr>'
+        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium">SGST (State)</td><td class="p-3 text-right">'+fmt(bd.taxable/2)+'</td><td class="p-3 text-right font-bold text-blue-700">'+fmt(bd.sgst)+'</td><td class="p-3 text-right text-slate-500">'+(bd.taxable>0?(bd.sgst/bd.taxable*100).toFixed(1)+'%':'—')+'</td></tr>'
+        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium">IGST (Integrated)</td><td class="p-3 text-right">'+fmt(bd.taxable)+'</td><td class="p-3 text-right font-bold text-purple-700">'+fmt(bd.igst)+'</td><td class="p-3 text-right text-slate-500">'+(bd.taxable>0?(bd.igst/bd.taxable*100).toFixed(1)+'%':'—')+'</td></tr>'
+        + '<tr class="bg-slate-50 font-bold"><td class="p-3">Total Output Tax</td><td class="p-3 text-right">'+fmt(bd.taxable)+'</td><td class="p-3 text-right text-orange-700">'+fmt(totalTax)+'</td><td class="p-3 text-right">—</td></tr>'
+        + '</tbody></table></div>'
+        // Invoice summary
+        + '<div class="grid grid-cols-3 gap-3">'
+        + _gstStatCard('B2B Invoices', bd.b2b.length+' invoices', 'bg-slate-50 text-slate-700', 'building-2')
+        + _gstStatCard('B2C Large', bd.b2cLarge.length+' invoices', 'bg-slate-50 text-slate-700', 'users')
+        + _gstStatCard('Nil/Exempt', fmt(bd.nilRated), 'bg-slate-50 text-slate-700', 'minus-circle')
+        + '</div>'
+        + '</div>';
+};
+
+function _gstStatCard(label, value, colorClass, icon) {
+    return '<div class="card p-4 '+colorClass+'">'
+        + '<div class="flex items-center gap-2 mb-1 opacity-70"><i data-lucide="'+icon+'" class="w-4 h-4"></i><span class="text-xs font-bold uppercase tracking-wide">'+label+'</span></div>'
+        + '<div class="text-lg font-black">'+value+'</div>'
+        + '</div>';
+}
+
+// ── GSTR-1 (SALES RETURN) ─────────────────────────────────────
+window.renderGSTR1 = function(inv, bd, p, fmt) {
+    var totalTax = bd.cgst+bd.sgst+bd.igst;
+    var s = window.AppState.settings||{};
+
+    // HSN Summary Table
+    var hsnRows = Object.keys(bd.hsn).map(function(hsn){
+        var h = bd.hsn[hsn];
+        var totalTax = h.igst+h.cgst+h.sgst;
+        return '<tr class="border-b border-slate-50 hover:bg-slate-50">'
+            +'<td class="p-3 font-mono font-bold text-slate-700">'+hsn+'</td>'
+            +'<td class="p-3 text-slate-600 text-xs">'+h.desc.substring(0,30)+'</td>'
+            +'<td class="p-3 text-center">'+Math.round(h.qty)+'</td>'
+            +'<td class="p-3 text-right">'+fmt(h.taxable)+'</td>'
+            +'<td class="p-3 text-right text-blue-600">'+fmt(h.igst)+'</td>'
+            +'<td class="p-3 text-right text-emerald-600">'+fmt(h.cgst)+'</td>'
+            +'<td class="p-3 text-right text-purple-600">'+fmt(h.sgst)+'</td>'
+            +'<td class="p-3 text-right font-bold">'+fmt(totalTax)+'</td>'
+            +'</tr>';
+    }).join('') || '<tr><td colspan="8" class="p-6 text-center text-slate-400">No sales data for this period</td></tr>';
+
+    // B2B Table
+    var b2bRows = bd.b2b.map(function(inv){
+        var taxable = (inv.items||[]).reduce(function(s,it){ return s + (Number(it.qty||1)*Number(it.rate||0)/(1+(Number(it.gst||0)/100))); }, 0);
+        var tax = Number(inv.totalTax||0);
+        return '<tr class="border-b border-slate-50 hover:bg-slate-50">'
+            +'<td class="p-3 font-mono text-xs text-emerald-700">'+inv.id+'</td>'
+            +'<td class="p-3 text-sm">'+inv.date+'</td>'
+            +'<td class="p-3 font-medium">'+((inv.client&&inv.client.name)||'')+'</td>'
+            +'<td class="p-3 font-mono text-xs">'+((inv.client&&inv.client.gstin)||'—')+'</td>'
+            +'<td class="p-3 text-right">'+fmt(taxable)+'</td>'
+            +'<td class="p-3 text-right font-bold text-orange-700">'+fmt(tax)+'</td>'
+            +'<td class="p-3 text-right font-black">'+fmt(Number(inv.grandTotal||0))+'</td>'
+            +'</tr>';
+    }).join('') || '<tr><td colspan="7" class="p-6 text-center text-slate-400">No B2B invoices this period</td></tr>';
+
+    // Document Summary
+    var docSerial = inv.map(function(i){ return i.id; }).join(', ') || 'No documents';
+    var firstDoc = inv.length ? inv[inv.length-1].id : '—';
+    var lastDoc = inv.length ? inv[0].id : '—';
+
+    return '<div class="space-y-4">'
+        // Status banner
+        + '<div class="card p-4 bg-blue-50 border border-blue-200 flex items-center justify-between flex-wrap gap-3">'
+        + '<div><div class="font-bold text-blue-800">GSTR-1 — '+p.label+'</div><div class="text-xs text-blue-600 mt-0.5">Due: 11th of next month • '+inv.length+' invoices to report</div></div>'
+        + '<div class="flex gap-2"><button onclick="window.exportGSTJSON(\'gstr1\')" class="btn btn-sm bg-blue-600 text-white border-0">📤 Export JSON</button><button onclick="window.exportGSTExcel(\'gstr1\')" class="btn btn-sm btn-ghost">📊 Excel</button></div>'
+        + '</div>'
+        // Summary stats
+        + '<div class="grid grid-cols-3 gap-3">'
+        + _gstStatCard('Total Taxable', fmt(bd.taxable), 'bg-slate-50 text-slate-700', 'calculator')
+        + _gstStatCard('Total Tax', fmt(totalTax), 'bg-orange-50 text-orange-700', 'landmark')
+        + _gstStatCard('Invoice Value', fmt(bd.total), 'bg-emerald-50 text-emerald-700', 'file-text')
+        + '</div>'
+        // Table 4 — B2B
+        + '<div class="card overflow-hidden">'
+        + '<div class="p-4 flex items-center justify-between border-b border-slate-100"><div><div class="font-bold text-slate-800">Table 4A — B2B Invoices</div><div class="text-xs text-slate-500">Registered party sales (GST buyers)</div></div><span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-bold">'+bd.b2b.length+' entries</span></div>'
+        + '<div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-3 text-left">Invoice No.</th><th class="p-3 text-left">Date</th><th class="p-3 text-left">Buyer Name</th><th class="p-3 text-left">GSTIN</th><th class="p-3 text-right">Taxable</th><th class="p-3 text-right">Tax</th><th class="p-3 text-right">Total</th></tr></thead><tbody>'+b2bRows+'</tbody></table></div></div>'
+        // Table 7 — B2C Small
+        + '<div class="card overflow-hidden">'
+        + '<div class="p-4 border-b border-slate-100"><div class="font-bold text-slate-800">Table 7 — B2C Small (Consolidated)</div><div class="text-xs text-slate-500">Unregistered buyer sales — state-wise consolidated</div></div>'
+        + '<div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-3 text-left">State/UT</th><th class="p-3 text-right">Total Sales</th><th class="p-3 text-right">Taxable</th><th class="p-3 text-right">Tax</th></tr></thead><tbody>'
+        + (Object.keys(bd.b2cSmall).length ? Object.keys(bd.b2cSmall).map(function(state){
+            var d = bd.b2cSmall[state];
+            return '<tr class="border-b border-slate-50"><td class="p-3">'+state+'</td><td class="p-3 text-right">'+fmt(d.total)+'</td><td class="p-3 text-right">'+fmt(d.total*0.85)+'</td><td class="p-3 text-right">'+fmt(d.total*0.15)+'</td></tr>';
+        }).join('') : '<tr><td colspan="4" class="p-6 text-center text-slate-400">No B2C data</td></tr>')
+        + '</tbody></table></div></div>'
+        // Table 12 — HSN Summary
+        + '<div class="card overflow-hidden">'
+        + '<div class="p-4 flex items-center justify-between border-b border-slate-100"><div><div class="font-bold text-slate-800">Table 12 — HSN Summary</div><div class="text-xs text-slate-500">Mandatory for turnover &gt; ₹5Cr (4-digit) or ₹50L (6-digit)</div></div></div>'
+        + '<div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-3 text-left">HSN Code</th><th class="p-3 text-left">Description</th><th class="p-3 text-center">Qty</th><th class="p-3 text-right">Taxable</th><th class="p-3 text-right text-blue-600">IGST</th><th class="p-3 text-right text-emerald-600">CGST</th><th class="p-3 text-right text-purple-600">SGST</th><th class="p-3 text-right">Total Tax</th></tr></thead><tbody>'+hsnRows+'</tbody></table></div></div>'
+        // Table 13 — Document Summary
+        + '<div class="card p-4">'
+        + '<div class="font-bold text-slate-800 mb-3">Table 13 — Document Summary</div>'
+        + '<div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">'
+        + '<div class="p-3 bg-slate-50 rounded-xl"><div class="text-xs text-slate-500">Total Invoices</div><div class="font-black text-slate-800 text-xl">'+inv.length+'</div></div>'
+        + '<div class="p-3 bg-slate-50 rounded-xl"><div class="text-xs text-slate-500">First Invoice</div><div class="font-bold text-slate-700 text-sm">'+firstDoc+'</div></div>'
+        + '<div class="p-3 bg-slate-50 rounded-xl"><div class="text-xs text-slate-500">Last Invoice</div><div class="font-bold text-slate-700 text-sm">'+lastDoc+'</div></div>'
+        + '<div class="p-3 bg-slate-50 rounded-xl"><div class="text-xs text-slate-500">Cancelled</div><div class="font-black text-red-600 text-xl">'+((window.AppState.invoices||[]).filter(function(i){ return i.status==='void' && i.date && i.date.startsWith(p.year+'-'+String(p.month+1).padStart(2,'0')); }).length)+'</div></div>'
+        + '</div></div>'
+        + '</div>';
+};
+
+// ── GSTR-3B ───────────────────────────────────────────────────
+window.renderGSTR3B = function(inv, bd, p, fmt) {
+    var totalTax = bd.cgst+bd.sgst+bd.igst;
+    var expenses = window.getGSTExpenses();
+    var itcCGST = expenses.reduce(function(s,e){ return s+Number(e.gstAmount||0)/2; }, 0);
+    var itcSGST = itcCGST;
+    var itcIGST = 0;
+    var totalITC = itcCGST + itcSGST + itcIGST;
+    var netCGST = Math.max(0, bd.cgst - itcCGST);
+    var netSGST = Math.max(0, bd.sgst - itcSGST);
+    var netIGST = Math.max(0, bd.igst - itcIGST);
+    var netTotal = netCGST + netSGST + netIGST;
+    var lateInterest = 0; // calc only if user enters late
+
+    return '<div class="space-y-4">'
+        + '<div class="card p-4 bg-orange-50 border border-orange-200 flex items-center justify-between flex-wrap gap-3">'
+        + '<div><div class="font-bold text-orange-800">GSTR-3B — '+p.label+'</div><div class="text-xs text-orange-600 mt-0.5">Due: 20th of next month • Monthly tax payment return</div></div>'
+        + '<button onclick="window.exportGSTJSON(\'gstr3b\')" class="btn btn-sm bg-orange-600 text-white border-0">📤 Export JSON</button>'
+        + '</div>'
+        // 3.1 — Outward Supplies
+        + '<div class="card overflow-hidden"><div class="p-4 font-bold text-slate-800 border-b border-slate-100">3.1 — Outward Supplies (Sales) [Table A]</div>'
+        + '<table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-3 text-left">Nature of Supply</th><th class="p-3 text-right">Total Taxable</th><th class="p-3 text-right">Integrated Tax</th><th class="p-3 text-right">Central Tax</th><th class="p-3 text-right">State Tax</th><th class="p-3 text-right">Cess</th></tr></thead><tbody>'
+        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium">3.1(a) Outward taxable supplies (other than zero-rated/nil)</td><td class="p-3 text-right">'+fmt(bd.taxable)+'</td><td class="p-3 text-right text-blue-600">'+fmt(bd.igst)+'</td><td class="p-3 text-right text-emerald-600">'+fmt(bd.cgst)+'</td><td class="p-3 text-right text-purple-600">'+fmt(bd.sgst)+'</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '<tr class="border-b border-slate-50"><td class="p-3">3.1(b) Outward taxable supplies (Zero rated)</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '<tr class="border-b border-slate-50"><td class="p-3">3.1(c) Other outward supplies (Nil, Exempt)</td><td class="p-3 text-right">'+fmt(bd.nilRated)+'</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '<tr class="border-b border-slate-50"><td class="p-3">3.1(d) Inward supplies (RCM)</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right text-blue-600">₹0.00</td><td class="p-3 text-right text-emerald-600">₹0.00</td><td class="p-3 text-right text-purple-600">₹0.00</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '<tr class="bg-slate-50 font-bold"><td class="p-3">Total Output Tax Liability</td><td class="p-3 text-right">'+fmt(bd.taxable)+'</td><td class="p-3 text-right text-blue-700">'+fmt(bd.igst)+'</td><td class="p-3 text-right text-emerald-700">'+fmt(bd.cgst)+'</td><td class="p-3 text-right text-purple-700">'+fmt(bd.sgst)+'</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '</tbody></table></div>'
+        // 4 — ITC
+        + '<div class="card overflow-hidden"><div class="p-4 font-bold text-slate-800 border-b border-slate-100">4 — Eligible ITC (Input Tax Credit)</div>'
+        + '<table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-3 text-left">ITC Type</th><th class="p-3 text-right">Integrated</th><th class="p-3 text-right">Central</th><th class="p-3 text-right">State</th><th class="p-3 text-right">Cess</th></tr></thead><tbody>'
+        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium">4(A)(5) All other ITC (from purchases)</td><td class="p-3 text-right text-blue-600">'+fmt(itcIGST)+'</td><td class="p-3 text-right text-emerald-600">'+fmt(itcCGST)+'</td><td class="p-3 text-right text-purple-600">'+fmt(itcSGST)+'</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '<tr class="bg-slate-50 font-bold"><td class="p-3">Total ITC Available</td><td class="p-3 text-right text-blue-700">'+fmt(itcIGST)+'</td><td class="p-3 text-right text-emerald-700">'+fmt(itcCGST)+'</td><td class="p-3 text-right text-purple-700">'+fmt(itcSGST)+'</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '</tbody></table>'
+        + '<div class="p-3 bg-amber-50 text-xs text-amber-700 flex gap-2"><i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5"></i>Add purchase invoices in Expenses with GST amount to track ITC automatically</div>'
+        + '</div>'
+        // 5 — Net Payable
+        + '<div class="card overflow-hidden"><div class="p-4 font-bold text-slate-800 border-b border-slate-100">5 — Net Tax Payable (after ITC set-off)</div>'
+        + '<table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-3 text-left">Tax Head</th><th class="p-3 text-right">Output Tax</th><th class="p-3 text-right">ITC Utilized</th><th class="p-3 text-right font-bold">Net Payable</th></tr></thead><tbody>'
+        + '<tr class="border-b border-slate-50"><td class="p-3">IGST</td><td class="p-3 text-right">'+fmt(bd.igst)+'</td><td class="p-3 text-right">'+fmt(itcIGST)+'</td><td class="p-3 text-right font-bold text-blue-700">'+fmt(netIGST)+'</td></tr>'
+        + '<tr class="border-b border-slate-50"><td class="p-3">CGST</td><td class="p-3 text-right">'+fmt(bd.cgst)+'</td><td class="p-3 text-right">'+fmt(itcCGST)+'</td><td class="p-3 text-right font-bold text-emerald-700">'+fmt(netCGST)+'</td></tr>'
+        + '<tr class="border-b border-slate-50"><td class="p-3">SGST/UTGST</td><td class="p-3 text-right">'+fmt(bd.sgst)+'</td><td class="p-3 text-right">'+fmt(itcSGST)+'</td><td class="p-3 text-right font-bold text-purple-700">'+fmt(netSGST)+'</td></tr>'
+        + '<tr class="bg-emerald-50 font-black text-base"><td class="p-4 text-emerald-800">💰 TOTAL NET GST PAYABLE</td><td class="p-4 text-right">'+fmt(totalTax)+'</td><td class="p-4 text-right">'+fmt(totalITC)+'</td><td class="p-4 text-right text-emerald-700 text-lg">'+fmt(netTotal)+'</td></tr>'
+        + '</tbody></table></div>'
+        // Late fee calculator
+        + '<div class="card p-4"><div class="font-bold text-slate-800 mb-3">🧮 Interest & Late Fee Calculator</div>'
+        + '<div class="grid grid-cols-1 md:grid-cols-3 gap-3">'
+        + '<div><label class="lbl">Days Delayed</label><input type="number" id="gst-delay-days" class="inp" placeholder="0" min="0" oninput="window.calcGSTLateFee()"></div>'
+        + '<div><label class="lbl">Tax Amount (₹)</label><input type="number" id="gst-late-tax" class="inp" value="'+Math.round(netTotal)+'" oninput="window.calcGSTLateFee()"></div>'
+        + '<div><label class="lbl">Filing Type</label><select id="gst-filing-type" class="inp" onchange="window.calcGSTLateFee()"><option value="tax">With Tax Liability</option><option value="nil">Nil Return</option></select></div>'
+        + '</div><div id="gst-late-result" class="mt-3 p-3 bg-red-50 rounded-xl text-sm text-red-700 hidden"></div>'
+        + '</div>'
+        + '</div>';
+};
+
+window.calcGSTLateFee = function() {
+    var days = parseInt((document.getElementById('gst-delay-days')||{}).value)||0;
+    var tax = parseFloat((document.getElementById('gst-late-tax')||{}).value)||0;
+    var isNil = (document.getElementById('gst-filing-type')||{}).value === 'nil';
+    var result = document.getElementById('gst-late-result');
+    if(!result || days <= 0) { if(result) result.classList.add('hidden'); return; }
+    var interest = tax * 0.18 * days / 365;
+    var lateFeePerDay = isNil ? 20 : 50;
+    var lateFee = Math.min(days * lateFeePerDay, isNil ? 500 : 5000); // CGST half, SGST half
+    var totalPenalty = interest + lateFee;
+    result.classList.remove('hidden');
+    result.innerHTML = '<div class="font-bold mb-2">Penalty Breakdown for '+days+' days delay:</div>'
+        + '<div class="grid grid-cols-3 gap-2">'
+        + '<div class="p-2 bg-white rounded-lg text-center"><div class="text-xs text-slate-500">Interest @18%</div><div class="font-bold text-red-700">₹'+interest.toFixed(2)+'</div></div>'
+        + '<div class="p-2 bg-white rounded-lg text-center"><div class="text-xs text-slate-500">Late Fee</div><div class="font-bold text-red-700">₹'+lateFee.toFixed(2)+'</div></div>'
+        + '<div class="p-2 bg-red-100 rounded-lg text-center"><div class="text-xs text-slate-500">Total Penalty</div><div class="font-black text-red-800">₹'+totalPenalty.toFixed(2)+'</div></div>'
+        + '</div>';
+};
+
+// ── ITC TRACKER ───────────────────────────────────────────────
+window.renderGSTITC = function(p, fmt) {
+    var expenses = window.getGSTExpenses();
+    var totalITC = expenses.reduce(function(s,e){ return s+Number(e.gstAmount||0); }, 0);
+    var rows = expenses.map(function(e){
+        return '<tr class="border-b border-slate-50 hover:bg-slate-50">'
+            +'<td class="p-3 text-sm">'+e.date+'</td>'
+            +'<td class="p-3 font-medium">'+e.description+'</td>'
+            +'<td class="p-3 text-slate-500 text-xs">'+e.category+'</td>'
+            +'<td class="p-3 text-right">'+fmt(e.amount||0)+'</td>'
+            +'<td class="p-3 text-right font-bold text-emerald-700">'+fmt(e.gstAmount||0)+'</td>'
+            +'<td class="p-3 text-right text-emerald-600">'+fmt((e.gstAmount||0)/2)+'</td>'
+            +'<td class="p-3 text-right text-purple-600">'+fmt((e.gstAmount||0)/2)+'</td>'
+            +'<td class="p-3 text-center"><span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">Eligible</span></td>'
+            +'</tr>';
+    }).join('') || '<tr><td colspan="8" class="p-8 text-center text-slate-400">No purchase entries with GST this period.<br><a onclick="window.switchTab(\'expenses\')" class="text-emerald-600 font-bold cursor-pointer">Add expenses with GST amount →</a></td></tr>';
+
+    return '<div class="space-y-4">'
+        + '<div class="card p-4 bg-purple-50 border border-purple-200">'
+        + '<div class="font-bold text-purple-800 mb-1">ITC Tracker — '+p.label+'</div>'
+        + '<div class="text-xs text-purple-600">Track Input Tax Credit from your purchases. Add GST amount when recording expenses.</div>'
+        + '</div>'
+        + '<div class="grid grid-cols-2 md:grid-cols-3 gap-3">'
+        + _gstStatCard('Total ITC Available', fmt(totalITC), 'bg-purple-50 text-purple-700', 'shield-check')
+        + _gstStatCard('CGST Credit', fmt(totalITC/2), 'bg-emerald-50 text-emerald-700', 'check-circle')
+        + _gstStatCard('SGST Credit', fmt(totalITC/2), 'bg-blue-50 text-blue-700', 'check-circle')
+        + '</div>'
+        + '<div class="card p-4 bg-amber-50 border border-amber-200 text-sm text-amber-800">'
+        + '<div class="font-bold mb-1">⚠️ ITC Eligibility Rules (Section 17(5) — Blocked Credits)</div>'
+        + '<ul class="text-xs space-y-1 text-amber-700 list-disc list-inside">'
+        + '<li>Food, beverages, outdoor catering — ITC NOT allowed</li>'
+        + '<li>Personal use items, gifts — ITC NOT allowed</li>'
+        + '<li>Motor vehicles for personal use — ITC NOT allowed</li>'
+        + '<li>Club memberships, health insurance (for employees) — NOT allowed</li>'
+        + '<li>Construction of immovable property — NOT allowed</li>'
+        + '<li>Rule 37: If supplier not paid within 180 days, ITC to be reversed</li>'
+        + '</ul></div>'
+        + '<div class="card overflow-hidden">'
+        + '<div class="p-4 flex items-center justify-between border-b border-slate-100">'
+        + '<div class="font-bold text-slate-800">Purchase Register with ITC</div>'
+        + '<span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-bold">'+expenses.length+' entries</span>'
+        + '</div>'
+        + '<div class="overflow-x-auto"><table class="w-full text-sm">'
+        + '<thead class="bg-slate-50"><tr><th class="p-3 text-left">Date</th><th class="p-3 text-left">Description</th><th class="p-3 text-left">Category</th><th class="p-3 text-right">Amount</th><th class="p-3 text-right">Total ITC</th><th class="p-3 text-right">CGST</th><th class="p-3 text-right">SGST</th><th class="p-3 text-center">Status</th></tr></thead>'
+        + '<tbody>'+rows+'</tbody>'
+        + '</table></div></div>'
+        + '<div class="card p-4"><div class="font-bold text-slate-800 mb-3">Rule 37 — 180-Day Payment Tracker</div>'
+        + '<p class="text-sm text-slate-600">If you have not paid your supplier within 180 days of invoice date, you must reverse the ITC claimed. Track payments here.</p>'
+        + '<div class="mt-3 p-3 bg-blue-50 rounded-xl text-xs text-blue-700">Go to Expenses tab → Add your purchase invoices with GST amount → System will track 180-day rule automatically.</div>'
+        + '</div>'
+        + '</div>';
+};
+
+// ── GST CALCULATOR ───────────────────────────────────────────
+window.renderGSTCalculator = function() {
+    return '<div class="space-y-4">'
+        + '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">'
+        // Forward calculation
+        + '<div class="card p-5"><div class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="calculator" class="w-4 h-4 text-emerald-600"></i> GST Calculator</div>'
+        + '<div class="space-y-3">'
+        + '<div><label class="lbl">Amount (₹)</label><input type="number" id="gst-calc-amount" class="inp" placeholder="Enter amount" oninput="window.doGSTCalc()"></div>'
+        + '<div><label class="lbl">GST Rate</label><select id="gst-calc-rate" class="inp" onchange="window.doGSTCalc()"><option value="5">5%</option><option value="12" selected>12%</option><option value="18">18%</option><option value="28">28%</option><option value="0">0% (Exempt)</option></select></div>'
+        + '<div><label class="lbl">Calculation Type</label><select id="gst-calc-type" class="inp" onchange="window.doGSTCalc()"><option value="excl">Add GST (Exclusive)</option><option value="incl">Extract GST (Inclusive)</option></select></div>'
+        + '</div>'
+        + '<div id="gst-calc-result" class="mt-4 p-4 bg-emerald-50 rounded-xl hidden">'
+        + '</div></div>'
+        // Set-off engine
+        + '<div class="card p-5"><div class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="git-merge" class="w-4 h-4 text-blue-600"></i> ITC Set-off Engine</div>'
+        + '<p class="text-sm text-slate-600 mb-4">Enter your output tax and ITC to calculate set-off as per GST rules (IGST first, then CGST/SGST).</p>'
+        + '<div class="space-y-3">'
+        + '<div class="grid grid-cols-3 gap-2"><div><label class="lbl text-xs">Output IGST</label><input type="number" id="so-igst-out" class="inp py-1.5 text-sm" placeholder="0" oninput="window.doSetOff()"></div><div><label class="lbl text-xs">Output CGST</label><input type="number" id="so-cgst-out" class="inp py-1.5 text-sm" placeholder="0" oninput="window.doSetOff()"></div><div><label class="lbl text-xs">Output SGST</label><input type="number" id="so-sgst-out" class="inp py-1.5 text-sm" placeholder="0" oninput="window.doSetOff()"></div></div>'
+        + '<div class="grid grid-cols-3 gap-2"><div><label class="lbl text-xs">ITC IGST</label><input type="number" id="so-igst-itc" class="inp py-1.5 text-sm" placeholder="0" oninput="window.doSetOff()"></div><div><label class="lbl text-xs">ITC CGST</label><input type="number" id="so-cgst-itc" class="inp py-1.5 text-sm" placeholder="0" oninput="window.doSetOff()"></div><div><label class="lbl text-xs">ITC SGST</label><input type="number" id="so-sgst-itc" class="inp py-1.5 text-sm" placeholder="0" oninput="window.doSetOff()"></div></div>'
+        + '</div>'
+        + '<div id="so-result" class="mt-4 hidden"></div>'
+        + '</div></div>'
+        // Annual summary card
+        + '<div class="card p-5 md:col-span-2"><div class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-600"></i> Annual GST Summary (GSTR-9 Preview)</div>'
+        + '<div id="gst-annual-summary">'+window.renderGSTAnnualSummary()+'</div>'
+        + '</div>'
+        + '</div>';
+};
+
+window.doGSTCalc = function() {
+    var amt = parseFloat((document.getElementById('gst-calc-amount')||{}).value)||0;
+    var rate = parseFloat((document.getElementById('gst-calc-rate')||{}).value)||0;
+    var type = (document.getElementById('gst-calc-type')||{}).value;
+    var result = document.getElementById('gst-calc-result');
+    if(!result || amt <= 0) { if(result) result.classList.add('hidden'); return; }
+    result.classList.remove('hidden');
+    var base, tax, total;
+    if(type === 'excl') { base=amt; tax=amt*rate/100; total=amt+tax; }
+    else { total=amt; base=amt/(1+rate/100); tax=amt-base; }
+    var fmt2 = function(n){ return '₹'+n.toFixed(2); };
+    result.innerHTML = '<div class="grid grid-cols-2 gap-2 text-sm">'
+        +'<div><span class="text-slate-500">Base Amount:</span> <span class="font-bold">'+fmt2(base)+'</span></div>'
+        +'<div><span class="text-slate-500">GST ('+rate+'%):</span> <span class="font-bold text-orange-700">'+fmt2(tax)+'</span></div>'
+        +'<div><span class="text-slate-500">CGST ('+(rate/2)+'%):</span> <span class="font-bold text-emerald-700">'+fmt2(tax/2)+'</span></div>'
+        +'<div><span class="text-slate-500">SGST ('+(rate/2)+'%):</span> <span class="font-bold text-blue-700">'+fmt2(tax/2)+'</span></div>'
+        +'<div class="col-span-2 pt-2 border-t border-emerald-200"><span class="text-slate-600 font-medium">Total Amount: </span><span class="font-black text-emerald-800 text-lg">'+fmt2(total)+'</span></div>'
+        +'</div>';
+};
+
+window.doSetOff = function() {
+    var v = function(id){ return parseFloat((document.getElementById(id)||{}).value)||0; };
+    var igstOut=v('so-igst-out'), cgstOut=v('so-cgst-out'), sgstOut=v('so-sgst-out');
+    var igstITC=v('so-igst-itc'), cgstITC=v('so-cgst-itc'), sgstITC=v('so-sgst-itc');
+    var result = document.getElementById('so-result');
+    if(!result) return;
+    // Set-off rules: IGST ITC → IGST first, then CGST, then SGST
+    var igstBal=igstITC, cgstBal=cgstITC, sgstBal=sgstITC;
+    var netIGST = igstOut - Math.min(igstBal, igstOut); igstBal -= Math.min(igstBal, igstOut);
+    var netCGST = cgstOut - Math.min(cgstBal, cgstOut); cgstBal -= Math.min(cgstBal, cgstOut);
+    var netSGST = sgstOut - Math.min(sgstBal, sgstOut); sgstBal -= Math.min(sgstBal, sgstOut);
+    // Remaining IGST ITC can offset CGST or SGST
+    if(igstBal > 0) { var adj=Math.min(igstBal,netCGST); netCGST-=adj; igstBal-=adj; }
+    if(igstBal > 0) { var adj2=Math.min(igstBal,netSGST); netSGST-=adj2; igstBal-=adj2; }
+    var netTotal=netIGST+netCGST+netSGST;
+    result.classList.remove('hidden');
+    result.innerHTML = '<div class="p-4 bg-blue-50 rounded-xl"><div class="font-bold text-blue-800 mb-3">Set-off Result:</div>'
+        +'<div class="grid grid-cols-3 gap-2 text-sm mb-3">'
+        +'<div class="p-2 bg-white rounded-lg text-center"><div class="text-xs text-slate-500">Net IGST</div><div class="font-bold text-blue-700">₹'+netIGST.toFixed(2)+'</div></div>'
+        +'<div class="p-2 bg-white rounded-lg text-center"><div class="text-xs text-slate-500">Net CGST</div><div class="font-bold text-emerald-700">₹'+netCGST.toFixed(2)+'</div></div>'
+        +'<div class="p-2 bg-white rounded-lg text-center"><div class="text-xs text-slate-500">Net SGST</div><div class="font-bold text-purple-700">₹'+netSGST.toFixed(2)+'</div></div>'
+        +'</div>'
+        +'<div class="text-center"><span class="text-slate-600 font-medium">Cash to be paid: </span><span class="font-black text-red-700 text-xl">₹'+netTotal.toFixed(2)+'</span></div>'
+        +'</div>';
+};
+
+window.renderGSTAnnualSummary = function() {
+    var year = new Date().getFullYear();
+    var months = [];
+    for(var m=0; m<12; m++) {
+        var prefix = year+'-'+String(m+1).padStart(2,'0');
+        var invs = (window.AppState.invoices||[]).filter(function(i){ return i.date&&i.date.startsWith(prefix)&&i.status==='final'; });
+        var bd = window.calcGSTBreakdown(invs);
+        months.push({ m:m, taxable:bd.taxable, tax:bd.cgst+bd.sgst+bd.igst, total:bd.total });
+    }
+    var totalTaxable = months.reduce(function(s,m){ return s+m.taxable; },0);
+    var totalTax = months.reduce(function(s,m){ return s+m.tax; },0);
+    var totalSales = months.reduce(function(s,m){ return s+m.total; },0);
+    var fmt2 = function(n){ return '₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:0}); };
+    var mNames = ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+    return '<div class="grid grid-cols-3 gap-3 mb-4">'
+        +'<div class="p-3 bg-blue-50 rounded-xl text-center"><div class="text-xs text-blue-600">Annual Turnover</div><div class="font-black text-blue-800 text-lg">'+fmt2(totalSales)+'</div></div>'
+        +'<div class="p-3 bg-emerald-50 rounded-xl text-center"><div class="text-xs text-emerald-600">Total Taxable</div><div class="font-black text-emerald-800 text-lg">'+fmt2(totalTaxable)+'</div></div>'
+        +'<div class="p-3 bg-orange-50 rounded-xl text-center"><div class="text-xs text-orange-600">Total Tax Paid</div><div class="font-black text-orange-800 text-lg">'+fmt2(totalTax)+'</div></div>'
+        +'</div>'
+        +'<div class="overflow-x-auto"><table class="w-full text-xs"><thead class="bg-slate-50"><tr><th class="p-2">Month</th>'
+        +mNames.map(function(m){ return '<th class="p-2 text-center">'+m+'</th>'; }).join('')
+        +'</tr></thead><tbody>'
+        +'<tr class="border-b"><td class="p-2 font-medium text-slate-600">Tax Collected</td>'
+        +months.map(function(m){ return '<td class="p-2 text-center font-mono text-orange-700">'+(m.tax>0?'₹'+Math.round(m.tax).toLocaleString('en-IN'):'-')+'</td>'; }).join('')+'</tr>'
+        +'</tbody></table></div>';
+};
+
+// ── TAX CALENDAR ─────────────────────────────────────────────
+window.renderGSTCalendarFull = function() {
+    var due = window.getGSTCalendar();
+    var now = new Date();
+    var fmt = function(d){ return d.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}); };
+    return '<div class="space-y-4">'
+        + '<div class="card p-4 bg-slate-50"><div class="font-bold text-slate-800 mb-1">📅 GST Compliance Calendar</div><div class="text-sm text-slate-500">All due dates for current month. Set reminders to avoid late fees.</div></div>'
+        + '<div class="space-y-3">'
+        + due.map(function(d){
+            var isPast = d.days < 0;
+            return '<div class="card p-4 flex items-center justify-between gap-4" style="border-left:4px solid '+d.color+'">'
+                +'<div class="flex items-center gap-3">'
+                +'<div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style="background:'+d.color+'20">📋</div>'
+                +'<div><div class="font-bold text-slate-800">'+d.name+'</div><div class="text-xs text-slate-500">'+d.desc+'</div><div class="text-xs font-medium mt-0.5" style="color:'+d.color+'">Due: '+fmt(d.date)+'</div></div>'
+                +'</div>'
+                +'<div class="text-right flex-shrink-0">'
+                +(isPast ? '<span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-bold">Overdue</span>'
+                : d.days === 0 ? '<span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-bold">DUE TODAY!</span>'
+                : '<span class="text-2xl font-black" style="color:'+d.color+'">'+d.days+'</span><div class="text-xs text-slate-400">days left</div>')
+                +'</div></div>';
+        }).join('')
+        + '</div>'
+        + '<div class="card p-4"><div class="font-bold text-slate-800 mb-3">📌 Important GST Rules</div>'
+        + '<div class="space-y-2 text-sm text-slate-600">'
+        + '<div class="flex gap-2"><span class="text-emerald-600 font-bold flex-shrink-0">GSTR-1</span><span>File by 11th for monthly filers. Contains all B2B invoices, B2C details, credit/debit notes, HSN summary.</span></div>'
+        + '<div class="flex gap-2"><span class="text-orange-600 font-bold flex-shrink-0">GSTR-3B</span><span>File by 20th. Pay net tax after ITC set-off. Late payment attracts 18% p.a. interest.</span></div>'
+        + '<div class="flex gap-2"><span class="text-blue-600 font-bold flex-shrink-0">GSTR-9</span><span>Annual return by Dec 31. Reconcile full year data. Mandatory for turnover &gt; ₹2Cr.</span></div>'
+        + '<div class="flex gap-2"><span class="text-purple-600 font-bold flex-shrink-0">E-Invoice</span><span>Mandatory for turnover &gt; ₹5Cr. Generate IRN from GST portal using IRP (Invoice Reference Number).</span></div>'
+        + '<div class="flex gap-2"><span class="text-red-600 font-bold flex-shrink-0">Late Fee</span><span>₹50/day (₹25 CGST + ₹25 SGST) for tax liability. ₹20/day for Nil return. Max ₹5000 per return.</span></div>'
+        + '</div></div>'
+        + '</div>';
+};
+
+// ── JSON EXPORT FOR GST PORTAL ────────────────────────────────
+window.exportGSTJSON = function(type) {
+    var p = window.getGSTPeriod();
+    var inv = window.getGSTInvoices();
+    var bd = window.calcGSTBreakdown(inv);
+    var s = window.AppState.settings||{};
+    type = type || 'gstr1';
+
+    var json = {};
+    if(type === 'gstr1') {
+        json = {
+            gstin: s.gstin||'', fp: String(p.month+1).padStart(2,'0')+String(p.year),
+            b2b: bd.b2b.map(function(inv){
+                return { ctin: (inv.client&&inv.client.gstin)||'', inv: [{
+                    inum: inv.id, idt: inv.date, val: Number(inv.grandTotal||0),
+                    itms: (inv.items||[]).map(function(it){
+                        var rate=Number(it.rate||0), qty=Number(it.qty||1), gst=Number(it.gst||0);
+                        var txval = rate*qty/(1+gst/100);
+                        return { num:1, itm_det:{ rt:gst, txval:+txval.toFixed(2), iamt:+(txval*gst/100).toFixed(2) } };
+                    })
+                }]};
+            }),
+            b2cs: Object.keys(bd.b2cSmall).map(function(state){
+                var d = bd.b2cSmall[state];
+                return { typ:'OE', pos:'96', rt:18, txval:+(d.total*0.85).toFixed(2), iamt:+(d.total*0.15).toFixed(2) };
+            }),
+            hsn: { data: Object.keys(bd.hsn).map(function(hsn){ var h=bd.hsn[hsn]; return { num:1, hsn_sc:hsn, desc:h.desc, uqc:'OTH', qty:+h.qty.toFixed(2), val:+(h.taxable+h.igst+h.cgst+h.sgst).toFixed(2), txval:+h.taxable.toFixed(2), iamt:+h.igst.toFixed(2), camt:+h.cgst.toFixed(2), samt:+h.sgst.toFixed(2) }; }) }
+        };
+    } else if(type === 'gstr3b') {
+        var totalTax = bd.cgst+bd.sgst+bd.igst;
+        var exp = window.getGSTExpenses();
+        var itc = exp.reduce(function(s,e){ return s+Number(e.gstAmount||0); }, 0);
+        json = {
+            gstin: s.gstin||'', ret_period: String(p.month+1).padStart(2,'0')+String(p.year),
+            sup_details: { osup_det: { txval:+bd.taxable.toFixed(2), iamt:+bd.igst.toFixed(2), camt:+bd.cgst.toFixed(2), samt:+bd.sgst.toFixed(2) } },
+            itc_elg: { itc_avl: [{ ty:'IMPG', iamt:0, camt:+(itc/2).toFixed(2), samt:+(itc/2).toFixed(2) }] },
+            intr_ltfee: { intr_details: { camt:0, samt:0 }, ltfee: { camt:0, samt:0 } }
+        };
+    }
+
+    var blob = new Blob([JSON.stringify(json, null, 2)], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href=url; a.download=type.toUpperCase()+'_'+s.gstin+'_'+String(p.month+1).padStart(2,'0')+p.year+'.json';
+    a.click(); URL.revokeObjectURL(url);
+    window.showToast && window.showToast('GST JSON exported! Upload to GST Offline Tool ✅');
+};
+
+window.exportGSTExcel = function(type) {
+    var p = window.getGSTPeriod();
+    var inv = window.getGSTInvoices();
+    var bd = window.calcGSTBreakdown(inv);
+    var rows = [['Invoice No','Date','Client','GSTIN','Taxable','CGST','SGST','IGST','Total']];
+    inv.forEach(function(i){
+        var taxable = (i.items||[]).reduce(function(s,it){ return s+Number(it.qty||1)*Number(it.rate||0)/(1+Number(it.gst||0)/100); }, 0);
+        rows.push([i.id, i.date, (i.client&&i.client.name)||'', (i.client&&i.client.gstin)||'',
+            taxable.toFixed(2), (i.totalTax/2||0).toFixed(2), (i.totalTax/2||0).toFixed(2), '0.00', Number(i.grandTotal||0).toFixed(2)]);
+    });
+    var csv = rows.map(function(r){ return r.join(','); }).join('\n');
+    var blob = new Blob([csv], {type:'text/csv'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href=url; a.download=type+'_'+p.label+'.csv';
+    a.click(); URL.revokeObjectURL(url);
+    window.showToast && window.showToast('Excel CSV exported ✅');
+};
+
+// Auto-render when GST tab opens
+window.EMP_TAB_PERMS.gst = 'settings_view';
 </script>
