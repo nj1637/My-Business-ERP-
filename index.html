@@ -292,7 +292,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
     </div>
     <!-- Title -->
     <div class="text-center">
-      <h1 class="splash-title text-4xl font-black text-white tracking-tight" style="font-family:'Plus Jakarta Sans',sans-serif">Dev Ayurveda</h1>
+      <h1 class="splash-title text-4xl font-black text-white tracking-tight" style="font-family:'Plus Jakarta Sans',sans-serif">My Business</h1>
       <p class="splash-sub text-emerald-400 text-[11px] font-bold uppercase tracking-[.25em] mt-2">Professional ERP System</p>
     </div>
     <!-- Progress bar -->
@@ -737,7 +737,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
 
       <!-- Footer -->
       <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-        <div class="text-xs text-slate-400">Built with ❤️ for Dev Ayurveda</div>
+        <div class="text-xs text-slate-400">Built with ❤️ for My Business</div>
         <button onclick="document.getElementById('privacy-modal').classList.add('open')" class="text-xs text-blue-600 font-semibold hover:underline">Privacy Policy</button>
       </div>
     </div>
@@ -782,7 +782,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
           <i data-lucide="leaf" class="w-5 h-5 text-white"></i>
         </div>
         <div>
-          <div class="text-white font-bold text-sm leading-tight" id="sidebar-biz-name">Dev Ayurveda</div>
+          <div class="text-white font-bold text-sm leading-tight" id="sidebar-biz-name">My Business</div>
           <div class="text-emerald-500 text-[9px] font-bold uppercase tracking-widest">Modular Pro ERP</div>
         </div>
       </div>
@@ -1355,7 +1355,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
     <div class="flex items-center gap-4">
       <div class="w-14 h-14 bg-white/10 border border-white/20 rounded-xl overflow-hidden flex items-center justify-center" id="settings-logo-preview"><i data-lucide="building-2" class="w-7 h-7 text-emerald-400"></i></div>
       <div class="flex-1 min-w-0">
-        <div class="text-white font-bold text-base" id="settings-biz-display">Dev Ayurveda</div>
+        <div class="text-white font-bold text-base" id="settings-biz-display">My Business</div>
         <div class="text-emerald-400 text-xs font-medium" id="settings-email-display">...</div>
         <div class="flex gap-2 mt-1.5"><span class="badge bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px]">Active</span><span class="badge bg-white/10 text-white/60 text-[10px]">Admin</span></div>
       </div>
@@ -3153,7 +3153,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const products = window.AppState.products || [];
                 const expenses = window.AppState.expenses || [];
                 const s = window.AppState.settings || {};
-                const bizName = s.businessName || 'Dev Ayurveda';
+                const bizName = s.businessName || 'My Business';
                 const now = new Date().toLocaleString('en-IN');
 
                 // Helper: add sheet with header styling info
@@ -4992,7 +4992,7 @@ try {
         window.populateSettingsUI = function() {
             const s = window.AppState.settings;
             // Dynamic app name update — show user's business name everywhere
-            const bizName = s.businessName || 'Dev Ayurveda';
+            const bizName = s.businessName || 'My Business';
             const sidebarName = document.getElementById('sidebar-biz-name'); if(sidebarName) sidebarName.textContent = bizName;
             const topbarTitle = document.getElementById('topbar-biz-name'); if(topbarTitle) topbarTitle.textContent = bizName;
             // Update settings header card
@@ -6654,7 +6654,7 @@ window.sendReminderWA = function(clientId) {
     var unpaidInvs = (window.AppState.invoices||[]).filter(function(i){ return i.client&&i.client.name===client.name && i.paymentStatus!=='paid' && i.status==='final'; });
     if(unpaidInvs.length===0) { window.showToast('No pending dues for this client','info'); return; }
     var total = unpaidInvs.reduce(function(s,i){ return s+Number(i.grandTotal||0); },0);
-    var bizName = (window.AppState.settings&&window.AppState.settings.businessName)||'Dev Ayurveda';
+    var bizName = (window.AppState.settings&&window.AppState.settings.businessName)||'My Business';
     var ids = unpaidInvs.map(function(i){ return i.id; }).join(', ');
     var fmt = function(n){ return '₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2}); };
     var msg = '🌿 *'+bizName+'*\n\nDear '+client.name+',\n\nThis is a friendly reminder regarding your outstanding payment:\n\n📋 Invoice(s): '+ids+'\n💰 Total Due: *'+fmt(total)+'*\n\nKindly arrange payment at your earliest convenience.\n\nThank you for your trust! 🙏';
@@ -6745,7 +6745,7 @@ window.updateBirthdayReminders = function() {
         list.innerHTML = matches.map(function(c){
             var num = (c.mobile||'').replace(/\D/g,'');
             var waNum = num.length===10?'91'+num:num;
-            var msg = '🎂 Happy Birthday '+c.name+'! Wishing you great health and happiness. 🌿\n\n— '+((window.AppState.settings&&window.AppState.settings.businessName)||'Dev Ayurveda');
+            var msg = '🎂 Happy Birthday '+c.name+'! Wishing you great health and happiness. 🌿\n\n— '+((window.AppState.settings&&window.AppState.settings.businessName)||'My Business');
             return '<div class="flex items-center justify-between p-2.5 bg-white rounded-xl border border-pink-100 shadow-sm"><div class="flex items-center gap-2"><div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center text-pink-600 font-bold text-sm">'+c.name.charAt(0)+'</div><div><div class="text-sm font-bold text-slate-800">'+c.name+'</div><div class="text-xs text-pink-500">🎂 Birthday Today!</div></div></div><a href="https://wa.me/'+waNum+'?text='+encodeURIComponent(msg)+'" target="_blank" class="btn btn-sm text-xs" style="background:#25D366;color:white;border:none">Wish 🎉</a></div>';
         }).join('');
     } else {
@@ -7252,7 +7252,7 @@ window.generateAIReport = function() {
   if(period.weekRange) exps = exps.filter(function(e){ var d=parseInt(e.date.split('-')[2]); return d>=period.weekRange[0] && d<=period.weekRange[1]; });
   var products = (window.AppState&&window.AppState.products)||[];
   var s = (window.AppState&&window.AppState.settings)||{};
-  var bizName = s.businessName || 'Dev Ayurveda';
+  var bizName = s.businessName || 'My Business';
 
   var rev = invs.reduce(function(sum,i){ return sum+Number(i.grandTotal||0); },0);
   var exp = exps.reduce(function(sum,e){ return sum+Number(e.amount||0); },0);
@@ -7560,7 +7560,7 @@ window.autoSendWAInvoice = async function() {
     var invs = (window.AppState&&window.AppState.invoices)||[];
     var latest = invs.filter(function(i){ return i.status==='final'; }).sort(function(a,b){ return (b.createdAt||0)-(a.createdAt||0); })[0];
     if(!latest) return;
-    var biz = (window.AppState.settings&&window.AppState.settings.businessName)||'Dev Ayurveda';
+    var biz = (window.AppState.settings&&window.AppState.settings.businessName)||'My Business';
     var fmt = function(n){ return '₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2}); };
     var msg = '🌿 *'+biz+'*\n\nDear '+latest.client.name+',\n\nYour invoice is ready:\n\n📋 *'+latest.id+'*\n📅 '+latest.date+'\n💰 *'+fmt(latest.grandTotal)+'*\n\n'+(latest.paymentStatus==='paid'?'✅ Paid':'⏳ Payment Pending')+'\n\nThank you! 🙏';
     var mobile = (latest.client&&latest.client.mobile||'').replace(/\D/g,'');
@@ -13118,7 +13118,7 @@ console.log('Final fixes loaded ✅');
             var inv = window.AppState && window.AppState.invoices.find(function(i){ return i.id === id; });
             if(!inv) return;
 
-            var biz = (window.AppState.settings && window.AppState.settings.businessName) || 'Dev Ayurveda';
+            var biz = (window.AppState.settings && window.AppState.settings.businessName) || 'My Business';
             var fmt = window.formatCurrency || function(a){ return '₹' + Number(a).toFixed(2); };
             var msg = '🌿 *' + biz + '*\n\nHello ' + (inv.client&&inv.client.name||'') + ','
                 + '\n\n📋 Invoice: *' + inv.id + '*\n📅 Date: ' + inv.date
