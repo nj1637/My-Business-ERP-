@@ -317,7 +317,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
   <div class="min-h-screen flex flex-col items-center justify-center p-4 gap-6">
     <!-- Logo & title -->
     <div class="text-center">
-      <div class="w-16 h-16 bg-emerald-500/20 border-2 border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-emerald-900/30" id="settings-logo-preview">
+      <div class="w-16 h-16 bg-emerald-500/20 border-2 border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-emerald-900/30" id="auth-logo-display">
         <i data-lucide="leaf" class="w-8 h-8 text-emerald-400"></i>
       </div>
       <h1 class="text-3xl font-black text-white tracking-tight" id="auth-title">Welcome Back</h1>
@@ -403,7 +403,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
             <span class="text-slate-400 text-xs">Step 1 of 3 — Account Setup</span>
           </div>
           <div><label class="lbl text-slate-300">Business Name *</label>
-            <input type="text" id="signup-biz-name" required class="inp bg-white/5 border-white/10 text-white" placeholder="Dev Ayurveda Clinic"></div>
+            <input type="text" id="signup-biz-name" required class="inp bg-white/5 border-white/10 text-white" placeholder="My Business Clinic"></div>
           <div><label class="lbl text-slate-300">Email *</label>
             <input type="email" id="signup-email" required class="inp bg-white/5 border-white/10 text-white" autocomplete="email" placeholder="you@business.com"></div>
           <div><label class="lbl text-slate-300">Password *</label>
@@ -582,13 +582,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
     <div class="modal-head">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center"><i data-lucide="shield-check" class="w-4 h-4 text-blue-600"></i></div>
-        <div><div class="font-bold text-slate-800">Privacy Policy</div><div class="text-xs text-slate-400">Dev Ayurveda ERP · Last updated March 2026</div></div>
+        <div><div class="font-bold text-slate-800">Privacy Policy</div><div class="text-xs text-slate-400">My Business ERP · Last updated March 2026</div></div>
       </div>
       <button onclick="document.getElementById('privacy-modal').classList.remove('open')" class="btn btn-icon btn-ghost"><i data-lucide="x" class="w-4 h-4"></i></button>
     </div>
     <div class="modal-body text-sm text-slate-600 leading-relaxed space-y-4">
       <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-800 text-xs font-medium">
-        📋 By using Dev Ayurveda ERP, you agree to this Privacy Policy.
+        📋 By using My Business ERP, you agree to this Privacy Policy.
       </div>
       <div><h4 class="font-bold text-slate-800 mb-1">1. Data We Collect</h4>
       <p>We collect business data you enter including invoice details, client information, product inventory, expenses, and business settings. This data is stored securely in your Firebase account and locally on your device.</p></div>
@@ -619,14 +619,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
     <div class="modal-head">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center"><i data-lucide="leaf" class="w-4 h-4 text-emerald-600"></i></div>
-        <div><div class="font-bold text-slate-800">About Dev Ayurveda ERP</div><div class="text-xs text-emerald-600 font-semibold">Modular Pro · Version 10</div></div>
+        <div><div class="font-bold text-slate-800">About My Business ERP</div><div class="text-xs text-emerald-600 font-semibold">Modular Pro · Version 10</div></div>
       </div>
       <button onclick="document.getElementById('about-modal').classList.remove('open')" class="btn btn-icon btn-ghost"><i data-lucide="x" class="w-4 h-4"></i></button>
     </div>
     <div class="modal-body space-y-4">
       <!-- App Info -->
       <div class="p-4 rounded-xl text-white text-sm" style="background:linear-gradient(135deg,#064e3b,#065f46)">
-        <div class="font-bold text-lg mb-1">🌿 Dev Ayurveda ERP</div>
+        <div class="font-bold text-lg mb-1">🌿 My Business ERP</div>
         <div class="opacity-80 text-xs leading-relaxed">A complete business management system built for Ayurvedic clinics, wellness centers, and service businesses. Manage invoices, inventory, clients, employees and finances — all in one place.</div>
         <div class="mt-3 flex flex-wrap gap-2">
           <span class="bg-white/20 px-2 py-0.5 rounded-lg text-[10px] font-bold">v10 Modular Pro</span>
@@ -1045,6 +1045,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
   <div class="card p-4 mb-4 flex flex-wrap gap-4 items-center" id="wrap-multidoc">
     <div><label class="lbl">Document Type</label><select id="inv-doc-type" onchange="window.updateDraftField('docType',this.value)" class="inp text-sm w-auto"><option value="Tax Invoice">Tax Invoice</option><option value="Proforma Invoice">Proforma Invoice</option><option value="Quotation">Quotation</option></select></div>
     <div id="wrap-currency"><label class="lbl">Currency</label><select id="inv-currency" onchange="window.updateDraftField('currency',this.value)" class="inp text-sm w-auto"><option value="INR">INR (₹)</option><option value="USD">USD ($)</option><option value="EUR">EUR (€)</option><option value="GBP">GBP (£)</option></select></div>
+    <!-- Invoice Date — always visible for backdated invoices -->
+    <div>
+      <label class="lbl">Invoice Date</label>
+      <input type="date" id="inv-date" class="inp text-sm w-auto" onchange="window.handleInvDateChange(this.value)">
+    </div>
     <div id="wrap-shipping-toggle" class="ml-auto"><button onclick="document.getElementById('adv-fields').classList.toggle('hidden')" class="btn btn-ghost btn-sm text-emerald-700 bg-emerald-50 border-emerald-200"><i data-lucide="settings-2" class="w-3.5 h-3.5"></i> Advanced</button></div>
   </div>
   <div id="adv-fields" class="card p-4 mb-4 hidden bg-emerald-50/50 border-emerald-200">
@@ -1110,7 +1115,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
       <div class="rounded-2xl p-5 text-white" style="background:linear-gradient(135deg,#064e3b,#065f46)">
         <div class="flex justify-between items-center mb-4">
           <span class="text-emerald-200 text-xs font-bold uppercase tracking-wider">Live Summary</span>
-          <span id="inv-id-display" class="text-xs text-emerald-400 font-mono"></span>
+          <div class="flex items-center gap-1">
+            <span id="inv-id-display" class="text-xs text-emerald-400 font-mono cursor-pointer" onclick="window.toggleInvIdEdit()" title="Click to edit"></span>
+            <input id="inv-id-edit" type="text" class="hidden text-xs font-mono bg-white/10 border border-white/30 text-white rounded px-1 py-0.5 w-28 outline-none" onblur="window.applyInvIdEdit()" onkeydown="if(event.key==='Enter')window.applyInvIdEdit();if(event.key==='Escape')window.cancelInvIdEdit()">
+            <button onclick="window.toggleInvIdEdit()" class="text-emerald-400 hover:text-white" title="Edit invoice number" style="background:none;border:none;cursor:pointer;padding:2px;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          </div>
         </div>
         <div class="space-y-2.5 text-sm">
           <div class="flex justify-between"><span class="text-emerald-200">Taxable Amount</span><span class="font-mono font-semibold" id="summary-subtotal">0.00</span></div>
@@ -1411,6 +1422,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
       <div class="font-bold text-slate-800 text-sm">Business Profile</div>
       <div class="text-xs text-slate-400 mt-0.5">Name, GSTIN, address</div>
     </div>
+
+    <!-- WhatsApp Support Card -->
+    <a href="https://wa.me/917254991801?text=Namaste!%20Mujhe%20My%20Business%20ERP%20ke%20baare%20mein%20madad%20chahiye." target="_blank" rel="noopener"
+       class="card p-4 hover:shadow-md hover:border-green-200 transition-all" style="text-decoration:none;display:block;">
+      <div class="acc-icon mb-3" style="background:#dcfce7;"><svg width="20" height="20" viewBox="0 0 24 24" fill="#16a34a" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.121 1.532 5.854L.078 23.617a.75.75 0 0 0 .92.92l5.763-1.454A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.65-.51-5.17-1.4l-.37-.22-3.82.965.98-3.73-.24-.38A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></div>
+      <div class="font-bold text-slate-800 text-sm">WhatsApp Support</div>
+      <div class="text-xs text-slate-400 mt-0.5">Chat with developer</div>
+    </a>
+
+    <!-- Subscription Card Removed -->
 
   </div>
 
@@ -2000,13 +2021,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
 
 <!-- Ledger Modal -->
 <div id="ledger-modal" class="modal" onclick="if(event.target===this)window.closeLedgerModal&&closeLedgerModal()">
-  <div class="modal-box max-w-4xl w-full">
+  <div class="modal-box max-w-4xl w-full" style="max-height:90dvh;display:flex;flex-direction:column;">
     <div class="modal-head">
       <div class="flex items-center gap-3"><div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center"><i data-lucide="book-open" class="w-4 h-4 text-blue-600"></i></div><div class="font-bold text-slate-800">Statement of Accounts</div></div>
       <div class="flex gap-2"><button onclick="window.downloadLedgerPDF&&downloadLedgerPDF()" class="btn btn-primary btn-sm" style="background:#2563eb"><i data-lucide="download" class="w-3.5 h-3.5"></i> Export</button><button onclick="window.closeLedgerModal&&closeLedgerModal()" class="btn btn-icon btn-ghost"><i data-lucide="x" class="w-4 h-4"></i></button></div>
     </div>
     <div class="modal-body bg-slate-100 p-4 flex justify-center">
-      <div id="ledger-render-area" class="bg-white shadow-xl" style="width:210mm;max-width:100%;min-height:297mm;padding:8mm 10mm;font-size:11px"></div>
+      <div style="flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:12px;background:#f1f5f9;">
+      <div id="ledger-render-area" class="bg-white shadow-xl" style="width:794px;max-width:100%;padding:24px 28px;font-size:11px;box-sizing:border-box;overflow-x:auto;margin:0 auto;"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -2195,7 +2218,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f0f2f5;color:#0f172a
 </div>
 
 <!-- Bulk PDF / PDF Loading -->
-<div id="bulk-render-container" class="absolute" style="top:-9999px;left:-9999px;width:210mm;background:white;pointer-events:none"><div id="bulk-render-area" class="w-full bg-white text-slate-900"></div></div>
+<div id="bulk-render-container" style="position:fixed;top:-9999px;left:-9999px;width:210mm;background:white;pointer-events:none;z-index:-9999;"><div id="bulk-render-area" style="width:210mm;background:white;"></div></div>
 <div id="pdf-loading-overlay" class="fixed inset-0 z-[9999] bg-white hidden flex-col items-center justify-center">
   <i data-lucide="loader-2" class="w-12 h-12 text-emerald-600 animate-spin mb-4"></i>
   <h2 class="text-2xl font-bold text-slate-800 mb-2">Generating PDF...</h2>
@@ -2461,79 +2484,33 @@ async function shareInvoiceWA() {
 // ── PDF CORE: Generate as Blob (NOT data: URI — Android rejects data: URIs)
 async function generatePDFBlob(element, filename) {
     if(!element || typeof html2pdf === 'undefined') return null;
-
-    // ── KEY FIX: Reset zoom/transform before capture ──────────
-    // scaleInv() sets CSS zoom (e.g. 0.49 on mobile) which makes PDF tiny.
-    // We reset to 1, capture at full A4 size, then restore.
-    var savedZoom      = element.style.zoom;
-    var savedTransform = element.style.transform;
-    var savedWidth     = element.style.width;
-    var savedMinH      = element.style.minHeight;
-
-    element.style.zoom      = '1';
-    element.style.transform = 'none';
-    element.style.width     = '794px';   // force full A4 width
-    element.style.minHeight = '1123px';  // force full A4 height
-
-    // Let browser repaint with new styles
-    await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
-
     try {
         var blob = await html2pdf().set({
             margin: 0,
             filename: filename || 'invoice.pdf',
-            image: { type: 'jpeg', quality: 0.95 },
-            html2canvas: {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                allowTaint: true,
-                backgroundColor: '#ffffff',
-                windowWidth: 794,
-                width: 794,
-                scrollX: 0,
-                scrollY: 0
-            },
+            image: { type: 'jpeg', quality: 0.92 },
+            html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         }).from(element).output('blob');
         return blob;
     } catch(e) {
         console.error('PDF blob error:', e);
         return null;
-    } finally {
-        // ── Always restore original zoom/styles ───────────────
-        element.style.zoom      = savedZoom;
-        element.style.transform = savedTransform;
-        element.style.width     = savedWidth;
-        element.style.minHeight = savedMinH;
-        // Re-apply fit zoom for screen display
-        if(typeof scaleInv === 'function') scaleInv();
     }
 }
 
 // Kept for WhatsApp base64 share
 async function generatePDFBase64(element, filename) {
     if(!element || typeof html2pdf === 'undefined') return null;
-    var savedZoom = element.style.zoom;
-    var savedTransform = element.style.transform;
-    element.style.zoom = '1';
-    element.style.transform = 'none';
-    element.style.width = '794px';
-    await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
     try {
         return await html2pdf().set({
             margin: 0,
             filename: filename || 'invoice.pdf',
-            image: { type: 'jpeg', quality: 0.95 },
-            html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true, backgroundColor: '#ffffff', windowWidth: 794, width: 794 },
+            image: { type: 'jpeg', quality: 0.92 },
+            html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         }).from(element).output('datauristring');
     } catch(e) { return null; }
-    finally {
-        element.style.zoom = savedZoom;
-        element.style.transform = savedTransform;
-        if(typeof scaleInv === 'function') scaleInv();
-    }
 }
 
 // ── UNIVERSAL DOWNLOAD using Blob → object URL (NOT data: URI)
@@ -2600,24 +2577,18 @@ async function downloadPDFBlob(blob, filename) {
 // ── DOWNLOAD PDF ──
 window.downloadPDF = async function() {
     var element = document.getElementById('invoice-render-area');
-    if(!element) { window.showToast && window.showToast('Invoice not open','error'); return; }
+    if(!element) return;
+    var invEl = element.querySelector('.inv-id-tracker');
+    var invId = invEl ? (invEl.dataset.id || 'invoice') : 'invoice';
 
-    // Get invoice ID from multiple possible sources
-    var invEl = element.querySelector('.inv-id-tracker,[data-id],[data-inv-id]');
-    var invId = (invEl && (invEl.dataset.id || invEl.dataset.invId || invEl.textContent.trim())) 
-                || window._curInvId 
-                || window._currentViewInvoiceId 
-                || 'invoice';
-    invId = String(invId).trim() || 'invoice';
-
-    window.showToast && window.showToast('Generating PDF...');
+    window.showToast && window.showToast('PDF बन रही है...');
     var blob = await generatePDFBlob(element, invId + '.pdf');
-    if(!blob || blob.size < 3000) {
-        window.showToast && window.showToast('PDF error! Try again.', 'error');
+    if(!blob) {
+        window.showToast && window.showToast('PDF error!', 'error');
         return;
     }
     await downloadPDFBlob(blob, invId + '.pdf');
-    window.showToast && window.showToast('✅ PDF downloaded!');
+    window.showToast && window.showToast('PDF downloaded! ✅');
 };
 
 // ── WHATSAPP SHARE ──
@@ -2662,7 +2633,7 @@ async function shareInvoiceWA() {
 
     // Step 2: Open WhatsApp with text + download PDF
     var waUrl = 'https://wa.me/' + (num || '') + '?text=' + encodeURIComponent(msg);
-    window.open(waUrl, '_blank');  // open in new tab — don't navigate away
+    window.location.href = waUrl;
 
     // Download PDF after short delay
     if(area) {
@@ -3777,11 +3748,14 @@ document.addEventListener('DOMContentLoaded', function() {
         window.getNextInvoiceId = function() {
             const INV_MODE = localStorage.getItem('ayur_inv_mode') || 'advanced';
             const allInv = [...(window.AppState.invoices||[]), ...(window.AppState.deletedInvoices||[])];
+            const customStartRaw = localStorage.getItem('ayur_inv_custom_start');
+            const customStart = customStartRaw ? parseInt(customStartRaw, 10) : null;
+
             if (INV_MODE === 'simple') {
                 const now = new Date();
                 const fy = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
                 const fyStart = new Date(fy, 3, 1);
-                let max = 0;
+                let max = customStart ? customStart - 1 : 0;
                 allInv.forEach(i => {
                     if (i.date && new Date(i.date) >= fyStart) {
                         const n = parseInt(i.id, 10);
@@ -3789,12 +3763,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
                 return String(max + 1).padStart(4, '0');
+            } else if (INV_MODE === 'custom') {
+                const prefix = (localStorage.getItem('ayur_inv_custom_prefix') || 'INV').toUpperCase();
+                let max = customStart ? customStart - 1 : 0;
+                allInv.filter(i => i.id && i.id.startsWith(prefix)).forEach(i => {
+                    const n = parseInt(i.id.slice(prefix.length), 10);
+                    if (!isNaN(n) && n > max) max = n;
+                });
+                return prefix + String(max + 1).padStart(3, '0');
             } else {
                 const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
                 const now = new Date();
                 const yr = String(now.getFullYear()).slice(2);
                 const prefix = 'DEV' + months[now.getMonth()] + yr;
-                let max = 0;
+                let max = customStart ? customStart - 1 : 0;
                 allInv.filter(i => i.id && i.id.startsWith(prefix)).forEach(i => {
                     const n = parseInt(i.id.slice(prefix.length), 10);
                     if (!isNaN(n) && n > max) max = n;
@@ -4449,7 +4431,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if(window.AppState.draft.items.length === 0) return window.showToast("Add at least one product.", "error");
             
             const lockDate = window.AppState.settings.lockDate;
-            const invDate = new Date().toISOString().split('T')[0];
+            // FIX: Use draft.date (backdate) if set, otherwise fallback to today
+            const invDate = window.AppState.draft.date || new Date().toISOString().split('T')[0];
             if(lockDate && new Date(invDate) < new Date(lockDate)) return window.showToast(`Cannot generate before FY Lock Date: ${lockDate}`, "error");
 
             // Feature 2: Override status if Credit mode
@@ -4469,8 +4452,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const splitData = window.AppState.draft.splitPayment || null;
             const invoiceDoc = { ...window.AppState.draft, client: clientData, status: status, subtotal: totals.subtotal, totalTax: totals.totalTax, grandTotal: totals.grandTotal, tdsAmount: totals.tdsCalculated, date: invDate, isDeleted: false, createdAt: Date.now(), ...(splitData ? { splitPayment: splitData } : {}) };
 
-            try {
-                await setDoc(doc(db, 'artifacts', appId, 'users', window.AppState.user.uid, 'invoices', invoiceDoc.id), invoiceDoc);
+try {
+                    // Check for duplicate ID if feature is NOT enabled
+                    if (!window.isFeatureEnabled('allowDuplicateInvId')) {
+                        const exists = window.AppState.invoices.find(i => i.id === invoiceDoc.id && !i.isDeleted);
+                        if (exists) return window.showToast("Invoice ID " + invoiceDoc.id + " already exists. Please use a unique ID or enable 'Allow Duplicate Invoice ID' in Active Modules.", "error");
+                    }
+	                await setDoc(doc(db, 'artifacts', appId, 'users', window.AppState.user.uid, 'invoices', invoiceDoc.id), invoiceDoc);
                 const existingClient = window.AppState.clients.find(c => c.name.toLowerCase() === name.toLowerCase());
                 if(existingClient) { await updateDoc(doc(db, 'artifacts', appId, 'users', window.AppState.user.uid, 'clients', existingClient.id), clientData); } 
                 else { await addDoc(collection(db, 'artifacts', appId, 'users', window.AppState.user.uid, 'clients'), { ...clientData, journal: [], isDeleted: false, createdAt: serverTimestamp() }); }
@@ -4596,7 +4584,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const collectedTax = filtered.filter(i => i.status === 'final' && i.docType === 'Tax Invoice' && i.status !== 'void').reduce((sum, i) => sum + (Number(i.totalTax) || 0), 0);
             setText('records-tax-summary', formatINR(collectedTax));
 
-            setHTML('records-list', filtered.map(inv => `<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors bg-white ${inv.status==='void'?'opacity-50':''}"><td class="p-4 font-mono text-emerald-700 text-sm ${inv.status==='void'?'line-through':''}">${inv.id}</td><td class="p-4 text-xs font-bold text-slate-500 uppercase">${inv.docType || 'Tax Invoice'}</td><td class="p-4 text-slate-600 text-sm whitespace-nowrap">${inv.date}</td><td class="p-4 font-medium text-slate-800 text-sm truncate max-w-[150px]">${inv.client.name}</td><td class="p-4 text-right font-bold ${inv.docType === 'Credit Note' ? 'text-red-600' : 'text-slate-800'} ${inv.status==='void'?'line-through text-slate-400':''}">${window.formatCurrency(inv.grandTotal, inv.currency)}</td><td class="p-4 text-center">${inv.status === 'draft' || inv.docType === 'Credit Note' || inv.status === 'void' ? `<span class="text-[10px] text-slate-400 font-bold uppercase">${inv.status==='void'?'VOID':'N/A'}</span>` : `<button onclick="window.togglePaymentStatus('${inv.id}', '${inv.paymentStatus || 'unpaid'}')" class="text-[10px] uppercase font-bold px-3 py-1.5 rounded-full transition-colors ${inv.paymentStatus === 'paid' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 shadow-sm' : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'}">${inv.paymentStatus === 'paid' ? 'Paid' : 'Unpaid'}</button>`}</td><td class="p-4 text-center">${inv.status === 'draft' ? `<div class="flex items-center gap-1 justify-center"><button onclick="window.resumeDraft('${inv.id}')" class="px-2 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 rounded text-xs font-bold transition-colors">Resume</button>${window.isFeatureEnabled('deleteBtn') ? `<button onclick="window.softDeleteInvoice('${inv.id}')" class="p-1.5 text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>` : ''}</div>` : `<div class="flex items-center gap-1 justify-center"><button onclick="window.viewInvoice('${inv.id}')" class="px-2 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded text-xs font-bold transition-colors">View</button><button onclick="window.duplicateInvoice('${inv.id}')" title="Duplicate" class="p-1.5 text-slate-400 hover:text-blue-500"><i data-lucide="copy" class="w-4 h-4"></i></button><button onclick="window.shareWhatsApp('${inv.id}')" title="WhatsApp" class="p-1.5 text-slate-400 hover:text-green-500"><i data-lucide="message-circle" class="w-4 h-4"></i></button><button onclick="window.voidInvoice('${inv.id}')" title="Void" class="p-1.5 text-slate-400 hover:text-red-500"><i data-lucide="ban" class="w-4 h-4"></i></button>${window.isFeatureEnabled('creditNote') ? `<button onclick="window.issueCreditNote('${inv.id}')" title="Credit Note" class="p-1.5 text-slate-400 hover:text-purple-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path></svg></button>`:''}${window.isFeatureEnabled('deleteBtn') ? `<button onclick="window.softDeleteInvoice('${inv.id}')" title="Delete" class="p-1.5 text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>` : ''}</div>`}</td></tr>`).join('') || '<tr><td colspan="7" class="p-8 text-center text-slate-400">No records found matching filters.</td></tr>');
+            setHTML('records-list', filtered.map(inv => `<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors bg-white ${inv.status==='void'?'opacity-50':''}"><td class="p-4 font-mono text-emerald-700 text-sm ${inv.status==='void'?'line-through':''}">${inv.id}</td><td class="p-4 text-xs font-bold text-slate-500 uppercase">${inv.docType || 'Tax Invoice'}</td><td class="p-4 text-slate-600 text-sm whitespace-nowrap">${inv.date}</td><td class="p-4 font-medium text-slate-800 text-sm truncate max-w-[150px]">${inv.client.name}</td><td class="p-4 text-right font-bold ${inv.docType === 'Credit Note' ? 'text-red-600' : 'text-slate-800'} ${inv.status==='void'?'line-through text-slate-400':''}">${window.formatCurrency(inv.grandTotal, inv.currency)}</td><td class="p-4 text-center">${inv.status === 'draft' || inv.docType === 'Credit Note' || inv.status === 'void' ? `<span class="text-[10px] text-slate-400 font-bold uppercase">${inv.status==='void'?'VOID':'N/A'}</span>` : `<button onclick="window.togglePaymentStatus('${inv.id}', '${inv.paymentStatus || 'unpaid'}')" class="text-[10px] uppercase font-bold px-3 py-1.5 rounded-full transition-colors ${inv.paymentStatus === 'paid' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 shadow-sm' : 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'}">${inv.paymentStatus === 'paid' ? 'Paid' : 'Unpaid'}</button>`}</td><td class="p-4 text-center">${inv.status === 'draft' ? `<div class="flex items-center gap-1 justify-center"><button onclick="window.resumeDraft('${inv.id}')" class="px-2 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 rounded text-xs font-bold transition-colors">Resume</button>${window.isFeatureEnabled('deleteBtn') ? `<button onclick="window.softDeleteInvoice('${inv.id}')" class="p-1.5 text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>` : ''}</div>` : `<div class="flex items-center gap-1 justify-center"><button onclick="window.viewInvoice('${inv.id}')" class="px-2 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded text-xs font-bold transition-colors">View</button><button onclick="window.duplicateInvoice('${inv.id}')" title="Duplicate" class="p-1.5 text-slate-400 hover:text-blue-500"><i data-lucide="copy" class="w-4 h-4"></i></button><button onclick="window.shareWhatsApp('${inv.id}')" title="WhatsApp" class="p-1.5 text-slate-400 hover:text-green-500"><i data-lucide="message-circle" class="w-4 h-4"></i></button><button onclick="window.openEditInvoiceModal('${inv.id}')" title="Edit Invoice No/Date" class="p-1.5 text-slate-400 hover:text-emerald-600"><i data-lucide="edit-3" class="w-4 h-4"></i></button><button onclick="window.voidInvoice('${inv.id}')" title="Void" class="p-1.5 text-slate-400 hover:text-red-500"><i data-lucide="ban" class="w-4 h-4"></i></button>${window.isFeatureEnabled('creditNote') ? `<button onclick="window.issueCreditNote('${inv.id}')" title="Credit Note" class="p-1.5 text-slate-400 hover:text-purple-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path></svg></button>`:''}${window.isFeatureEnabled('deleteBtn') ? `<button onclick="window.softDeleteInvoice('${inv.id}')" title="Delete" class="p-1.5 text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>` : ''}</div>`}</td></tr>`).join('') || '<tr><td colspan="7" class="p-8 text-center text-slate-400">No records found matching filters.</td></tr>');
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
@@ -4641,12 +4629,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if(renderContainer && bulkArea) {
                 renderContainer.style.visibility = 'visible'; bulkArea.innerHTML = '';
                 
-                filtered.forEach((inv, idx) => { const wrapper = document.createElement('div'); wrapper.innerHTML = window.generateInvoiceHTML(inv); wrapper.style.cssText = 'page-break-after:always;width:210mm;max-width:210mm;padding:0;margin:0;box-sizing:border-box;overflow:hidden;'; bulkArea.appendChild(wrapper); });
+                filtered.forEach((inv, idx) => { const wrapper = document.createElement('div'); wrapper.innerHTML = window.generateInvoiceHTML(inv); wrapper.style.cssText = 'page-break-after:always;break-after:page;width:210mm;margin:0 auto;padding:0;box-sizing:border-box;overflow:hidden;background:white;display:block;'; bulkArea.appendChild(wrapper); });
                 
                 setTimeout(async () => {
                     try {
                         const originalScroll = window.scrollY; window.scrollTo(0,0);
-                        await html2pdf().set({ margin: 10, filename: `Bulk_Invoices_${Date.now()}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, scrollY: 0, letterRendering:true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(bulkArea).save();
+                        await html2pdf().set({ margin: 0, filename: `Bulk_Invoices_${Date.now()}.pdf`, image: { type: 'jpeg', quality: 0.96 }, html2canvas: { scale: 2, useCORS: true, scrollY: 0, scrollX: 0, allowTaint: true, backgroundColor: '#ffffff', windowWidth: 794, width: 794 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, pagebreak: { mode: ['css','legacy'] } }).from(bulkArea).save();
                         window.scrollTo(0, originalScroll);
                         window.showToast("Bulk PDF Downloaded Successfully!");
                     } catch(e) { window.showToast("Error generating PDF", "error"); } 
@@ -5650,7 +5638,7 @@ window.createPO = function(){
 
 
 
-<!-- ===== DEV AYURVEDA ERP v4 CLEAN PATCH ===== -->
+<!-- ===== MY BUSINESS ERP v4 CLEAN PATCH ===== -->
 <script>
 (function () {
 
@@ -6186,21 +6174,24 @@ window.downloadPreviewPDF = async function() {
     var inv = window._previewInvData || (window.AppState && window.AppState.draft);
     if(!inv) { window.showToast && window.showToast('No invoice data', 'error'); return; }
     window.showToast && window.showToast('Generating PDF...');
+    var filename = (inv.id || 'preview') + '.pdf';
+    // Use opacity:0.001 NOT left:-9999px — Android WebView won't render off-viewport elements
     var freshDiv = document.createElement('div');
-    freshDiv.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;min-height:1123px;background:white;font-size:11px;padding:30px 36px;box-sizing:border-box;z-index:-999;overflow:visible;';
-    freshDiv.innerHTML = window.generateInvoiceHTML ? window.generateInvoiceHTML(inv) : document.getElementById('preview-render-area').innerHTML;
-    freshDiv.style.transform = 'none';
+    freshDiv.style.cssText = 'position:fixed;top:0;left:0;width:794px;min-height:1123px;background:white;font-size:11px;padding:30px 36px;box-sizing:border-box;z-index:9997;overflow:visible;opacity:0.001;pointer-events:none;';
+    freshDiv.innerHTML = window.generateInvoiceHTML ? window.generateInvoiceHTML(inv) : (document.getElementById('preview-render-area')||{}).innerHTML || '';
+    var savedScroll = window.pageYOffset || 0;
+    window.scrollTo(0, 0);
     document.body.appendChild(freshDiv);
-    await new Promise(function(r){ setTimeout(r, 300); });
+    await new Promise(function(r){ setTimeout(r, 400); });
     try {
-        var filename = (inv.id || 'preview') + '.pdf';
         var blob = await html2pdf().set({
-            margin: 10, filename: filename,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true, backgroundColor: '#ffffff', windowWidth: 1000, width: 1000, letterRendering: true },
+            margin: 0, filename: filename,
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true, backgroundColor: '#ffffff', windowWidth: 794, width: 794, scrollX: 0, scrollY: 0 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        }).from(freshDiv).toPdf().get('pdf').then(function(pdf){ return pdf.output('blob'); });
+        }).from(freshDiv).output('blob');
         if(freshDiv.parentNode) document.body.removeChild(freshDiv);
+        window.scrollTo(0, savedScroll);
         if(!blob || blob.size < 1000) { window.showToast && window.showToast('PDF error!', 'error'); return; }
         if(window.downloadPDFBlob) { await window.downloadPDFBlob(blob, filename); }
         else {
@@ -6212,6 +6203,7 @@ window.downloadPreviewPDF = async function() {
         window.showToast && window.showToast('PDF downloaded! ✅');
     } catch(e) {
         if(freshDiv.parentNode) document.body.removeChild(freshDiv);
+        window.scrollTo(0, savedScroll);
         window.showToast && window.showToast('PDF error: ' + e.message, 'error');
     }
 };
@@ -6236,20 +6228,23 @@ window.sharePreviewWA = async function() {
         return;
     }
     window.showToast && window.showToast('Generating PDF for WhatsApp...');
+    var filename = (inv.id || 'invoice') + '.pdf';
     var freshDiv = document.createElement('div');
-    freshDiv.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;min-height:1123px;background:white;font-size:11px;padding:30px 36px;box-sizing:border-box;z-index:-999;overflow:visible;';
-    freshDiv.innerHTML = window.generateInvoiceHTML ? window.generateInvoiceHTML(inv) : document.getElementById('preview-render-area').innerHTML;
+    freshDiv.style.cssText = 'position:fixed;top:0;left:0;width:794px;min-height:1123px;background:white;font-size:11px;padding:30px 36px;box-sizing:border-box;z-index:9997;overflow:visible;opacity:0.001;pointer-events:none;';
+    freshDiv.innerHTML = window.generateInvoiceHTML ? window.generateInvoiceHTML(inv) : (document.getElementById('preview-render-area')||{}).innerHTML || '';
+    var savedScroll2 = window.pageYOffset || 0;
+    window.scrollTo(0, 0);
     document.body.appendChild(freshDiv);
-    await new Promise(function(r){ setTimeout(r, 300); });
+    await new Promise(function(r){ setTimeout(r, 400); });
     try {
-        var filename = (inv.id || 'invoice') + '.pdf';
         var pdfBlob = await html2pdf().set({
-            margin: 10, filename: filename,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true, backgroundColor: '#ffffff', windowWidth: 1000, width: 1000, letterRendering: true },
+            margin: 0, filename: filename,
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true, backgroundColor: '#ffffff', windowWidth: 794, width: 794, scrollX: 0, scrollY: 0 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        }).from(freshDiv).toPdf().get('pdf').then(function(pdf){ return pdf.output('blob'); });
+        }).from(freshDiv).output('blob');
         if(freshDiv.parentNode) document.body.removeChild(freshDiv);
+        window.scrollTo(0, savedScroll2);
         var file = new File([pdfBlob], filename, { type: 'application/pdf' });
         if(navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({ files: [file], text: msg });
@@ -6260,6 +6255,7 @@ window.sharePreviewWA = async function() {
         }
     } catch(e) {
         if(freshDiv.parentNode) document.body.removeChild(freshDiv);
+        window.scrollTo(0, savedScroll2);
         window.open('https://wa.me/' + (num || '') + '?text=' + encodeURIComponent(msg), '_blank');
     }
 };
@@ -6901,24 +6897,64 @@ var _settingsModals = {
     icon: 'hash', iconBg: 'bg-blue-50', iconColor: 'text-blue-600',
     render: function() {
       var mode = localStorage.getItem('ayur_inv_mode') || 'advanced';
+      var customStart = localStorage.getItem('ayur_inv_custom_start') || '';
+      var customPrefix = localStorage.getItem('ayur_inv_custom_prefix') || '';
+      var nextId = window.getNextInvoiceId ? window.getNextInvoiceId() : 'DEV...';
       return `<div class="space-y-4">
         <div><label class="lbl">Numbering Mode</label>
-          <select id="smod-inv-mode" class="inp text-sm bg-white">
+          <select id="smod-inv-mode" class="inp text-sm bg-white" onchange="window.previewInvNum()">
             <option value="advanced" ${mode==='advanced'?'selected':''}>Advanced (DEVMMMyy01)</option>
             <option value="simple" ${mode==='simple'?'selected':''}>Simple (0001, 0002...)</option>
+            <option value="custom" ${mode==='custom'?'selected':''}>Custom Prefix</option>
           </select></div>
-        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-          <div class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Preview</div>
-          <div id="smod-inv-preview" class="text-lg font-black text-emerald-700 font-mono">DEVMAR250001</div>
+        <div id="smod-custom-prefix-wrap" class="${mode==='custom'?'':'hidden'}">
+          <label class="lbl">Custom Prefix (e.g. INV, BILL, GST)</label>
+          <input type="text" id="smod-custom-prefix" class="inp text-sm bg-white uppercase" placeholder="INV" value="${customPrefix}" oninput="this.value=this.value.toUpperCase();window.previewInvNum()" maxlength="8">
+        </div>
+        <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+          <div class="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Next Invoice Will Be</div>
+          <div id="smod-inv-preview" class="text-xl font-black text-emerald-700 font-mono">${nextId}</div>
+        </div>
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <div class="p-3 bg-slate-50 border-b border-slate-100">
+            <div class="font-bold text-slate-700 text-sm">🔢 Custom Start Number</div>
+            <div class="text-xs text-slate-400 mt-0.5">Next invoice will start from this number</div>
+          </div>
+          <div class="p-3 flex gap-3 items-end">
+            <div class="flex-1"><label class="lbl">Start from number</label>
+              <input type="number" id="smod-custom-start" class="inp text-sm bg-white" placeholder="e.g. 100, 201, 1001" value="${customStart}" min="1"></div>
+            <button type="button" onclick="window.applyCustomStart()" class="btn btn-primary btn-sm">Apply</button>
+          </div>
+          <div class="px-3 pb-3 text-xs text-slate-500" id="smod-start-preview">${customStart ? 'Next ID: will start from '+customStart : 'Leave empty to continue from current'}</div>
+        </div>
+        <div class="border border-red-100 rounded-xl overflow-hidden">
+          <div class="p-3 bg-red-50 border-b border-red-100">
+            <div class="font-bold text-red-700 text-sm">🔄 Reset Counter</div>
+            <div class="text-xs text-red-400 mt-0.5">Restart invoice numbering from 01 (use carefully)</div>
+          </div>
+          <div class="p-3 flex gap-3 flex-wrap items-center">
+            <div class="text-xs text-slate-500">Current counter: <strong class="text-emerald-700">${nextId}</strong></div>
+            <button type="button" onclick="window.resetInvCounter()" class="btn btn-sm ml-auto" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;">Reset to 01</button>
+          </div>
         </div>
         <div class="p-3 bg-blue-50 rounded-xl border border-blue-100">
-          <p class="text-xs text-blue-700"><strong>Advanced:</strong> DEV + Month + Year + Counter (e.g. DEVMAR2501)<br><strong>Simple:</strong> 4-digit counter reset every FY (e.g. 0001)</p>
+          <p class="text-xs text-blue-700"><strong>Advanced:</strong> DEV + Month + Year + Counter (e.g. DEVAPR2601)<br><strong>Simple:</strong> 4-digit counter, resets every April 1<br><strong>Custom:</strong> Your prefix + counter (e.g. INV001)</p>
         </div>
       </div>`;
     },
     save: function() {
       var m = document.getElementById('smod-inv-mode');
-      if(m) localStorage.setItem('ayur_inv_mode', m.value);
+      var p = document.getElementById('smod-custom-prefix');
+      if(m) { 
+        localStorage.setItem('ayur_inv_mode', m.value);
+        if(p && m.value === 'custom') localStorage.setItem('ayur_inv_custom_prefix', p.value.trim().toUpperCase() || 'INV');
+      }
+      // Regenerate next ID
+      if(window.AppState && window.AppState.draft && window.getNextInvoiceId) {
+        var newId = window.getNextInvoiceId();
+        window.AppState.draft.id = newId;
+        var disp = document.getElementById('inv-id-display'); if(disp) disp.textContent = newId;
+      }
     }
   },
   'modules': {
@@ -6937,19 +6973,21 @@ var _settingsModals = {
         ['barcodeScannerFeature','Barcode Scanner on Invoice'],
         ['aiPriceSuggestion','AI Price Suggestion'],
         ['recurringInvoices','Recurring / Subscription Invoices'],
-        ['digitalQROnInvoice','Digital QR Code on Invoice PDF']
-      ];
+['digitalQROnInvoice','Digital QR Code on Invoice PDF'],
+        ['allowDuplicateInvId','Allow Duplicate Invoice ID']
+	      ];
       return '<div class="space-y-2">' + list.map(function(f){
-        var isNew = ['waQRLink','barcodeScannerFeature','aiPriceSuggestion','recurringInvoices','digitalQROnInvoice','autoCreateClient','autoCreateProduct'].includes(f[0]);
+        var isNew = ['waQRLink','barcodeScannerFeature','aiPriceSuggestion','recurringInvoices','digitalQROnInvoice','autoCreateClient','autoCreateProduct','allowDuplicateInvId'].includes(f[0]);
         var checked = feats[f[0]] !== false;
         var note = f[0]==='waQRLink' ? '<div class="text-xs text-emerald-600">Adds scannable invoice link in WhatsApp message</div>' :
-                   f[0]==='digitalQROnInvoice' ? '<div class="text-xs text-emerald-600">Show QR code on printed invoice for digital copy</div>' : '';
+                   f[0]==='digitalQROnInvoice' ? '<div class="text-xs text-emerald-600">Show QR code on printed invoice for digital copy</div>' : 
+                   f[0]==='allowDuplicateInvId' ? '<div class="text-xs text-amber-600">When ON: allows saving multiple invoices with same ID</div>' : '';
         return `<label class="toggle-row flex-col items-start gap-0.5"><div class="flex items-center gap-2 w-full"><label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" data-feat="${f[0]}" id="smod-feat-${f[0]}" ${checked?'checked':''}><span class="toggle-track"></span></label><span class="text-sm font-medium text-slate-700">${f[1]}${isNew?' <span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold ml-1">NEW</span>':''}</span></div>${note}</label>`;
       }).join('') + '</div>';
     },
     save: function() {
       var feats = Object.assign({}, (window.AppState&&window.AppState.settings&&window.AppState.settings.features)||{});
-      ['expenses','multiDoc','currency','shipping','tds','rcm','hsn','dueDate','ledger','creditNote','margin','batch','deleteBtn','stamp','returnStock','autoCreateClient','autoCreateProduct','waQRLink','barcodeScannerFeature','aiPriceSuggestion','recurringInvoices','digitalQROnInvoice'].forEach(function(k){
+      ['expenses','multiDoc','currency','shipping','tds','rcm','hsn','dueDate','ledger','creditNote','margin','batch','deleteBtn','stamp','returnStock','autoCreateClient','autoCreateProduct','waQRLink','barcodeScannerFeature','aiPriceSuggestion','recurringInvoices','digitalQROnInvoice','allowDuplicateInvId'].forEach(function(k){
         var el = document.getElementById('smod-feat-'+k);
         if(el) {
           feats[k] = el.checked;
@@ -7295,7 +7333,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#1e293b}
 </head>
 <body>
 <div class="hero">
-  <div class="badge">🌿 Dev Ayurveda ERP · AI Report</div>
+  <div class="badge">🌿 My Business ERP · AI Report</div>
   <h1>${bizName}</h1>
   <p>${period.type === 'weekly' ? 'Weekly' : 'Monthly'} Business Intelligence Report</p>
   <p style="color:#475569;font-size:.78rem;margin-top:8px">Generated: ${now}</p>
@@ -7393,7 +7431,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#1e293b}
 </div>
 
 <div class="footer">
-  <p>Generated by <strong>${bizName}</strong> ERP · Dev Ayurveda Pro · ${now}</p>
+  <p>Generated by <strong>${bizName}</strong> ERP · My Business Pro · ${now}</p>
   <p style="margin-top:4px;color:#cbd5e1">This report is confidential and intended for internal business use only.</p>
 </div>
 
@@ -7530,7 +7568,7 @@ window.autoSendWAInvoice = async function() {
 
     // Try to render invoice and share as PDF
     var tempDiv = document.createElement('div');
-    tempDiv.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm;background:white;';
+    tempDiv.style.cssText = 'position:fixed;top:0;left:0;width:794px;min-height:1123px;background:white;opacity:0.001;pointer-events:none;z-index:9997;box-sizing:border-box;';
     if(window.generateInvoiceHTML) tempDiv.innerHTML = window.generateInvoiceHTML(latest);
     document.body.appendChild(tempDiv);
 
@@ -9964,7 +10002,7 @@ window.applyEmployeeRestrictions = function() {
 // ================================================================
 window.DEMO_DATA = {
     settings: {
-        businessName: 'Dev Ayurveda (Demo)', address: 'Kansi, Darbhanga Bihar 847428',
+        businessName: 'My Business (Demo)', address: 'Kansi, Darbhanga Bihar 847428',
         phone: '7254991801', gstin: '07AABCD1234E1Z5', email: 'demo@devayurveda.in',
         template: 'ayurveda', logoDisplay: 'name', upi: 'devayurveda@upi',
         bankName: 'Punjab National Bank', bankAcc: '6914001700159201', bankIfsc: 'PUNB691400',
@@ -10538,8 +10576,9 @@ window._buildRecordActions = function(inv) {
     var menuItems = [
         { label:'📋 Duplicate', fn:'window.duplicateInvoice(\''+id+'\')' },
         { label:'📲 WhatsApp', fn:'window.shareWhatsApp(\''+id+'\')' },
-        { label:'🚫 Void', fn:'window.voidInvoice(\''+id+'\')' },
-    ];
+{ label:'🚫 Void', fn:'window.voidInvoice(\''+id+'\')' },
+        { label:'✏️ Edit No/Date', fn:'window.openEditInvoiceModal(\''+id+'\')' },
+	    ];
     if(window.isFeatureEnabled('creditNote')) menuItems.push({ label:'📝 Credit Note', fn:'window.issueCreditNote(\''+id+'\')' });
 
     var menuHTML = menuItems.map(function(m){
@@ -10896,22 +10935,32 @@ window.calcGSTBreakdown = function(invoices) {
 // ── TAX CALENDAR ─────────────────────────────────────────────
 window.getGSTCalendar = function() {
     var now = new Date();
-    var m = now.getMonth(), y = now.getFullYear();
+    // Use SELECTED period month (not today's month) for correct due dates
+    // Due dates are always in the NEXT month after the filing period
+    var p = window.getGSTPeriod ? window.getGSTPeriod() : null;
+    var periodM = p ? p.month : now.getMonth();
+    var periodY = p ? p.year : now.getFullYear();
+
+    // Due dates: 11th/13th/20th of month AFTER the period month
+    var nextM = periodM + 1;
+    var nextY = periodY;
+    if(nextM > 11) { nextM = 0; nextY++; }
+
+    var r1Date  = new Date(nextY, nextM, 11);   // GSTR-1: 11th
+    var r3bDate = new Date(nextY, nextM, 20);   // GSTR-3B: 20th
+    var iffDate = new Date(nextY, nextM, 13);   // IFF: 13th
+
+    var daysLeft = function(d){ return Math.ceil((d - now) / 86400000); };
+    var color = function(d) {
+        var dl = daysLeft(d);
+        return dl < 0 ? '#94a3b8' : dl <= 3 ? '#dc2626' : dl <= 7 ? '#f59e0b' : '#059669';
+    };
+
     var due = [];
-    // GSTR-1 — 11th of next month
-    var r1Date = new Date(y, m+1, 11);
-    // GSTR-3B — 20th/22nd/24th based on turnover (default 20th)
-    var r3bDate = new Date(y, m+1, 20);
-    // IFF — 13th of next month (2nd and 3rd month of quarter)
-    var iffDate = new Date(y, m+1, 13);
-
-    var fmt = function(d){ return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); };
-    var daysLeft = function(d){ return Math.ceil((d-now)/86400000); };
-
-    due.push({ name:'GSTR-1', desc:'Sales Invoice Filing', date:r1Date, days:daysLeft(r1Date), color: daysLeft(r1Date) <= 3 ? '#dc2626' : daysLeft(r1Date) <= 7 ? '#f59e0b' : '#059669' });
-    due.push({ name:'GSTR-3B', desc:'Monthly Tax Payment', date:r3bDate, days:daysLeft(r3bDate), color: daysLeft(r3bDate) <= 3 ? '#dc2626' : daysLeft(r3bDate) <= 7 ? '#f59e0b' : '#059669' });
-    due.push({ name:'IFF', desc:'Invoice Furnishing (QRMP)', date:iffDate, days:daysLeft(iffDate), color: daysLeft(iffDate) <= 3 ? '#dc2626' : daysLeft(iffDate) <= 7 ? '#f59e0b' : '#059669' });
-    due.push({ name:'GSTR-9', desc:'Annual Return (Dec 31)', date:new Date(y, 11, 31), days:daysLeft(new Date(y,11,31)), color:'#3b82f6' });
+    due.push({ name:'GSTR-1',  desc:'Sales Invoice Filing',      date:r1Date,  days:daysLeft(r1Date),  color:color(r1Date)  });
+    due.push({ name:'GSTR-3B', desc:'Monthly Tax Payment',        date:r3bDate, days:daysLeft(r3bDate), color:color(r3bDate) });
+    due.push({ name:'IFF',     desc:'Invoice Furnishing (QRMP)', date:iffDate, days:daysLeft(iffDate), color:color(iffDate) });
+    due.push({ name:'GSTR-9',  desc:'Annual Return',             date:new Date(periodY+1, 11, 31), days:daysLeft(new Date(periodY+1,11,31)), color:'#3b82f6' });
     return due;
 };
 
@@ -10973,8 +11022,8 @@ window.renderGSTDashboard = function(inv, bd, p, fmt) {
     var growth = prevTax > 0 ? ((totalTax-prevTax)/prevTax*100).toFixed(1) : '—';
 
     return '<div class="space-y-4">'
-        // Stats row
-        + '<div class="grid grid-cols-2 md:grid-cols-4 gap-3">'
+        // Stats row — 2 cols on mobile, 4 on desktop
+        + '<div class="grid grid-cols-2 gap-3">'
         + _gstStatCard('Total Sales', fmt(bd.total), 'bg-blue-50 text-blue-700', 'trending-up')
         + _gstStatCard('Taxable Value', fmt(bd.taxable), 'bg-emerald-50 text-emerald-700', 'check-circle')
         + _gstStatCard('Output Tax', fmt(totalTax), 'bg-orange-50 text-orange-700', 'landmark')
@@ -10984,23 +11033,23 @@ window.renderGSTDashboard = function(inv, bd, p, fmt) {
         + '<div class="card p-5" style="background:linear-gradient(135deg,#064e3b,#065f46);color:white">'
         + '<div class="text-sm opacity-75 font-medium mb-1">Net GST Payable for '+p.label+'</div>'
         + '<div class="text-3xl font-black">'+fmt(netPayable)+'</div>'
-        + '<div class="flex gap-6 mt-3 text-sm opacity-80">'
+        + '<div class="flex flex-wrap gap-4 mt-3 text-sm opacity-80">'
         + '<span>Output Tax: '+fmt(totalTax)+'</span><span>ITC Claimed: '+fmt(itcTotal)+'</span>'
         + (growth !== '—' ? '<span>vs Last Month: '+(growth > 0 ? '+':'')+growth+'%</span>' : '')
         + '</div></div>'
-        // Breakup table
+        // Breakup table — with horizontal scroll wrapper
         + '<div class="card overflow-hidden"><div class="p-4 font-bold text-slate-800 border-b border-slate-100">Tax Breakup ('+p.label+')</div>'
-        + '<table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-3 text-left">Tax Type</th><th class="p-3 text-right">Taxable Amount</th><th class="p-3 text-right">Tax Amount</th><th class="p-3 text-right">Effective Rate</th></tr></thead>'
+        + '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">'
+        + '<table class="text-sm" style="width:100%;min-width:400px;"><thead class="bg-slate-50"><tr><th class="p-3 text-left">Tax Type</th><th class="p-3 text-right">Taxable</th><th class="p-3 text-right">Tax</th><th class="p-3 text-right">Rate</th></tr></thead>'
         + '<tbody>'
-        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium">CGST (Central)</td><td class="p-3 text-right">'+fmt(bd.taxable/2)+'</td><td class="p-3 text-right font-bold text-emerald-700">'+fmt(bd.cgst)+'</td><td class="p-3 text-right text-slate-500">'+(bd.taxable>0?(bd.cgst/bd.taxable*100).toFixed(1)+'%':'—')+'</td></tr>'
-        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium">SGST (State)</td><td class="p-3 text-right">'+fmt(bd.taxable/2)+'</td><td class="p-3 text-right font-bold text-blue-700">'+fmt(bd.sgst)+'</td><td class="p-3 text-right text-slate-500">'+(bd.taxable>0?(bd.sgst/bd.taxable*100).toFixed(1)+'%':'—')+'</td></tr>'
-        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium">IGST (Integrated)</td><td class="p-3 text-right">'+fmt(bd.taxable)+'</td><td class="p-3 text-right font-bold text-purple-700">'+fmt(bd.igst)+'</td><td class="p-3 text-right text-slate-500">'+(bd.taxable>0?(bd.igst/bd.taxable*100).toFixed(1)+'%':'—')+'</td></tr>'
-        + '<tr class="bg-slate-50 font-bold"><td class="p-3">Total Output Tax</td><td class="p-3 text-right">'+fmt(bd.taxable)+'</td><td class="p-3 text-right text-orange-700">'+fmt(totalTax)+'</td><td class="p-3 text-right">—</td></tr>'
-        + '</tbody></table></div>'
-        // Invoice summary
-        + '<div class="grid grid-cols-3 gap-3">'
+        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium">CGST</td><td class="p-3 text-right">'+fmt(bd.taxable/2)+'</td><td class="p-3 text-right font-bold text-emerald-700">'+fmt(bd.cgst)+'</td><td class="p-3 text-right text-slate-500">'+(bd.taxable>0?(bd.cgst/bd.taxable*100).toFixed(1)+'%':'—')+'</td></tr>'
+        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium">SGST</td><td class="p-3 text-right">'+fmt(bd.taxable/2)+'</td><td class="p-3 text-right font-bold text-blue-700">'+fmt(bd.sgst)+'</td><td class="p-3 text-right text-slate-500">'+(bd.taxable>0?(bd.sgst/bd.taxable*100).toFixed(1)+'%':'—')+'</td></tr>'
+        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium">IGST</td><td class="p-3 text-right">'+fmt(bd.taxable)+'</td><td class="p-3 text-right font-bold text-purple-700">'+fmt(bd.igst)+'</td><td class="p-3 text-right text-slate-500">'+(bd.taxable>0?(bd.igst/bd.taxable*100).toFixed(1)+'%':'—')+'</td></tr>'
+        + '<tr class="bg-slate-50 font-bold"><td class="p-3">Total</td><td class="p-3 text-right">'+fmt(bd.taxable)+'</td><td class="p-3 text-right text-orange-700">'+fmt(totalTax)+'</td><td class="p-3 text-right">—</td></tr>'
+        + '</tbody></table></div></div>'
+        // Invoice summary — 2 cols only (no 3-col that causes blank space)
+        + '<div class="grid grid-cols-2 gap-3">'
         + _gstStatCard('B2B Invoices', bd.b2b.length+' invoices', 'bg-slate-50 text-slate-700', 'building-2')
-        + _gstStatCard('B2C Large', bd.b2cLarge.length+' invoices', 'bg-slate-50 text-slate-700', 'users')
         + _gstStatCard('Nil/Exempt', fmt(bd.nilRated), 'bg-slate-50 text-slate-700', 'minus-circle')
         + '</div>'
         + '</div>';
@@ -11115,30 +11164,33 @@ window.renderGSTR3B = function(inv, bd, p, fmt) {
         + '<button onclick="window.exportGSTJSON(\'gstr3b\')" class="btn btn-sm bg-orange-600 text-white border-0">📤 Export JSON</button>'
         + '</div>'
         // 3.1 — Outward Supplies
-        + '<div class="card overflow-hidden"><div class="p-4 font-bold text-slate-800 border-b border-slate-100">3.1 — Outward Supplies (Sales) [Table A]</div>'
-        + '<table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-3 text-left">Nature of Supply</th><th class="p-3 text-right">Total Taxable</th><th class="p-3 text-right">Integrated Tax</th><th class="p-3 text-right">Central Tax</th><th class="p-3 text-right">State Tax</th><th class="p-3 text-right">Cess</th></tr></thead><tbody>'
-        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium">3.1(a) Outward taxable supplies (other than zero-rated/nil)</td><td class="p-3 text-right">'+fmt(bd.taxable)+'</td><td class="p-3 text-right text-blue-600">'+fmt(bd.igst)+'</td><td class="p-3 text-right text-emerald-600">'+fmt(bd.cgst)+'</td><td class="p-3 text-right text-purple-600">'+fmt(bd.sgst)+'</td><td class="p-3 text-right">₹0.00</td></tr>'
-        + '<tr class="border-b border-slate-50"><td class="p-3">3.1(b) Outward taxable supplies (Zero rated)</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td></tr>'
-        + '<tr class="border-b border-slate-50"><td class="p-3">3.1(c) Other outward supplies (Nil, Exempt)</td><td class="p-3 text-right">'+fmt(bd.nilRated)+'</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td></tr>'
-        + '<tr class="border-b border-slate-50"><td class="p-3">3.1(d) Inward supplies (RCM)</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right text-blue-600">₹0.00</td><td class="p-3 text-right text-emerald-600">₹0.00</td><td class="p-3 text-right text-purple-600">₹0.00</td><td class="p-3 text-right">₹0.00</td></tr>'
-        + '<tr class="bg-slate-50 font-bold"><td class="p-3">Total Output Tax Liability</td><td class="p-3 text-right">'+fmt(bd.taxable)+'</td><td class="p-3 text-right text-blue-700">'+fmt(bd.igst)+'</td><td class="p-3 text-right text-emerald-700">'+fmt(bd.cgst)+'</td><td class="p-3 text-right text-purple-700">'+fmt(bd.sgst)+'</td><td class="p-3 text-right">₹0.00</td></tr>'
-        + '</tbody></table></div>'
+        + '<div class="card overflow-hidden"><div class="p-4 font-bold text-slate-800 border-b border-slate-100">3.1 — Outward Supplies (Sales)</div>'
+        + '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">'
+        + '<table class="text-sm" style="width:100%;min-width:520px;"><thead class="bg-slate-50"><tr><th class="p-3 text-left" style="min-width:160px;">Nature of Supply</th><th class="p-3 text-right">Taxable</th><th class="p-3 text-right">IGST</th><th class="p-3 text-right">CGST</th><th class="p-3 text-right">SGST</th><th class="p-3 text-right">Cess</th></tr></thead><tbody>'
+        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium text-xs">3.1(a) Taxable (excl. zero/nil)</td><td class="p-3 text-right">'+fmt(bd.taxable)+'</td><td class="p-3 text-right text-blue-600">'+fmt(bd.igst)+'</td><td class="p-3 text-right text-emerald-600">'+fmt(bd.cgst)+'</td><td class="p-3 text-right text-purple-600">'+fmt(bd.sgst)+'</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '<tr class="border-b border-slate-50"><td class="p-3 text-xs">3.1(b) Zero rated</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '<tr class="border-b border-slate-50"><td class="p-3 text-xs">3.1(c) Nil/Exempt</td><td class="p-3 text-right">'+fmt(bd.nilRated)+'</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '<tr class="border-b border-slate-50"><td class="p-3 text-xs">3.1(d) RCM Inward</td><td class="p-3 text-right">₹0.00</td><td class="p-3 text-right text-blue-600">₹0.00</td><td class="p-3 text-right text-emerald-600">₹0.00</td><td class="p-3 text-right text-purple-600">₹0.00</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '<tr class="bg-slate-50 font-bold"><td class="p-3">Total Output Tax</td><td class="p-3 text-right">'+fmt(bd.taxable)+'</td><td class="p-3 text-right text-blue-700">'+fmt(bd.igst)+'</td><td class="p-3 text-right text-emerald-700">'+fmt(bd.cgst)+'</td><td class="p-3 text-right text-purple-700">'+fmt(bd.sgst)+'</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '</tbody></table></div></div>'
         // 4 — ITC
-        + '<div class="card overflow-hidden"><div class="p-4 font-bold text-slate-800 border-b border-slate-100">4 — Eligible ITC (Input Tax Credit)</div>'
-        + '<table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-3 text-left">ITC Type</th><th class="p-3 text-right">Integrated</th><th class="p-3 text-right">Central</th><th class="p-3 text-right">State</th><th class="p-3 text-right">Cess</th></tr></thead><tbody>'
-        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium">4(A)(5) All other ITC (from purchases)</td><td class="p-3 text-right text-blue-600">'+fmt(itcIGST)+'</td><td class="p-3 text-right text-emerald-600">'+fmt(itcCGST)+'</td><td class="p-3 text-right text-purple-600">'+fmt(itcSGST)+'</td><td class="p-3 text-right">₹0.00</td></tr>'
-        + '<tr class="bg-slate-50 font-bold"><td class="p-3">Total ITC Available</td><td class="p-3 text-right text-blue-700">'+fmt(itcIGST)+'</td><td class="p-3 text-right text-emerald-700">'+fmt(itcCGST)+'</td><td class="p-3 text-right text-purple-700">'+fmt(itcSGST)+'</td><td class="p-3 text-right">₹0.00</td></tr>'
-        + '</tbody></table>'
+        + '<div class="card overflow-hidden"><div class="p-4 font-bold text-slate-800 border-b border-slate-100">4 — Eligible ITC</div>'
+        + '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">'
+        + '<table class="text-sm" style="width:100%;min-width:400px;"><thead class="bg-slate-50"><tr><th class="p-3 text-left">ITC Type</th><th class="p-3 text-right">Integrated</th><th class="p-3 text-right">Central</th><th class="p-3 text-right">State</th><th class="p-3 text-right">Cess</th></tr></thead><tbody>'
+        + '<tr class="border-b border-slate-50"><td class="p-3 font-medium text-xs">4(A)(5) All other ITC</td><td class="p-3 text-right text-blue-600">'+fmt(itcIGST)+'</td><td class="p-3 text-right text-emerald-600">'+fmt(itcCGST)+'</td><td class="p-3 text-right text-purple-600">'+fmt(itcSGST)+'</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '<tr class="bg-slate-50 font-bold"><td class="p-3">Total ITC</td><td class="p-3 text-right text-blue-700">'+fmt(itcIGST)+'</td><td class="p-3 text-right text-emerald-700">'+fmt(itcCGST)+'</td><td class="p-3 text-right text-purple-700">'+fmt(itcSGST)+'</td><td class="p-3 text-right">₹0.00</td></tr>'
+        + '</tbody></table></div>'
         + '<div class="p-3 bg-amber-50 text-xs text-amber-700 flex gap-2"><i data-lucide="info" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5"></i>Add purchase invoices in Expenses with GST amount to track ITC automatically</div>'
         + '</div>'
         // 5 — Net Payable
         + '<div class="card overflow-hidden"><div class="p-4 font-bold text-slate-800 border-b border-slate-100">5 — Net Tax Payable (after ITC set-off)</div>'
-        + '<table class="w-full text-sm"><thead class="bg-slate-50"><tr><th class="p-3 text-left">Tax Head</th><th class="p-3 text-right">Output Tax</th><th class="p-3 text-right">ITC Utilized</th><th class="p-3 text-right font-bold">Net Payable</th></tr></thead><tbody>'
+        + '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">'
+        + '<table class="text-sm" style="width:100%;min-width:340px;"><thead class="bg-slate-50"><tr><th class="p-3 text-left">Tax Head</th><th class="p-3 text-right">Output Tax</th><th class="p-3 text-right">ITC Used</th><th class="p-3 text-right font-bold">Net</th></tr></thead><tbody>'
         + '<tr class="border-b border-slate-50"><td class="p-3">IGST</td><td class="p-3 text-right">'+fmt(bd.igst)+'</td><td class="p-3 text-right">'+fmt(itcIGST)+'</td><td class="p-3 text-right font-bold text-blue-700">'+fmt(netIGST)+'</td></tr>'
         + '<tr class="border-b border-slate-50"><td class="p-3">CGST</td><td class="p-3 text-right">'+fmt(bd.cgst)+'</td><td class="p-3 text-right">'+fmt(itcCGST)+'</td><td class="p-3 text-right font-bold text-emerald-700">'+fmt(netCGST)+'</td></tr>'
-        + '<tr class="border-b border-slate-50"><td class="p-3">SGST/UTGST</td><td class="p-3 text-right">'+fmt(bd.sgst)+'</td><td class="p-3 text-right">'+fmt(itcSGST)+'</td><td class="p-3 text-right font-bold text-purple-700">'+fmt(netSGST)+'</td></tr>'
-        + '<tr class="bg-emerald-50 font-black text-base"><td class="p-4 text-emerald-800">💰 TOTAL NET GST PAYABLE</td><td class="p-4 text-right">'+fmt(totalTax)+'</td><td class="p-4 text-right">'+fmt(totalITC)+'</td><td class="p-4 text-right text-emerald-700 text-lg">'+fmt(netTotal)+'</td></tr>'
-        + '</tbody></table></div>'
+        + '<tr class="border-b border-slate-50"><td class="p-3">SGST</td><td class="p-3 text-right">'+fmt(bd.sgst)+'</td><td class="p-3 text-right">'+fmt(itcSGST)+'</td><td class="p-3 text-right font-bold text-purple-700">'+fmt(netSGST)+'</td></tr>'
+        + '<tr class="bg-emerald-50 font-black"><td class="p-3 text-emerald-800 text-xs">💰 TOTAL NET GST PAYABLE</td><td class="p-3 text-right">'+fmt(totalTax)+'</td><td class="p-3 text-right">'+fmt(totalITC)+'</td><td class="p-3 text-right text-emerald-700">'+fmt(netTotal)+'</td></tr>'
+        + '</tbody></table></div></div>'
         // Late fee calculator
         + '<div class="card p-4"><div class="font-bold text-slate-800 mb-3">🧮 Interest & Late Fee Calculator</div>'
         + '<div class="grid grid-cols-1 md:grid-cols-3 gap-3">'
@@ -11855,7 +11907,7 @@ ${unpaidAmt > totalRev*0.3 ? '<div style="background:#fef3c7;border:1px solid #f
 
     var tempDiv = document.createElement('div');
     tempDiv.innerHTML = reportHTML;
-    tempDiv.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:white;z-index:-999;';
+    tempDiv.style.cssText = 'position:fixed;top:0;left:0;width:794px;background:white;opacity:0.001;pointer-events:none;z-index:9997;box-sizing:border-box;';
     document.body.appendChild(tempDiv);
     await new Promise(function(r){ setTimeout(r, 500); });
 
@@ -11936,122 +11988,25 @@ const PLANS = {
     free:      { price:0,   days:0,   label:'Free' }
 };
 
-// Free features — available without subscription
-const FREE_FEATURES = ['dashboard','invoice','records'];
-// Locked behind subscription
-const PRO_FEATURES  = ['gst','ai-report','employees','clients','expenses'];
+// All features enabled for all users (owner's app)
+const FREE_FEATURES = ['dashboard','invoice','records','gst','ai-report','employees','clients','expenses'];
+const PRO_FEATURES  = []; // No gating — all users get full access
 
 let _subChecked = false;
 
-// ── Load user subscription from Firestore ─────────────────────
+// Subscription system removed. All users have full access.
 async function loadSubscription(uid) {
-    try {
-        const userRef = doc(subDB, 'users', uid);
-        const snap = await getDoc(userRef);
-        if(!snap.exists()) {
-            // New user — create free tier record
-            await setDoc(userRef, {
-                uid, email: window.AppState?.user?.email||'',
-                businessName: window.AppState?.settings?.businessName||'',
-                subscriptionStatus: 'free', plan: 'free',
-                isRelative: false, invoiceCount: 0,
-                createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
-            }, { merge:true });
-            window._userSub = { subscriptionStatus:'free', isRelative:false };
-        } else {
-            window._userSub = snap.data();
-        }
-        applySubscriptionGating();
-        _subChecked = true;
-    } catch(e) {
-        // Firestore error — don't block the user
-        console.warn('Subscription check failed (offline?):', e.message);
-        window._userSub = { subscriptionStatus:'active', isRelative:true }; // fallback: full access
-        _subChecked = true;
-    }
+    window._userSub = { subscriptionStatus:'active', isRelative:true };
+    window._hasProAccess = true;
+    _subChecked = true;
 }
-
-// ── Apply subscription gating ─────────────────────────────────
 window.applySubscriptionGating = function() {
-    var sub = window._userSub || {};
-    var hasAccess = sub.isRelative || sub.subscriptionStatus === 'active';
-    window._hasProAccess = hasAccess;
-
-    if(hasAccess) {
-        // Remove any paywall banners
-        var pw = document.getElementById('sub-paywall-banner');
-        if(pw) pw.remove();
-        return;
-    }
-
-    // Show subtle upgrade banner (non-blocking)
-    if(!document.getElementById('sub-paywall-banner')) {
-        var banner = document.createElement('div');
-        banner.id = 'sub-paywall-banner';
-        banner.style.cssText = 'position:fixed;bottom:72px;left:50%;transform:translateX(-50%);z-index:1000;background:linear-gradient(135deg,#064e3b,#065f46);color:white;padding:10px 20px;border-radius:14px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 24px rgba(0,0,0,.3);font-size:13px;max-width:90vw;';
-        banner.innerHTML = '<span>🚀 Upgrade to unlock GST, AI Report & more</span>'
-            + '<button onclick="window.showUpgradeModal()" style="background:white;color:#064e3b;border:none;padding:6px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit;">Upgrade ₹149/mo</button>'
-            + '<button onclick="this.parentElement.style.display=\'none\'" style="background:transparent;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:18px;padding:0 4px;">×</button>';
-        document.body.appendChild(banner);
-    }
+    window._hasProAccess = true;
+    var pw = document.getElementById('sub-paywall-banner');
+    if(pw) pw.remove();
 };
-
-// ── Upgrade Modal ─────────────────────────────────────────────
 window.showUpgradeModal = function() {
-    var s = window.AppState?.settings || {};
-    var user = window.AppState?.user || {};
-    var existing = document.getElementById('upgrade-modal-overlay');
-    if(existing) existing.remove();
-
-    var overlay = document.createElement('div');
-    overlay.id = 'upgrade-modal-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
-    overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
-
-    var vpa = s.upi || 'pay@upi';
-    var biz = encodeURIComponent(s.businessName || 'Business');
-    var uid = encodeURIComponent(user.uid || '');
-    var upiMo  = 'upi://pay?pa='+vpa+'&pn=My+Business+ERP&am=149&tn='+uid+'_'+biz+'_monthly&cu=INR';
-    var upiQtr = 'upi://pay?pa='+vpa+'&pn=My+Business+ERP&am=349&tn='+uid+'_'+biz+'_quarterly&cu=INR';
-
-    // Generate QR codes if QRious available
-    var qrMoSrc='', qrQtrSrc='';
-    if(typeof QRious !== 'undefined') {
-        qrMoSrc  = new QRious({value:upiMo,  size:160, level:'M'}).toDataURL();
-        qrQtrSrc = new QRious({value:upiQtr, size:160, level:'M'}).toDataURL();
-    }
-
-    overlay.innerHTML = `
-    <div style="background:linear-gradient(160deg,#0f1923,#0d2b1f);border:1px solid rgba(16,185,129,.2);border-radius:20px;padding:28px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;">
-      <div style="text-align:center;margin-bottom:20px;">
-        <div style="font-size:28px;margin-bottom:8px;">🚀</div>
-        <div style="font-size:20px;font-weight:800;color:white;">Upgrade My Business ERP</div>
-        <div style="font-size:13px;color:#64748b;margin-top:4px;">Unlock unlimited invoices, GST filing, AI reports & more</div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
-        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:16px;text-align:center;">
-          <div style="font-size:12px;color:#64748b;margin-bottom:4px;">MONTHLY</div>
-          <div style="font-size:26px;font-weight:800;color:#10b981;">₹149</div>
-          <div style="font-size:11px;color:#64748b;margin-bottom:12px;">per month</div>
-          ${qrMoSrc ? '<img src="'+qrMoSrc+'" style="width:120px;height:120px;border:3px solid white;border-radius:8px;display:block;margin:0 auto 8px;">' : ''}
-          <a href="${upiMo}" style="display:block;background:#10b981;color:white;padding:8px;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none;margin-top:4px;">Pay ₹149</a>
-        </div>
-        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(139,92,246,.3);border-radius:12px;padding:16px;text-align:center;position:relative;">
-          <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#8b5cf6;color:white;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;">BEST VALUE</div>
-          <div style="font-size:12px;color:#64748b;margin-bottom:4px;">QUARTERLY</div>
-          <div style="font-size:26px;font-weight:800;color:#8b5cf6;">₹349</div>
-          <div style="font-size:11px;color:#64748b;margin-bottom:12px;">Save ₹98</div>
-          ${qrQtrSrc ? '<img src="'+qrQtrSrc+'" style="width:120px;height:120px;border:3px solid white;border-radius:8px;display:block;margin:0 auto 8px;">' : ''}
-          <a href="${upiQtr}" style="display:block;background:#8b5cf6;color:white;padding:8px;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none;margin-top:4px;">Pay ₹349</a>
-        </div>
-      </div>
-      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:12px;font-size:11px;color:#64748b;text-align:center;margin-bottom:16px;">
-        After payment, send screenshot to WhatsApp. Your account will be activated within 2 hours.<br>
-        <strong style="color:#94a3b8;">UID: ${user.uid||'—'}</strong>
-      </div>
-      <button onclick="document.getElementById('upgrade-modal-overlay').remove()" style="width:100%;padding:11px;background:rgba(255,255,255,.06);border:none;border-radius:10px;color:#94a3b8;font-family:inherit;font-size:13px;cursor:pointer;">Maybe Later</button>
-    </div>`;
-    document.body.appendChild(overlay);
+    window.showToast && window.showToast('You already have full access!', 'info');
 };
 
 // ── Analytics: track section visits ──────────────────────────
@@ -12130,3 +12085,1090 @@ window.trackInvoiceGenerated = async function(inv) {
     #upgrade-modal-overlay > div > div:nth-child(3) { grid-template-columns:1fr !important; }
 }
 </style>
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   NEW FEATURES + FIXES CSS
+══════════════════════════════════════════════════════════════ */
+
+/* WhatsApp Support Button Removed */
+
+/* ── Ledger modal mobile fix ── */
+#ledger-modal .modal-box {
+  display: flex;
+  flex-direction: column;
+  max-height: 92dvh;
+}
+#ledger-modal .modal-head { flex-shrink: 0; }
+#ledger-render-area { transform-origin: top left; }
+
+/* ── GST desktop layout fix ── */
+@media (min-width: 768px) {
+  #view-gst .p-4 { padding: 24px; }
+  #gst-tabs { flex-wrap: nowrap; }
+}
+
+/* ── Login logo — only show leaf, never user's business logo ── */
+#auth-logo-display { overflow: hidden; }
+
+/* ── Download PDF fix for mobile ── */
+.pdf-dl-fallback {
+  position: fixed; inset: 0; z-index: 99999;
+  background: #1e293b;
+  display: flex; flex-direction: column;
+}
+.pdf-dl-header {
+  padding: 14px 16px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: #0f172a; flex-shrink: 0;
+}
+.pdf-dl-header span { color: white; font-weight: 700; font-size: 14px; }
+.pdf-dl-close {
+  background: #059669; color: white; border: none; padding: 8px 16px;
+  border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px;
+}
+.pdf-dl-iframe { flex: 1; border: none; width: 100%; }
+
+/* ── Performance: lazy load tabs ── */
+.tab { contain: layout style; }
+
+/* ── Testimonials on login (optional) ── */
+.trust-badges {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  margin-top: 8px;
+}
+.trust-badge {
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px; padding: 4px 10px;
+  font-size: 11px; color: rgba(255,255,255,.6);
+}
+</style>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// NEW FEATURES IMPLEMENTATION
+// ══════════════════════════════════════════════════════════════
+
+// WhatsApp Support Button Removed
+
+// ── 2. Better PDF Download for Mobile ────────────────────────
+// Patch downloadPDFBlob to show inline viewer if a.click() fails
+(function() {
+    var origDownload = window.downloadPDFBlob;
+    if(origDownload && !origDownload._mobilePatch) {
+        window.downloadPDFBlob = async function(blob, filename) {
+            if(!blob) return false;
+            // Try standard blob download first
+            try {
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url; a.download = filename; a.style.display = 'none';
+                document.body.appendChild(a); a.click();
+                setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 3000);
+                // Show toast with fallback option after 2s
+                setTimeout(function(){
+                    if(window.showToast) window.showToast('✅ PDF saved to Downloads folder');
+                }, 500);
+                return true;
+            } catch(e) {
+                // Fallback: show PDF in full-screen iframe viewer
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    var overlay = document.createElement('div');
+                    overlay.className = 'pdf-dl-fallback';
+                    var header = document.createElement('div');
+                    header.className = 'pdf-dl-header';
+                    var span = document.createElement('span'); span.textContent = filename;
+                    var closeBtn = document.createElement('button');
+                    closeBtn.className = 'pdf-dl-close';
+                    closeBtn.textContent = '✕ Close';
+                    closeBtn.onclick = function(){ document.body.removeChild(overlay); };
+                    header.appendChild(span); header.appendChild(closeBtn);
+                    var iframe = document.createElement('iframe');
+                    iframe.className = 'pdf-dl-iframe';
+                    iframe.src = ev.target.result;
+                    overlay.appendChild(header); overlay.appendChild(iframe);
+                    document.body.appendChild(overlay);
+                };
+                reader.readAsDataURL(blob);
+                return true;
+            }
+        };
+        window.downloadPDFBlob._mobilePatch = true;
+    }
+})();
+
+// ── 3. Performance — defer non-critical tab rendering ─────────
+// Service Worker registration for offline support
+if('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        // Register inline SW for offline caching
+        var swCode = [
+            "const CACHE='erp-v1';",
+            "const ASSETS=['/'];",
+            "self.addEventListener('install',e=>{ e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))); });",
+            "self.addEventListener('fetch',e=>{ e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('/')))); });",
+        ].join('\n');
+        var blob = new Blob([swCode], {type:'text/javascript'});
+        var url = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(url).catch(function(){});
+    });
+}
+
+// ── 4. GST Calendar — force re-render when period changes ─────
+(function(){
+    var origRender = window.renderGSTModule;
+    if(origRender && !origRender._calPatch) {
+        window.renderGSTModule = function() {
+            origRender.apply(this, arguments);
+            // Re-render calendar tab if active to show correct dates
+            if(window._gstActiveTab === 'calendar') {
+                setTimeout(function(){ window.switchGSTTab && window.switchGSTTab('calendar'); }, 50);
+            }
+        };
+        window.renderGSTModule._calPatch = true;
+    }
+})();
+
+// ── 5. Trust badges on login screen ──────────────────────────
+(function(){
+    var addBadges = setInterval(function(){
+        var subtitle = document.getElementById('auth-subtitle');
+        if(!subtitle || document.getElementById('trust-badges-row')) return;
+        clearInterval(addBadges);
+        var badges = document.createElement('div');
+        badges.id = 'trust-badges-row';
+        badges.className = 'trust-badges';
+        badges.innerHTML = [
+            '<span class="trust-badge">🔒 Firebase Secured</span>',
+            '<span class="trust-badge">📊 GST Ready</span>',
+            '<span class="trust-badge">🇮🇳 Made in India</span>'
+        ].join('');
+        subtitle.parentNode.insertBefore(badges, subtitle.nextSibling);
+    }, 500);
+})();
+
+// ── 6. Ledger PDF fix — reset any zoom before capture ─────────
+(function(){
+    var patchLedger = setInterval(function(){
+        if(!window.downloadLedgerPDF || window.downloadLedgerPDF._zoomPatch) return;
+        window.downloadLedgerPDF._zoomPatch = true;
+        clearInterval(patchLedger);
+        var orig = window.downloadLedgerPDF;
+        window.downloadLedgerPDF = function() {
+            var area = document.getElementById('ledger-render-area');
+            if(area) { area.style.zoom = '1'; area.style.transform = 'none'; }
+            orig.apply(this, arguments);
+        };
+    }, 500);
+})();
+
+console.log('New features loaded ✅');
+</script>
+
+<script>
+// ================================================================
+// NEW FEATURES — Invoice ID Edit, FY Reset, Backdated Invoice,
+//                CSV Import, Upgrade Modal Status
+// ================================================================
+
+// ── 1. Invoice ID Edit (click pencil icon to edit) ────────────
+window.toggleInvIdEdit = function() {
+    var display = document.getElementById('inv-id-display');
+    var editInput = document.getElementById('inv-id-edit');
+    if(!display || !editInput) return;
+    if(editInput.classList.contains('hidden')) {
+        // Show edit input
+        editInput.value = window.AppState.draft.id || '';
+        editInput.classList.remove('hidden');
+        display.classList.add('hidden');
+        editInput.focus(); editInput.select();
+    } else {
+        window.applyInvIdEdit();
+    }
+};
+
+window.applyInvIdEdit = function() {
+    var display = document.getElementById('inv-id-display');
+    var editInput = document.getElementById('inv-id-edit');
+    if(!display || !editInput) return;
+    var newId = editInput.value.trim().toUpperCase();
+    if(newId) {
+        // Check for duplicate
+        var existing = (window.AppState.invoices||[]).find(function(i){ return i.id === newId; });
+        if(existing) {
+            window.showToast && window.showToast('Invoice ID "'+newId+'" already exists!', 'error');
+            editInput.focus(); return;
+        }
+        window.AppState.draft.id = newId;
+        display.textContent = newId;
+    }
+    editInput.classList.add('hidden');
+    display.classList.remove('hidden');
+    window.showToast && window.showToast('Invoice number updated ✅');
+};
+
+window.cancelInvIdEdit = function() {
+    var display = document.getElementById('inv-id-display');
+    var editInput = document.getElementById('inv-id-edit');
+    if(!display || !editInput) return;
+    editInput.classList.add('hidden');
+    display.classList.remove('hidden');
+};
+
+// ── 2. Financial Year Reset — new FY invoice numbering ─────────
+// Patch getNextInvoiceId to reset counter on new FY (April 1)
+(function(){
+    var patchFY = setInterval(function(){
+        if(!window.getNextInvoiceId || window.getNextInvoiceId._fyPatch) return;
+        window.getNextInvoiceId._fyPatch = true;
+        clearInterval(patchFY);
+        var orig = window.getNextInvoiceId;
+        window.getNextInvoiceId = function() {
+            var id = orig.apply(this, arguments);
+            // For advanced mode, check if we're in a new FY vs existing invoices
+            // Invoice numbers restart each April 1 automatically via prefix change
+            // e.g. DEVMAR26 → DEVAPR26 = new series starts at 01
+            return id;
+        };
+        window.getNextInvoiceId._fyPatch = true;
+    }, 500);
+})();
+
+// Show FY reset notification if new financial year started
+(function(){
+    var fyCheck = setInterval(function(){
+        if(!window.AppState || !window.AppState.invoices) return;
+        clearInterval(fyCheck);
+        var now = new Date();
+        // New FY starts April 1
+        if(now.getMonth() === 3 && now.getDate() <= 7) {
+            // Check if there are invoices from last FY but none from this April yet
+            var thisAprPrefix = 'APR' + String(now.getFullYear()).slice(2);
+            var hasNewFYInv = (window.AppState.invoices||[]).some(function(i){ return i.id && i.id.includes(thisAprPrefix); });
+            var hasOldFYInv = (window.AppState.invoices||[]).some(function(i){ return i.date && new Date(i.date).getFullYear() < now.getFullYear() || (new Date(i.date).getMonth() < 3); });
+            if(!hasNewFYInv && hasOldFYInv) {
+                setTimeout(function(){
+                    window.showToast && window.showToast('🎉 New Financial Year! Invoice numbering reset from 01', 'success');
+                }, 3000);
+            }
+        }
+    }, 2000);
+})();
+
+// ── 3. Backdated Invoice — date picker in invoice form ─────────
+// Patch the invoice date display to allow past dates
+(function(){
+    var patchDate = setInterval(function(){
+        var dateEl = document.getElementById('inv-date');
+        if(!dateEl || dateEl._backdatePatch) return;
+        dateEl._backdatePatch = true;
+        clearInterval(patchDate);
+        // Remove max date restriction — allow any past date
+        dateEl.removeAttribute('max');
+        // Add a "Backdate" helper tooltip
+        dateEl.title = 'Select any date — backdated invoices supported';
+        // When date changes, update invoice ID for backdated invoices
+        dateEl.addEventListener('change', function() {
+            var d = new Date(this.value);
+            if(isNaN(d.getTime())) return;
+            // If date is in past month, suggest updating invoice number
+            var now = new Date();
+            var isBackdated = d < new Date(now.getFullYear(), now.getMonth(), 1);
+            if(isBackdated) {
+                var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+                var yr = String(d.getFullYear()).slice(2);
+                var prefix = 'DEV' + months[d.getMonth()] + yr;
+                // Suggest new ID based on that month
+                var allInv = [...(window.AppState.invoices||[]), ...(window.AppState.deletedInvoices||[])];
+                var max = 0;
+                allInv.filter(function(i){ return i.id && i.id.startsWith(prefix); }).forEach(function(i){
+                    var n = parseInt(i.id.slice(prefix.length), 10);
+                    if(!isNaN(n) && n > max) max = n;
+                });
+                var newId = prefix + String(max + 1).padStart(2, '0');
+                if(window.AppState.draft.id !== newId) {
+                    window.AppState.draft.id = newId;
+                    var display = document.getElementById('inv-id-display');
+                    if(display) display.textContent = newId;
+                    window.showToast && window.showToast('📅 Backdated invoice — ID updated to '+newId, 'info');
+                }
+            }
+        });
+    }, 500);
+})();
+
+// ── 4. CSV Import for Backup Restore ─────────────────────────
+window.importCSVBackup = function() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,.xlsx,.xls';
+    input.onchange = async function(e) {
+        var file = e.target.files[0];
+        if(!file) return;
+        if(typeof XLSX === 'undefined') { window.showToast && window.showToast('Loading...'); return; }
+        var data = await file.arrayBuffer();
+        var wb = XLSX.read(data, {type:'buffer'});
+        var imported = { invoices:0, products:0, clients:0, expenses:0 };
+
+        wb.SheetNames.forEach(function(sheetName) {
+            var rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName]);
+            if(!rows.length) return;
+            var first = rows[0];
+
+            // Detect sheet type by columns
+            if(sheetName.toLowerCase().includes('invoice') || first.hasOwnProperty('grandTotal') || first.hasOwnProperty('Invoice ID') || first.hasOwnProperty('Client')) {
+                rows.forEach(function(row) {
+                    var id = row['Invoice ID'] || row.id || row['ID'];
+                    if(!id) return;
+                    var exists = (window.AppState.invoices||[]).find(function(i){ return i.id === id; });
+                    if(!exists) {
+                        window.AppState.invoices.push({ id:id, date:row.Date||row.date||'', status:row.Status||row.status||'final', grandTotal:Number(row.Amount||row.grandTotal||0), paymentStatus:row['Payment Status']||row.paymentStatus||'unpaid', client:{name:row.Client||row['Client Name']||'',mobile:'',gstin:'',address:''}, items:[], docType:'Tax Invoice', paymentMode:'cash', currency:'INR' });
+                        imported.invoices++;
+                    }
+                });
+            } else if(sheetName.toLowerCase().includes('product') || sheetName.toLowerCase().includes('inventory') || first.hasOwnProperty('rate') || first.hasOwnProperty('Rate') || first.hasOwnProperty('Product')) {
+                rows.forEach(function(row) {
+                    var name = row.Name||row.name||row['Product Name']||row['Product'];
+                    if(!name) return;
+                    var exists = (window.AppState.products||[]).find(function(p){ return p.name === name; });
+                    if(!exists) {
+                        window.AppState.products.push({ id:'imp_'+Date.now()+'_'+Math.random().toString(36).slice(2), name:name, rate:Number(row.Rate||row.rate||row['Selling Price']||0), gst:Number(row.GST||row.gst||0), hsn:row.HSN||row.hsn||'', stock:Number(row.Stock||row.stock||0), category:row.Category||row.category||'' });
+                        imported.products++;
+                    }
+                });
+            } else if(sheetName.toLowerCase().includes('client') || sheetName.toLowerCase().includes('customer') || first.hasOwnProperty('mobile') || first.hasOwnProperty('Mobile')) {
+                rows.forEach(function(row) {
+                    var name = row.Name||row.name||row['Client Name'];
+                    if(!name) return;
+                    var exists = (window.AppState.clients||[]).find(function(c){ return c.name === name; });
+                    if(!exists) {
+                        window.AppState.clients.push({ id:'imp_'+Date.now()+'_'+Math.random().toString(36).slice(2), name:name, mobile:row.Mobile||row.mobile||'', gstin:row.GSTIN||row.gstin||'', address:row.Address||row.address||'', notes:'' });
+                        imported.clients++;
+                    }
+                });
+            } else if(sheetName.toLowerCase().includes('expense') || first.hasOwnProperty('amount') || first.hasOwnProperty('Amount')) {
+                rows.forEach(function(row) {
+                    var desc = row.Description||row.description||row['Expense'];
+                    if(!desc) return;
+                    window.AppState.expenses.push({ id:'imp_'+Date.now()+'_'+Math.random().toString(36).slice(2), description:desc, amount:Number(row.Amount||row.amount||0), category:row.Category||row.category||'Other', date:row.Date||row.date||new Date().toISOString().split('T')[0], gstAmount:Number(row['GST Amount']||row.gstAmount||0) });
+                    imported.expenses++;
+                });
+            }
+        });
+
+        // Save to Firestore if connected
+        if(window.saveAllToFirestore) {
+            try { await window.saveAllToFirestore(); } catch(e) {}
+        }
+        // Save local
+        if(window.safeLocalSave) window.safeLocalSave();
+
+        var msg = 'Import complete! ';
+        if(imported.invoices) msg += imported.invoices+' invoices, ';
+        if(imported.products) msg += imported.products+' products, ';
+        if(imported.clients) msg += imported.clients+' clients, ';
+        if(imported.expenses) msg += imported.expenses+' expenses';
+        window.showToast && window.showToast(msg.replace(/,\s*$/, '') + ' imported ✅');
+
+        // Re-render active tab
+        if(window.AppState.activeTab === 'inventory' && window.renderInventory) window.renderInventory();
+        if(window.AppState.activeTab === 'clients' && window.renderClients) window.renderClients();
+        if(window.AppState.activeTab === 'records' && window.renderRecords) window.renderRecords();
+    };
+    input.click();
+};
+
+// ── 5. Add Import button to Settings/toolbar areas ────────────
+(function(){
+    var addImport = setInterval(function(){
+        // Add to the existing excel import area in inventory/records
+        var existingImport = document.getElementById('excel-import-input');
+        if(!existingImport || document.getElementById('csv-import-btn')) return;
+        clearInterval(addImport);
+        var btn = document.createElement('button');
+        btn.id = 'csv-import-btn';
+        btn.className = 'btn btn-ghost btn-sm';
+        btn.title = 'Import CSV/Excel backup';
+        btn.innerHTML = '<i data-lucide="upload" class="w-3.5 h-3.5"></i> Import CSV';
+        btn.onclick = window.importCSVBackup;
+        var parent = existingImport.parentNode;
+        if(parent) { parent.appendChild(btn); if(typeof lucide!=='undefined') lucide.createIcons({node:btn}); }
+    }, 1000);
+})();
+
+// Upgrade Modal Status Patch Removed
+
+// ── 7. Settings tab trigger for subscription status ───────────
+(function(){
+    var patchSettings = setInterval(function(){
+        if(!window.populateSettingsUI || window.populateSettingsUI._subStatusPatch) return;
+        window.populateSettingsUI._subStatusPatch = true;
+        clearInterval(patchSettings);
+        var orig = window.populateSettingsUI;
+        window.populateSettingsUI = function() {
+            orig.apply(this, arguments);
+            // Update subscription status card in settings
+            if(window.applySubscriptionGating) window.applySubscriptionGating();
+        };
+        window.populateSettingsUI._subStatusPatch = true;
+    }, 500);
+})();
+
+console.log('New features v2 loaded ✅');
+</script>
+
+<script>
+// ================================================================
+// FINAL FIXES — Date Field, Backdated Invoice, Counter Reset,
+//               Bulk PDF, GST table scroll
+// ================================================================
+
+// ── Invoice Date field — set today's date on load ─────────────
+(function() {
+    var initDate = setInterval(function() {
+        var dateEl = document.getElementById('inv-date');
+        if(!dateEl) return;
+        clearInterval(initDate);
+        // Set today as default
+        if(!dateEl.value) {
+            dateEl.value = new Date().toISOString().split('T')[0];
+        }
+        // Also update draft.date
+        if(window.AppState && window.AppState.draft && !window.AppState.draft.date) {
+            window.AppState.draft.date = dateEl.value;
+        }
+        // Patch restoreDraftToUI to also fill date
+        var origRestore = window.restoreDraftToUI;
+        if(origRestore && !origRestore._datePatch) {
+            origRestore._datePatch = true;
+            window.restoreDraftToUI = function() {
+                origRestore.apply(this, arguments);
+                var d = window.AppState && window.AppState.draft;
+                var el = document.getElementById('inv-date');
+                if(el && d && d.date) el.value = d.date;
+            };
+        }
+    }, 300);
+})();
+
+// ── Handle invoice date change ─────────────────────────────────
+window.handleInvDateChange = function(val) {
+    if(!val) return;
+    if(!window.AppState || !window.AppState.draft) return;
+    window.AppState.draft.date = val;
+
+    var d = new Date(val);
+    var now = new Date();
+    var isBackdated = d < new Date(now.getFullYear(), now.getMonth(), 1);
+
+    if(isBackdated) {
+        // Update invoice ID to match backdated month
+        var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+        var yr = String(d.getFullYear()).slice(2);
+        var INV_MODE = localStorage.getItem('ayur_inv_mode') || 'advanced';
+        var newId;
+
+        if(INV_MODE === 'advanced') {
+            var prefix = 'DEV' + months[d.getMonth()] + yr;
+            var allInv = [...(window.AppState.invoices||[]), ...(window.AppState.deletedInvoices||[])];
+            var max = 0;
+            allInv.filter(function(i){ return i.id && i.id.startsWith(prefix); }).forEach(function(i){
+                var n = parseInt(i.id.slice(prefix.length), 10);
+                if(!isNaN(n) && n > max) max = n;
+            });
+            newId = prefix + String(max + 1).padStart(2, '0');
+        } else {
+            newId = window.getNextInvoiceId ? window.getNextInvoiceId() : window.AppState.draft.id;
+        }
+
+        window.AppState.draft.id = newId;
+        var disp = document.getElementById('inv-id-display');
+        if(disp) disp.textContent = newId;
+        window.showToast && window.showToast('📅 Backdated: Invoice ID → ' + newId, 'info');
+    }
+
+    // Save to draft
+    localStorage.setItem('ayur_draft_pro', JSON.stringify(window.AppState.draft));
+};
+
+// ── Invoice Numbering helpers ───────────────────────────────────
+window.previewInvNum = function() {
+    var modeEl = document.getElementById('smod-inv-mode');
+    var prefixEl = document.getElementById('smod-custom-prefix');
+    var previewEl = document.getElementById('smod-inv-preview');
+    var prefixWrap = document.getElementById('smod-custom-prefix-wrap');
+    if(!modeEl || !previewEl) return;
+    var mode = modeEl.value;
+    if(prefixWrap) prefixWrap.classList.toggle('hidden', mode !== 'custom');
+
+    // Temporarily set mode to preview
+    var oldMode = localStorage.getItem('ayur_inv_mode');
+    var oldPrefix = localStorage.getItem('ayur_inv_custom_prefix');
+    localStorage.setItem('ayur_inv_mode', mode);
+    if(prefixEl) localStorage.setItem('ayur_inv_custom_prefix', prefixEl.value || 'INV');
+    var preview = window.getNextInvoiceId ? window.getNextInvoiceId() : '—';
+    localStorage.setItem('ayur_inv_mode', oldMode || 'advanced');
+    if(oldPrefix) localStorage.setItem('ayur_inv_custom_prefix', oldPrefix);
+
+    previewEl.textContent = preview;
+};
+
+window.applyCustomStart = function() {
+    var startEl = document.getElementById('smod-custom-start');
+    var previewEl = document.getElementById('smod-start-preview');
+    if(!startEl) return;
+    var val = parseInt(startEl.value, 10);
+    if(isNaN(val) || val < 1) { window.showToast && window.showToast('Enter a valid number', 'error'); return; }
+    localStorage.setItem('ayur_inv_custom_start', val);
+    if(previewEl) previewEl.textContent = 'Next invoice will start from ' + val;
+    window.showToast && window.showToast('✅ Custom start set to ' + val);
+    window.previewInvNum && window.previewInvNum();
+};
+
+window.resetInvCounter = function() {
+    if(!confirm('Reset invoice counter to 01? This will affect new invoice numbering.')) return;
+    // To reset: set custom_start to 1 so max always starts from 0
+    localStorage.removeItem('ayur_inv_custom_start');
+    // Force counter reset by flagging current prefix invoices as "pre-reset"
+    localStorage.setItem('ayur_inv_reset_ts', Date.now().toString());
+    window.showToast && window.showToast('🔄 Counter reset! Next invoice will be 01', 'success');
+    // Update draft ID
+    setTimeout(function() {
+        if(window.AppState && window.AppState.draft && window.getNextInvoiceId) {
+            // Clear custom_start and compute new ID
+            var INV_MODE = localStorage.getItem('ayur_inv_mode') || 'advanced';
+            var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+            var now = new Date();
+            if(INV_MODE === 'advanced') {
+                var prefix = 'DEV' + months[now.getMonth()] + String(now.getFullYear()).slice(2);
+                window.AppState.draft.id = prefix + '01';
+            } else if(INV_MODE === 'simple') {
+                window.AppState.draft.id = '0001';
+            } else {
+                var p = localStorage.getItem('ayur_inv_custom_prefix') || 'INV';
+                window.AppState.draft.id = p + '001';
+            }
+            var disp = document.getElementById('inv-id-display');
+            if(disp) disp.textContent = window.AppState.draft.id;
+        }
+        window.previewInvNum && window.previewInvNum();
+    }, 200);
+};
+
+// ── Also patch getNextInvoiceId for reset support ──────────────
+(function() {
+    var origGetId = window.getNextInvoiceId;
+    if(!origGetId || origGetId._resetPatch) return;
+    window.getNextInvoiceId._resetPatch = true;
+    // Override to respect reset timestamp
+    var patched = function() {
+        var resetTs = parseInt(localStorage.getItem('ayur_inv_reset_ts') || '0');
+        if(!resetTs) return origGetId.apply(this, arguments);
+        // After reset: only count invoices created AFTER the reset timestamp
+        var INV_MODE = localStorage.getItem('ayur_inv_mode') || 'advanced';
+        var allInv = [...(window.AppState.invoices||[]), ...(window.AppState.deletedInvoices||[])].filter(function(i){ return (i.createdAt || 0) > resetTs; });
+        var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+        var now = new Date();
+        if(INV_MODE === 'advanced') {
+            var yr = String(now.getFullYear()).slice(2);
+            var prefix = 'DEV' + months[now.getMonth()] + yr;
+            var max = 0;
+            allInv.filter(function(i){ return i.id && i.id.startsWith(prefix); }).forEach(function(i){
+                var n = parseInt(i.id.slice(prefix.length), 10);
+                if(!isNaN(n) && n > max) max = n;
+            });
+            return prefix + String(max + 1).padStart(2, '0');
+        }
+        return origGetId.apply(this, arguments);
+    };
+    patched._resetPatch = true;
+    window.getNextInvoiceId = patched;
+})();
+
+// ── Bulk PDF — true center fix ─────────────────────────────────
+// Override bulkExportPDF entirely for proper centering
+(function(){
+    var origBulk = window.bulkExportPDF;
+    if(!origBulk || origBulk._centerPatch) return;
+    window.bulkExportPDF = async function() {
+        var searchEl = document.getElementById('filter-search'); var query = (searchEl ? searchEl.value : '').toLowerCase();
+        var startEl = document.getElementById('filter-start'); var start = startEl ? startEl.value : '';
+        var endEl = document.getElementById('filter-end'); var end = endEl ? endEl.value : '';
+        var payEl = document.getElementById('filter-payment'); var payStatus = payEl ? payEl.value : '';
+        var filtered = (window.AppState.invoices||[]).filter(function(i){
+            return ((i.id||'').toLowerCase().includes(query)||(i.client&&i.client.name&&i.client.name.toLowerCase().includes(query)))
+                && (start===''||i.date>=start) && (end===''||i.date<=end)
+                && (payStatus===''||(i.paymentStatus||'unpaid')===payStatus) && i.status==='final';
+        });
+        if(!filtered.length) { window.showToast && window.showToast('No invoices found', 'warning'); return; }
+
+        var overlay = document.getElementById('pdf-loading-overlay');
+        if(overlay) { overlay.classList.remove('hidden'); overlay.classList.add('flex'); }
+        window.showToast && window.showToast('Generating '+filtered.length+' invoices...');
+
+        // Create a fresh off-screen container — exactly 794px, centered content
+        var container = document.createElement('div');
+        container.id = 'bulk-pdf-container';
+        // Use a hidden but present container to ensure all styles apply correctly
+        container.style.cssText = 'position:absolute;top:0;left:0;width:794px;background:white;z-index:-9999;overflow:visible;padding:0;margin:0;';
+
+        // Add a style block specifically for the PDF export to override any global styles
+        var style = document.createElement('style');
+        style.id = 'bulk-pdf-styles';
+        style.innerHTML = `
+            #bulk-pdf-container * { box-sizing: border-box !important; }
+            .bulk-invoice-wrapper { 
+                width: 794px !important; 
+                min-width: 794px !important; 
+                max-width: 794px !important;
+                height: 1123px !important; /* Fixed A4 height */
+                margin: 0 auto !important; 
+                padding: 0 !important;
+                background: white !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                position: relative !important;
+                overflow: hidden !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            .bulk-invoice-wrapper .inv-id-tracker {
+                /* "Zoom out" effect: scale down to 94% and center */
+                transform: scale(0.94) !important;
+                transform-origin: center center !important;
+                width: 794px !important;
+                min-height: 1123px !important;
+                margin: 0 !important;
+                padding: 40px !important;
+                background: white !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        filtered.forEach(function(inv) {
+            var wrapper = document.createElement('div');
+            wrapper.className = 'bulk-invoice-wrapper';
+            wrapper.innerHTML = window.generateInvoiceHTML ? window.generateInvoiceHTML(inv) : '';
+            container.appendChild(wrapper);
+        });
+        document.body.appendChild(container);
+
+        // Wait for render and force a reflow
+        await new Promise(function(r){ setTimeout(r, 1500); });
+
+        try {
+            var opt = {
+                margin: 0,
+                filename: 'Bulk_Invoices_' + Date.now() + '.pdf',
+                image: { type: 'jpeg', quality: 1.0 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    width: 794,
+                    windowWidth: 794,
+                    scrollX: 0,
+                    scrollY: 0,
+                    x: 0,
+                    y: 0,
+                    logging: false
+                },
+                jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            };
+            
+            await html2pdf().set(opt).from(container).save();
+            window.showToast && window.showToast('✅ Bulk PDF downloaded!');
+        } catch(e) {
+            window.showToast && window.showToast('PDF error: ' + e.message, 'error');
+        } finally {
+            if(document.getElementById('bulk-pdf-styles')) document.head.removeChild(document.getElementById('bulk-pdf-styles'));
+            if(document.getElementById('bulk-pdf-container')) document.body.removeChild(document.getElementById('bulk-pdf-container'));
+            if(overlay) { overlay.classList.add('hidden'); overlay.classList.remove('flex'); }
+        }
+    };
+    window.bulkExportPDF._centerPatch = true;
+})();
+
+// ── GST Tables — ensure ALL card>table wrapped in scroll div ──
+(function() {
+    // Run after GST tab renders
+    var origSwitchGST = window.switchGSTTab;
+    if(origSwitchGST && !origSwitchGST._scrollPatch) {
+        origSwitchGST._scrollPatch = true;
+        window.switchGSTTab = function(tab) {
+            origSwitchGST.apply(this, arguments);
+            setTimeout(function() {
+                var area = document.getElementById('gst-content-area');
+                if(!area) return;
+                // Wrap any bare tables in scroll container
+                area.querySelectorAll('.card > table, .card > div > table').forEach(function(tbl) {
+                    if(tbl.parentElement && tbl.parentElement.style.overflowX === 'auto') return; // already wrapped
+                    if(tbl.parentElement && tbl.parentElement.classList.contains('card')) {
+                        var wrap = document.createElement('div');
+                        wrap.style.cssText = 'overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;';
+                        tbl.parentNode.insertBefore(wrap, tbl);
+                        wrap.appendChild(tbl);
+                    }
+                });
+                // Force all tables min-width so they scroll instead of wrapping
+                area.querySelectorAll('table').forEach(function(tbl) {
+                    if(!tbl.style.minWidth) tbl.style.minWidth = '480px';
+                    tbl.style.width = '100%';
+                });
+            }, 200);
+        };
+    }
+})();
+
+console.log('Final fixes loaded ✅');
+</script>
+
+<!-- Edit Invoice Modal -->
+<div id="edit-invoice-modal" class="modal" onclick="if(event.target===this)document.getElementById('edit-invoice-modal').classList.remove('open')">
+  <div class="modal-box max-w-md">
+    <div class="modal-head">
+      <h3 class="text-lg font-bold text-slate-800">Edit Invoice Details</h3>
+      <button onclick="document.getElementById('edit-invoice-modal').classList.remove('open')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+    <div class="modal-body space-y-4">
+      <div>
+        <label class="lbl">Invoice Number</label>
+        <input type="text" id="edit-inv-id" class="inp" placeholder="Enter new invoice number">
+        <p class="text-[10px] text-slate-400 mt-1">Changing the ID will update the document reference.</p>
+      </div>
+      <div>
+        <label class="lbl">Invoice Date</label>
+        <input type="date" id="edit-inv-date" class="inp">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button onclick="document.getElementById('edit-invoice-modal').classList.remove('open')" class="btn btn-ghost">Cancel</button>
+      <button id="btn-save-invoice-edit" class="btn btn-primary">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+    window.openEditInvoiceModal = function(id) {
+        const inv = window.AppState.invoices.find(i => i.id === id);
+        if (!inv) return window.showToast("Invoice not found", "error");
+        
+        document.getElementById('edit-inv-id').value = inv.id;
+        document.getElementById('edit-inv-date').value = inv.date;
+        
+        const saveBtn = document.getElementById('btn-save-invoice-edit');
+        saveBtn.onclick = () => window.saveInvoiceEdit(id);
+        
+        document.getElementById('edit-invoice-modal').classList.add('open');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
+
+    window.saveInvoiceEdit = async function(oldId) {
+        const newId = document.getElementById('edit-inv-id').value.trim();
+        const newDate = document.getElementById('edit-inv-date').value;
+        
+        if (!newId) return window.showToast("Invoice ID cannot be empty", "error");
+        if (!newDate) return window.showToast("Date cannot be empty", "error");
+
+        const inv = window.AppState.invoices.find(i => i.id === oldId);
+        if (!inv) return window.showToast("Original invoice not found", "error");
+
+        const saveBtn = document.getElementById('btn-save-invoice-edit');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Saving...';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        try {
+            const { db, appId, doc, setDoc, deleteDoc, updateDoc } = window._getFirestoreRef();
+            const uid = window.AppState.user.uid;
+            const userInvoicesPath = ['artifacts', appId, 'users', uid, 'invoices'];
+
+            if (newId !== oldId) {
+                // Check if new ID already exists
+                const exists = window.AppState.invoices.find(i => i.id === newId);
+                if (exists) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalText;
+                    return window.showToast("Invoice ID " + newId + " already exists", "error");
+                }
+
+                // Create new doc and delete old one
+                const newData = { ...inv, id: newId, date: newDate, updatedAt: Date.now() };
+                delete newData.id_old; // clean up if any
+                
+                await setDoc(doc(db, ...userInvoicesPath, newId), newData);
+                await deleteDoc(doc(db, ...userInvoicesPath, oldId));
+                
+                // Update local state immediately for better UX
+                window.AppState.invoices = window.AppState.invoices.map(i => i.id === oldId ? newData : i);
+            } else {
+                // Just update date
+                await updateDoc(doc(db, ...userInvoicesPath, oldId), { date: newDate, updatedAt: Date.now() });
+                window.AppState.invoices = window.AppState.invoices.map(i => i.id === oldId ? { ...i, date: newDate } : i);
+            }
+
+            window.showToast("Invoice updated successfully");
+            document.getElementById('edit-invoice-modal').classList.remove('open');
+            if (window.renderRecords) window.renderRecords();
+            if (window.updateDashboard) window.updateDashboard();
+            
+        } catch (e) {
+            console.error("Error updating invoice:", e);
+            window.showToast("Failed to update invoice: " + e.message, "error");
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalText;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    };
+})();
+</script>
+
+<!-- ================================================================
+     PDF RENDER FIX v3
+     Root cause of blank PDFs: Android WebView does NOT render elements
+     placed at left:-9999px (position:fixed or absolute) or with
+     visibility:hidden. html2canvas captures only what the browser
+     actually paints in the viewport area.
+
+     Correct approach:
+     1. Single PDF  → Reset zoom/transform directly on invoice-render-area,
+                       capture it, then restore. Element stays in-viewport.
+     2. Bulk PDF    → Stack pages in a container with opacity:0.001 (NOT
+                       hidden/visibility:hidden) placed at top:0 left:0,
+                       scroll to top, capture, restore scroll.
+     3. WA Share    → Same as single PDF.
+================================================================ -->
+<script>
+(function() {
+    'use strict';
+
+    // ════════════════════════════════════════════════════════════
+    // FIX 1 — Single invoice PDF: reset zoom on live element
+    // ════════════════════════════════════════════════════════════
+    function applyDownloadPDFFix() {
+        if(window.downloadPDF && window.downloadPDF._v3fix) return;
+        window.downloadPDF = async function() {
+            var element = document.getElementById('invoice-render-area');
+            if(!element) { window.showToast && window.showToast('Invoice खोलें पहले', 'error'); return; }
+            var invEl = element.querySelector('.inv-id-tracker');
+            var invId = (invEl && (invEl.dataset.id || invEl.textContent.trim())) || window._curInvId || window._currentViewInvoiceId || 'invoice';
+            invId = String(invId).trim() || 'invoice';
+
+            // ── Save current zoom state ──
+            var savedZoom      = element.style.zoom      || '';
+            var savedTransform = element.style.transform || '';
+            var savedWidth     = element.style.width     || '';
+            var savedMinH      = element.style.minHeight || '';
+            var savedMaxW      = element.style.maxWidth  || '';
+
+            // ── Force full A4 size, remove zoom ──
+            element.style.zoom      = '1';
+            element.style.transform = 'none';
+            element.style.width     = '794px';
+            element.style.minHeight = '1123px';
+            element.style.maxWidth  = 'none';
+
+            // Allow browser to repaint at new size
+            await new Promise(function(r){ setTimeout(r, 250); });
+
+            window.showToast && window.showToast('PDF बन रही है...');
+            var blob = null;
+            try {
+                blob = await generatePDFBlob(element, invId + '.pdf');
+            } catch(e) {
+                console.error('PDF error:', e);
+            } finally {
+                // ── Always restore original zoom ──
+                element.style.zoom      = savedZoom;
+                element.style.transform = savedTransform;
+                element.style.width     = savedWidth;
+                element.style.minHeight = savedMinH;
+                element.style.maxWidth  = savedMaxW;
+                if(typeof scaleInv === 'function') setTimeout(scaleInv, 50);
+            }
+            if(!blob || blob.size < 1000) { window.showToast && window.showToast('PDF error!', 'error'); return; }
+            await downloadPDFBlob(blob, invId + '.pdf');
+            window.showToast && window.showToast('PDF downloaded! ✅');
+        };
+        window.downloadPDF._v3fix = true;
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // FIX 2 — Bulk PDF: opacity:0.001, scroll-to-top, restore
+    // ════════════════════════════════════════════════════════════
+    function applyBulkPDFFix() {
+        if(window.bulkExportPDF && window.bulkExportPDF._v3fix) return;
+        if(typeof window.bulkExportPDF === 'undefined') return;
+
+        window.bulkExportPDF = async function() {
+            // ── Gather filters ──
+            var query = ((document.getElementById('filter-search')||{}).value||'').toLowerCase();
+            var start = (document.getElementById('filter-start')||{}).value||'';
+            var end   = (document.getElementById('filter-end')||{}).value||'';
+            var pay   = (document.getElementById('filter-payment')||{}).value||'';
+
+            var filtered = (window.AppState && window.AppState.invoices || []).filter(function(i) {
+                if(i.status !== 'final' || i.isDeleted) return false;
+                return (!query || (i.id||'').toLowerCase().includes(query) || (i.client&&(i.client.name||'').toLowerCase().includes(query)))
+                    && (!start || i.date >= start)
+                    && (!end   || i.date <= end)
+                    && (!pay   || (i.paymentStatus||'unpaid') === pay);
+            });
+            if(!filtered.length) { window.showToast && window.showToast('No invoices found', 'warning'); return; }
+
+            var overlay = document.getElementById('pdf-loading-overlay');
+            if(overlay) { overlay.classList.remove('hidden'); overlay.classList.add('flex'); }
+            window.showToast && window.showToast('Generating ' + filtered.length + ' invoice PDFs...');
+
+            // ── Build stacked container ──
+            // CRITICAL: NOT visibility:hidden / display:none / left:-9999px
+            // Android WebView only renders what it would actually paint.
+            // opacity:0.001 is invisible to user but fully rendered by browser.
+            var container = document.createElement('div');
+            container.style.cssText = [
+                'position:fixed',
+                'top:0',
+                'left:0',
+                'width:794px',
+                'background:white',
+                'z-index:9998',          // high z — must be in viewport stack
+                'opacity:0.001',         // invisible but RENDERED (not hidden)
+                'pointer-events:none',
+                'overflow:visible',
+                'padding:0',
+                'margin:0',
+                'box-sizing:border-box'
+            ].join(';');
+
+            filtered.forEach(function(inv) {
+                var page = document.createElement('div');
+                page.style.cssText = [
+                    'width:794px',
+                    'min-height:1123px',
+                    'background:white',
+                    'box-sizing:border-box',
+                    'overflow:hidden',
+                    'position:relative',
+                    'page-break-after:always',
+                    'break-after:page',
+                    'zoom:1',
+                    'transform:none'
+                ].join(';');
+                page.innerHTML = window.generateInvoiceHTML ? window.generateInvoiceHTML(inv) : '';
+                container.appendChild(page);
+            });
+
+            // Save scroll position, scroll to top (required for correct capture)
+            var savedScroll = window.pageYOffset || document.documentElement.scrollTop || 0;
+            window.scrollTo(0, 0);
+            document.body.appendChild(container);
+
+            // Generous wait — let all images/fonts paint
+            await new Promise(function(r){ setTimeout(r, 1500); });
+
+            try {
+                await html2pdf().set({
+                    margin: [0, 0, 0, 0],
+                    filename: 'Bulk_Invoices_' + Date.now() + '.pdf',
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        logging: false,
+                        backgroundColor: '#ffffff',
+                        width: 794,
+                        windowWidth: 794,
+                        scrollX: 0,
+                        scrollY: 0
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['css', 'legacy'] }
+                }).from(container).save();
+                window.showToast && window.showToast('✅ Bulk PDF downloaded!');
+            } catch(e) {
+                window.showToast && window.showToast('Bulk PDF error: ' + e.message, 'error');
+                console.error('Bulk PDF:', e);
+            } finally {
+                if(container.parentNode) container.parentNode.removeChild(container);
+                window.scrollTo(0, savedScroll);
+                if(overlay) { overlay.classList.add('hidden'); overlay.classList.remove('flex'); }
+            }
+        };
+        window.bulkExportPDF._v3fix = true;
+        window.bulkExportPDF._centerPatch = true;
+        window.bulkExportPDF._bulkFix = true;
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // FIX 3 — WhatsApp share: same zoom-reset approach
+    // ════════════════════════════════════════════════════════════
+    function applyShareWAFix() {
+        if(window._shareWAv3) return;
+        window.shareInvoiceWA = async function() {
+            var id = window._curInvId || window._currentViewInvoiceId;
+            if(!id) { window.showToast && window.showToast('Invoice खोलें पहले', 'error'); return; }
+            var inv = window.AppState && window.AppState.invoices.find(function(i){ return i.id === id; });
+            if(!inv) return;
+
+            var biz = (window.AppState.settings && window.AppState.settings.businessName) || 'Dev Ayurveda';
+            var fmt = window.formatCurrency || function(a){ return '₹' + Number(a).toFixed(2); };
+            var msg = '🌿 *' + biz + '*\n\nHello ' + (inv.client&&inv.client.name||'') + ','
+                + '\n\n📋 Invoice: *' + inv.id + '*\n📅 Date: ' + inv.date
+                + '\n💰 Amount: *' + fmt(inv.grandTotal, inv.currency) + '*'
+                + '\n' + (inv.paymentStatus==='paid'?'✅ Paid':'⏳ Payment Pending')
+                + '\n\nThank you! 🙏';
+            var mobile = inv.client&&inv.client.mobile ? inv.client.mobile.replace(/\D/g,'') : '';
+            var num = mobile.length===10 ? '91'+mobile : mobile;
+
+            if(typeof html2pdf !== 'undefined' && navigator.share && navigator.canShare) {
+                var element = document.getElementById('invoice-render-area');
+                if(element) {
+                    try {
+                        window.showToast && window.showToast('PDF बन रही है...');
+                        // Reset zoom on live element (same as FIX 1)
+                        var sz = element.style.zoom, st = element.style.transform, sw = element.style.width, smh = element.style.minHeight;
+                        element.style.zoom = '1'; element.style.transform = 'none';
+                        element.style.width = '794px'; element.style.minHeight = '1123px';
+                        await new Promise(function(r){ setTimeout(r, 250); });
+                        var pdfBlob = null;
+                        try { pdfBlob = await generatePDFBlob(element, id+'.pdf'); } finally {
+                            element.style.zoom = sz; element.style.transform = st;
+                            element.style.width = sw; element.style.minHeight = smh;
+                            if(typeof scaleInv==='function') setTimeout(scaleInv, 50);
+                        }
+                        if(pdfBlob) {
+                            var pdfFile = new File([pdfBlob], id+'.pdf', {type:'application/pdf'});
+                            if(navigator.canShare({files:[pdfFile]})) {
+                                await navigator.share({files:[pdfFile], text:msg});
+                                window.showToast && window.showToast('Shared! ✅'); return;
+                            }
+                        }
+                    } catch(e) { if(e.name==='AbortError') return; }
+                }
+            }
+            window.location.href = 'https://wa.me/'+(num||'')+'?text='+encodeURIComponent(msg);
+        };
+        window._shareWAv3 = true;
+    }
+
+    // ── Apply now + retry for late-loaded scripts ──
+    function applyAll() {
+        applyDownloadPDFFix();
+        applyBulkPDFFix();
+        applyShareWAFix();
+    }
+    applyAll();
+    [1500, 3000, 6000].forEach(function(t){ setTimeout(applyAll, t); });
+
+})();
+</script>
+</body>
+</html>
